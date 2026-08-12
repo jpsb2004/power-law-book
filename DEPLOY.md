@@ -94,14 +94,28 @@ It needs no environment variables — the quote endpoint requires no API key.
 ## Relationship to the Claude scheduled task
 
 There is also a local task (`~/.claude/scheduled-tasks/refresh-power-law-book/`)
-that refreshes the private Claude artifact on weekdays at 17:42 local. The two
-are independent and read the same public source:
+that keeps the private Claude artifact in step. **It does not fetch market
+data** — it pulls what CI already committed, rebuilds the page from it, and
+republishes:
+
+```
+20:45 UTC  GitHub Action   fetch → validate → commit data → deploy Pages
+18:08 BRT  Claude task     git pull → npm run page → republish artifact
+```
+
+The ordering matters, and so does the division of labour. Both processes used to
+run `npm run refresh`, which writes the tracked files `data/snapshot.json` and
+`data/history.json`. With CI committing those same files, the local task would
+have hit a merge conflict on its next pull. Only CI fetches now; the local task
+is read-only with respect to the repository and writes only the gitignored
+`out/`.
 
 | | Claude task | GitHub Action |
 |---|---|---|
 | Target | private artifact URL | public Pages URL |
+| Fetches market data | no | yes |
 | Runs when | the Claude app is open | always |
-| Good for | previewing changes | the link on your CV |
+| Good for | a private preview | the link on your CV |
 
-Once Pages is live, the Pages URL is the one worth sharing. Delete the local
-task if you would rather have a single source of truth — nothing depends on it.
+The Pages URL is the one worth sharing. The local task is optional — delete it
+from the Scheduled sidebar if you would rather have a single source of truth.
