@@ -91,5 +91,20 @@
       "now": 45.2,
       "move": 0
     }
+  },
+  {
+    "at": 1786578535848,
+    "index": 147.2401,
+    "ytd": 31.34007100422816,
+    "priced": 18,
+    "book": "a94db5675a",
+    "positions": 18,
+    "failures": [],
+    "biggestMove": {
+      "ticker": "URA",
+      "was": 45.2,
+      "now": 45.2,
+      "move": 0
+    }
   }
 ]
