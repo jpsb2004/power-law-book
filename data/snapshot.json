@@ -1,5 +1,5 @@
 {
-  "asOf": 1786559547914,
+  "asOf": 1786561760966,
   "base": "USD",
   "source": "Yahoo Finance chart API (v8), daily closes",
   "fx": {
@@ -20,18 +20,18 @@
     },
     "KRW": {
       "pair": "KRW=X",
-      "rate": 0.0007051291091398835,
-      "quoted": 1418.18
+      "rate": 0.0007052534328210842,
+      "quoted": 1417.93
     },
     "TWD": {
       "pair": "TWD=X",
-      "rate": 0.03102410573015233,
-      "quoted": 32.233
+      "rate": 0.031028918952463694,
+      "quoted": 32.228
     },
     "GBP": {
       "pair": "GBPUSD=X",
-      "rate": 1.3493,
-      "quoted": 1.3493
+      "rate": 1.3489,
+      "quoted": 1.3489
     }
   },
   "positions": [
@@ -46,26 +46,26 @@
       "thesis": "The purest listed claim on the fuel bottleneck. Holds miners and enrichers, so it captures the spot uranium move with equity beta stacked on top.",
       "breaks": "A restart of idled Kazakh and Namibian supply, or one high-profile reactor incident, resets sentiment far faster than mine supply can respond.",
       "exchange": "NYSEArca",
-      "price": 45.47,
+      "price": 45.36,
       "previousClose": 40.41,
-      "quoteTime": 1786559545000,
+      "quoteTime": 1786561739000,
       "fiftyTwoWeekHigh": 62.28,
       "fiftyTwoWeekLow": 35.64,
-      "priceUsd": 45.47,
+      "priceUsd": 45.36,
       "local": {
-        "ytd": -1.280937907077732,
-        "ret1m": 11.665029469548134,
-        "ret3m": -13.39047619047619,
-        "ret1y": 12.52165305617422,
-        "vol": 52.777866194355404,
+        "ytd": -1.5197568389057812,
+        "ret1m": 11.39489194499018,
+        "ret3m": -13.600000000000001,
+        "ret1y": 12.249443207126957,
+        "vol": 52.7755793608462,
         "maxDrawdown": -39.29784824462061
       },
       "usd": {
-        "ytd": -1.280937907077732,
-        "ret1m": 11.665029469548134,
-        "ret3m": -13.39047619047619,
-        "ret1y": 12.52165305617422,
-        "vol": 52.777866194355404,
+        "ytd": -1.5197568389057812,
+        "ret1m": 11.39489194499018,
+        "ret3m": -13.600000000000001,
+        "ret1y": 12.249443207126957,
+        "vol": 52.7755793608462,
         "maxDrawdown": -39.29784824462061
       },
       "usdPoints": [
@@ -1075,7 +1075,7 @@
         },
         {
           "t": 1786541400000,
-          "c": 45.47
+          "c": 45.36
         }
       ]
     },
@@ -1090,26 +1090,26 @@
       "thesis": "Deliberately the boring half of the sleeve. Weighted toward utilities and reactor builders rather than juniors, it earns cash while URA takes the risk.",
       "breaks": "It is not really a uranium proxy — the utility weighting means it can drift with rates while the actual fuel thesis plays out.",
       "exchange": "NYSEArca",
-      "price": 119.533,
+      "price": 119.25,
       "previousClose": 119.19,
-      "quoteTime": 1786559526000,
+      "quoteTime": 1786561752000,
       "fiftyTwoWeekHigh": 168.12,
       "fiftyTwoWeekLow": 101.92,
-      "priceUsd": 119.5325,
+      "priceUsd": 119.25,
       "local": {
-        "ytd": -10.152961515333729,
-        "ret1m": 9.182042382170254,
-        "ret3m": -11.194279346210994,
-        "ret1y": 0.2873563218390814,
-        "vol": 43.97914497360073,
+        "ytd": -10.365303668069748,
+        "ret1m": 8.924004384362437,
+        "ret3m": -11.404160475482907,
+        "ret1y": 0.05033979360684812,
+        "vol": 43.97818854995238,
         "maxDrawdown": -37.519011985155444
       },
       "usd": {
-        "ytd": -10.152961515333729,
-        "ret1m": 9.182042382170254,
-        "ret3m": -11.194279346210994,
-        "ret1y": 0.2873563218390814,
-        "vol": 43.97914497360073,
+        "ytd": -10.365303668069748,
+        "ret1m": 8.924004384362437,
+        "ret3m": -11.404160475482907,
+        "ret1y": 0.05033979360684812,
+        "vol": 43.97818854995238,
         "maxDrawdown": -37.519011985155444
       },
       "usdPoints": [
@@ -2119,7 +2119,7 @@
         },
         {
           "t": 1786541400000,
-          "c": 119.5325
+          "c": 119.25
         }
       ]
     },
@@ -2134,26 +2134,26 @@
       "thesis": "Pre-salt barrels at a single-digit multiple with a double-digit payout. Priced for permanent political risk, which is a real risk that is nonetheless already in the number.",
       "breaks": "Dividend policy is set by the controlling shareholder, and the controlling shareholder is the state. Fuel-price intervention ahead of an election ends the thesis without warning.",
       "exchange": "São Paulo",
-      "price": 41.65,
+      "price": 41.55,
       "previousClose": 30.8,
-      "quoteTime": 1786558645000,
+      "quoteTime": 1786560859000,
       "fiftyTwoWeekHigh": 50.69,
       "fiftyTwoWeekLow": 29.31,
-      "priceUsd": 8.063111025070178,
+      "priceUsd": 8.043751814925951,
       "local": {
-        "ytd": 35.62357538261152,
-        "ret1m": 2.4348253812100396,
-        "ret3m": -7.444444444444448,
-        "ret1y": 35.22727272727272,
-        "vol": 25.094491762550764,
+        "ytd": 35.297948550960584,
+        "ret1m": 2.1888834235120527,
+        "ret3m": -7.666666666666673,
+        "ret1y": 34.902597402597394,
+        "vol": 25.321842669364546,
         "maxDrawdown": -24.12615508236239
       },
       "usd": {
-        "ytd": 44.852437399258136,
-        "ret1m": 2.0858072945370654,
-        "ret3m": -10.336413598769598,
-        "ret1y": 41.39764697600339,
-        "vol": 28.09673487695531,
+        "ytd": 44.504652435514394,
+        "ret1m": 1.840703315438525,
+        "ret3m": -10.551692317620102,
+        "ret1y": 41.05815682720145,
+        "vol": 28.369602212016886,
         "maxDrawdown": -27.29833587056698
       },
       "usdPoints": [
@@ -3127,7 +3127,7 @@
         },
         {
           "t": 1785502800000,
-          "c": 8.436226147574882
+          "c": 8.550442094484158
         },
         {
           "t": 1785762000000,
@@ -3151,7 +3151,7 @@
         },
         {
           "t": 1786366800000,
-          "c": 8.00430865648257
+          "c": 8.27066196631414
         },
         {
           "t": 1786453200000,
@@ -3159,7 +3159,7 @@
         },
         {
           "t": 1786539600000,
-          "c": 8.063111025070178
+          "c": 8.043751814925951
         }
       ]
     },
@@ -4230,26 +4230,26 @@
       "thesis": "The hinge of the whole book. Owns Permian surface acreage and collects royalties on whatever sits on it — water handling, pipelines, and now data-centre leases. Sells energy and compute demand without drilling or buying a GPU.",
       "breaks": "Small float, and the data-centre revenue is a handful of contracts. Concentration cuts both ways, as a 9.5% single-session drop on 12 Aug demonstrated.",
       "exchange": "NYSE",
-      "price": 78.395,
+      "price": 78.4,
       "previousClose": 52.3,
-      "quoteTime": 1786559473000,
+      "quoteTime": 1786561739000,
       "fiftyTwoWeekHigh": 88,
       "fiftyTwoWeekLow": 43.75,
-      "priceUsd": 78.395,
+      "priceUsd": 78.4,
       "local": {
-        "ytd": 61.77259595542714,
-        "ret1m": -0.17190882465300536,
-        "ret3m": 16.140740740740736,
-        "ret1y": 49.89483747609943,
-        "vol": 61.567508927181194,
+        "ytd": 61.78291374329344,
+        "ret1m": -0.16554183114732643,
+        "ret3m": 16.148148148148156,
+        "ret1y": 49.90439770554495,
+        "vol": 61.86180226153806,
         "maxDrawdown": -48.3343074225599
       },
       "usd": {
-        "ytd": 61.77259595542714,
-        "ret1m": -0.17190882465300536,
-        "ret3m": 16.140740740740736,
-        "ret1y": 49.89483747609943,
-        "vol": 61.567508927181194,
+        "ytd": 61.78291374329344,
+        "ret1m": -0.16554183114732643,
+        "ret3m": 16.148148148148156,
+        "ret1y": 49.90439770554495,
+        "vol": 61.86180226153806,
         "maxDrawdown": -48.3343074225599
       },
       "usdPoints": [
@@ -5255,11 +5255,11 @@
         },
         {
           "t": 1786455000000,
-          "c": 81.71
+          "c": 83.91
         },
         {
           "t": 1786541400000,
-          "c": 78.395
+          "c": 78.4
         }
       ]
     },
@@ -5279,7 +5279,7 @@
       "quoteTime": 1786512630000,
       "fiftyTwoWeekHigh": 964,
       "fiftyTwoWeekLow": 490,
-      "priceUsd": 26.029224707597805,
+      "priceUsd": 26.03326300111704,
       "local": {
         "ytd": 51.17117117117117,
         "ret1m": 19.176136363636363,
@@ -5289,11 +5289,11 @@
         "maxDrawdown": -30.532212885154063
       },
       "usd": {
-        "ytd": 46.811862276448274,
-        "ret1m": 18.91362571672735,
-        "ret3m": 21.00101036237116,
-        "ret1y": 19.097056468005814,
-        "vol": 40.43492164231608,
+        "ytd": 46.83463934332743,
+        "ret1m": 18.932074523000868,
+        "ret3m": 21.01978301508964,
+        "ret1y": 19.115533732568906,
+        "vol": 40.43488868146882,
         "maxDrawdown": -32.49669347454963
       },
       "usdPoints": [
@@ -6271,7 +6271,7 @@
         },
         {
           "t": 1786496400000,
-          "c": 26.029224707597805
+          "c": 26.03326300111704
         }
       ]
     },
@@ -6292,7 +6292,7 @@
       "quoteTime": 1786525530000,
       "fiftyTwoWeekHigh": 9385.59,
       "fiftyTwoWeekLow": 0,
-      "priceUsd": 4.474417459390383,
+      "priceUsd": 4.475206358903024,
       "local": {
         "ytd": 47.24071317585764,
         "ret1m": -6.778391821911139,
@@ -6302,11 +6302,11 @@
         "maxDrawdown": -38.63042911894563
       },
       "usd": {
-        "ytd": 49.884054337805985,
-        "ret1m": -1.5512891710131351,
-        "ret3m": -16.282631748384077,
-        "ret1y": 94.00303575684833,
-        "vol": 55.17731129331739,
+        "ytd": 49.91048089690398,
+        "ret1m": -1.5339313494200546,
+        "ret3m": -16.26787125908851,
+        "ret1y": 94.03724108117231,
+        "vol": 55.17720305990692,
         "maxDrawdown": -33.697041422507866
       },
       "usdPoints": [
@@ -7284,7 +7284,7 @@
         },
         {
           "t": 1786492800000,
-          "c": 4.474417459390383
+          "c": 4.475206358903024
         }
       ]
     },
@@ -7299,26 +7299,26 @@
       "thesis": "The application layer. Sells the deployment of models into government and commercial workflows, which is where the margin sits once inference is a commodity.",
       "breaks": "The multiple is the position. Growth is real and accelerating, but at this valuation a single decelerating quarter costs more than the growth adds.",
       "exchange": "NasdaqGS",
-      "price": 171.31,
+      "price": 171.4,
       "previousClose": 186.97,
-      "quoteTime": 1786559544000,
+      "quoteTime": 1786561756000,
       "fiftyTwoWeekHigh": 207.52,
       "fiftyTwoWeekLow": 106.37,
-      "priceUsd": 171.31,
+      "priceUsd": 171.4,
       "local": {
-        "ytd": 2.0552841653759013,
-        "ret1m": 31.736388803445102,
-        "ret3m": 28.101398339938694,
-        "ret1y": -8.375675242017435,
-        "vol": 58.8645245798053,
+        "ytd": 2.1089002740378837,
+        "ret1m": 31.805598277453107,
+        "ret3m": 28.16869812308384,
+        "ret1y": -8.327539177408138,
+        "vol": 58.8567457637306,
         "maxDrawdown": -48.223766772854525
       },
       "usd": {
-        "ytd": 2.0552841653759013,
-        "ret1m": 31.736388803445102,
-        "ret3m": 28.101398339938694,
-        "ret1y": -8.375675242017435,
-        "vol": 58.8645245798053,
+        "ytd": 2.1089002740378837,
+        "ret1m": 31.805598277453107,
+        "ret3m": 28.16869812308384,
+        "ret1y": -8.327539177408138,
+        "vol": 58.8567457637306,
         "maxDrawdown": -48.223766772854525
       },
       "usdPoints": [
@@ -8324,11 +8324,11 @@
         },
         {
           "t": 1786455000000,
-          "c": 175.23
+          "c": 174.94
         },
         {
           "t": 1786541400000,
-          "c": 171.31
+          "c": 171.4
         }
       ]
     },
@@ -8371,7 +8371,7 @@
       "quoteTime": 1786548367000,
       "fiftyTwoWeekHigh": 8.99,
       "fiftyTwoWeekLow": 4.262,
-      "priceUsd": 11.3395172,
+      "priceUsd": 11.3361556,
       "local": {
         "ytd": 53.32968436416713,
         "ret1m": 2.114216281895498,
@@ -8381,11 +8381,11 @@
         "maxDrawdown": -29.47642106421614
       },
       "usd": {
-        "ytd": 53.54589810937412,
-        "ret1m": 3.2234881848678363,
-        "ret3m": 9.945647112075127,
-        "ret1y": 88.03247625609184,
-        "vol": 49.4972302707294,
+        "ytd": 53.50037942617265,
+        "ret1m": 3.192887580647911,
+        "ret3m": 9.913053723766502,
+        "ret1y": 87.97673402641539,
+        "vol": 49.4965491065506,
         "maxDrawdown": -30.75703231224343
       },
       "usdPoints": [
@@ -9403,7 +9403,7 @@
         },
         {
           "t": 1786518000000,
-          "c": 11.3395172
+          "c": 11.3361556
         }
       ]
     },
@@ -9420,26 +9420,26 @@
       "thesis": "The hedge against the financing of everything above. If the energy and compute build-out is funded by deficits and suppressed real rates, gold is the direct expression of that.",
       "breaks": "A dated future, not bullion — it expires 29 Dec 2026 and must be rolled, so the position carries basis and roll cost that a spot holding does not.",
       "exchange": "COMEX",
-      "price": 4469.2,
+      "price": 4473.4,
       "previousClose": 3348.9,
-      "quoteTime": 1786558945000,
+      "quoteTime": 1786561154000,
       "fiftyTwoWeekHigh": 5586.2,
       "fiftyTwoWeekLow": 3310.1,
-      "priceUsd": 4469.2002,
+      "priceUsd": 4473.3999,
       "local": {
-        "ytd": 3.5879914608750076,
-        "ret1m": 11.813865399049291,
-        "ret3m": -4.465485892445941,
-        "ret1y": 33.452785495320434,
-        "vol": 28.78063673840698,
+        "ytd": 3.6853329242845567,
+        "ret1m": 11.918936702526905,
+        "ret3m": -4.375712268320195,
+        "ret1y": 33.578190856047996,
+        "vol": 28.78681860044871,
         "maxDrawdown": -25.06016518238879
       },
       "usd": {
-        "ytd": 3.5879914608750076,
-        "ret1m": 11.813865399049291,
-        "ret3m": -4.465485892445941,
-        "ret1y": 33.452785495320434,
-        "vol": 28.78063673840698,
+        "ytd": 3.6853329242845567,
+        "ret1m": 11.918936702526905,
+        "ret3m": -4.375712268320195,
+        "ret1y": 33.578190856047996,
+        "vol": 28.78681860044871,
         "maxDrawdown": -25.06016518238879
       },
       "usdPoints": [
@@ -10449,7 +10449,7 @@
         },
         {
           "t": 1786507200000,
-          "c": 4469.2002
+          "c": 4473.3999
         }
       ]
     },
@@ -10464,26 +10464,26 @@
       "thesis": "The deliberate opposite of the rest of the book: ex-US, small, cheap, profitable, and largely unowned by the AI trade. It is here to be uncorrelated, not to be exciting.",
       "breaks": "Value has underperformed growth for most of a decade. If the AI build-out simply keeps compounding, this sleeve is a permanent drag on returns.",
       "exchange": "NYSEArca",
-      "price": 110.24,
+      "price": 110.265,
       "previousClose": 83.89,
-      "quoteTime": 1786559527000,
+      "quoteTime": 1786561747000,
       "fiftyTwoWeekHigh": 110.99,
       "fiftyTwoWeekLow": 83.57,
-      "priceUsd": 110.24,
+      "priceUsd": 110.265,
       "local": {
-        "ytd": 16.27465457230249,
-        "ret1m": 6.925315227934045,
-        "ret3m": 0.10897203051215977,
-        "ret1y": 31.410179997615916,
-        "vol": 17.100015301506442,
+        "ytd": 16.301023098829234,
+        "ret1m": 6.949563530552867,
+        "ret3m": 0.1316745368688667,
+        "ret1y": 31.439980927404935,
+        "vol": 17.096024076379006,
         "maxDrawdown": -13.289127077845409
       },
       "usd": {
-        "ytd": 16.27465457230249,
-        "ret1m": 6.925315227934045,
-        "ret3m": 0.10897203051215977,
-        "ret1y": 31.410179997615916,
-        "vol": 17.100015301506442,
+        "ytd": 16.301023098829234,
+        "ret1m": 6.949563530552867,
+        "ret3m": 0.1316745368688667,
+        "ret1y": 31.439980927404935,
+        "vol": 17.096024076379006,
         "maxDrawdown": -13.289127077845409
       },
       "usdPoints": [
@@ -11489,11 +11489,11 @@
         },
         {
           "t": 1786455000000,
-          "c": 109.46
+          "c": 109.61
         },
         {
           "t": 1786541400000,
-          "c": 110.24
+          "c": 110.265
         }
       ]
     }
@@ -12705,11 +12705,11 @@
     },
     {
       "t": 1785456000000,
-      "c": 119.3633
+      "c": 119.3647
     },
     {
       "t": 1785628800000,
-      "c": 119.3659
+      "c": 119.3673
     },
     {
       "t": 1785715200000,
@@ -12737,47 +12737,47 @@
     },
     {
       "t": 1786320000000,
-      "c": 129.0504
+      "c": 129.0537
     },
     {
       "t": 1786406400000,
-      "c": 129.6834
+      "c": 129.6996
     },
     {
       "t": 1786492800000,
-      "c": 132.0374
+      "c": 132.152
     }
   ],
   "curveStats": {
-    "ytd": 3.65134029536974,
-    "ret1m": 11.904352270040246,
-    "ret3m": -3.9867655613729047,
-    "ret1y": 32.03739999999999,
-    "vol": 25.12244865570179,
+    "ytd": 3.7413030150071225,
+    "ret1m": 12.00147807507841,
+    "ret3m": -3.9034322280395743,
+    "ret1y": 32.15199999999999,
+    "vol": 25.126776917920235,
     "maxDrawdown": -24.40580134741138
   },
   "correlations": {
     "PLTR": {
       "URA": 0.369,
-      "NLR": 0.365,
-      "PETR4.SA": -0.11,
-      "2222.SR": 0.007,
-      "LB": 0.067,
+      "NLR": 0.366,
+      "PETR4.SA": -0.106,
+      "2222.SR": 0.006,
+      "LB": 0.068,
       "2357.TW": 0.007,
       "^KS11": -0.031,
       "PLTR": 1,
       "AINF.L": 0.168,
       "GC=F": 0.153,
-      "AVDV": 0.222
+      "AVDV": 0.223
     },
     "GC=F": {
-      "URA": 0.456,
-      "NLR": 0.441,
-      "PETR4.SA": 0.007,
-      "2222.SR": -0.081,
-      "LB": 0.082,
+      "URA": 0.455,
+      "NLR": 0.44,
+      "PETR4.SA": 0.005,
+      "2222.SR": -0.082,
+      "LB": 0.079,
       "2357.TW": 0.107,
-      "^KS11": 0.216,
+      "^KS11": 0.215,
       "PLTR": 0.153,
       "AINF.L": 0.203,
       "GC=F": 1,
