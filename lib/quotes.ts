@@ -19,6 +19,7 @@ export interface LivePosition extends Holding {
   local?: Stats;
   usd?: Stats;
   manual?: boolean;
+  fxMissing?: boolean;
   error?: string;
 }
 
@@ -50,16 +51,19 @@ async function loadFx() {
         fx[ccy] = { pair: "—", rate: 1, quoted: 1, invert: false, points: [] };
         return;
       }
-      // `GBPUSD=X` already quotes CCY->USD; `BRL=X` quotes USD->CCY and inverts.
+      // Derived, not assumed: `USDBRL=X` quotes USD->CCY and must be divided;
+      // a `GBPUSD=X`-style pair already quotes CCY->USD.
       const invert = !pair.endsWith("USD=X");
       try {
         const { meta, points } = await fetchSeries(pair, "1y");
         const quoted = meta.regularMarketPrice ?? 1;
         fx[ccy] = { pair, quoted, rate: invert ? 1 / quoted : quoted, invert, points };
       } catch {
-        // A missing rate must not take the page down; the position falls back
-        // to its local-currency numbers and is flagged as degraded.
-        fx[ccy] = { pair, quoted: 1, rate: 1, invert, points: [] };
+        // A missing rate must not take the page down, but it must not be
+        // papered over either: a rate of 1 would label won and reais as
+        // dollars. The empty series marks the currency unconvertible, and
+        // affected positions drop out of the USD figures instead.
+        fx[ccy] = { pair, quoted: NaN, rate: NaN, invert, points: [] };
       }
     })
   );
@@ -97,12 +101,19 @@ export async function getBook(): Promise<Book> {
         const { meta, points } = await fetchSeries(h.ticker, "1y");
         const ccy = meta.currency ?? h.currency;
         const rate = fx[ccy];
-        const usdPoints = toUsdSeries(points, rate?.points ?? [], rate?.invert ?? false);
+        // Without a rate series a non-USD line cannot be converted; leaving the
+        // USD side empty is honest, whereas passing the local series through
+        // would report reais as dollars.
+        const convertible = ccy === "USD" || (rate?.points?.length ?? 0) > 0;
+        const usdPoints = convertible
+          ? toUsdSeries(points, rate?.points ?? [], rate?.invert ?? false)
+          : [];
         const price = meta.regularMarketPrice ?? null;
         const prev = meta.chartPreviousClose;
 
         return {
           ...h,
+          fxMissing: !convertible,
           currency: ccy,
           price,
           previousClose: prev,
@@ -143,7 +154,7 @@ export async function getBook(): Promise<Book> {
   };
 }
 
-export const sleeveOrder: SleeveId[] = ["fuel", "ground", "compute", "ballast"];
+export const sleeveOrder: SleeveId[] = ["energy", "compute", "ballast"];
 
 export const sleeveWeightOf = (id: SleeveId) =>
   HOLDINGS.filter((h) => h.sleeve === id).reduce((a, h) => a + h.weight, 0);

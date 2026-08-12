@@ -22,7 +22,7 @@ artifact, so the branch option will not find it.
 
 ## 3. Run it once by hand
 
-**Actions → Refresh portfolio → Run workflow.**
+**Actions → Daily refresh → Run workflow.**
 
 The first run proves the whole chain before the schedule ever fires. When it
 finishes, the page is live at:
@@ -38,15 +38,15 @@ itself.
 
 ## What runs, and when
 
-`.github/workflows/refresh.yml` fires **weekdays at 20:45 UTC**, about 45
-minutes after the US close, by which point every market in the book has settled.
+`.github/workflows/daily_refresh.yml` fires **weekdays at 22:00 UTC**, about two
+hours after the US close, by which point every market in the book has settled.
 GitHub cron is UTC and has no DST, so this drifts by an hour relative to São
 Paulo across the year — harmless, since it snapshots a close rather than an
 intraday moment.
 
 Each run:
 
-1. `node scripts/refresh.mjs` — fetch 12 positions + 5 FX pairs, validate,
+1. `node scripts/refresh.mjs` — fetch 18 positions + 5 FX pairs, validate,
    rebuild the page, smoke-test it in a DOM
 2. commit the refreshed `data/snapshot.json` and `data/history.json` back to the
    repo, so the next run has a baseline to validate against
@@ -72,7 +72,7 @@ without digging through logs.
   GitHub emails first. A single manual run or commit re-arms it.
 - **Runs can start late** when GitHub's scheduler is busy. Expected; the job
   snapshots a daily close, so a 20-minute delay changes nothing.
-- **The data commits accumulate.** `snapshot.json` is ~250 KB and is committed
+- **The data commits accumulate.** `snapshot.json` is ~370 KB and is committed
   on every successful weekday run — roughly 60 MB a year before git's
   compression. Fine for years; if it ever matters, drop `usdPoints` from the
   committed copy and keep the full series only in the build.
@@ -99,8 +99,8 @@ data** — it pulls what CI already committed, rebuilds the page from it, and
 republishes:
 
 ```
-20:45 UTC  GitHub Action   fetch → validate → commit data → deploy Pages
-18:08 BRT  Claude task     git pull → npm run page → republish artifact
+22:00 UTC  GitHub Action   fetch → validate → commit data → deploy Pages
+22:22 UTC  Claude task     git pull → npm run page → republish artifact
 ```
 
 The ordering matters, and so does the division of labour. Both processes used to

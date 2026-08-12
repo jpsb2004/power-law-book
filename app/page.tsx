@@ -4,10 +4,9 @@ import type { SleeveId } from "@/lib/holdings";
 import { Sparkline } from "@/components/Sparkline";
 
 const SLEEVE_VAR: Record<SleeveId, string> = {
-  fuel: "var(--s1)",
-  ground: "var(--s2)",
-  compute: "var(--s3)",
-  ballast: "var(--s4)",
+  energy: "var(--s1)",
+  compute: "var(--s2)",
+  ballast: "var(--s3)",
 };
 
 const pct = (v: number | null | undefined, d = 1) =>
@@ -26,7 +25,7 @@ export default function Page() {
           Law Book
         </h1>
         <p style={{ color: "var(--ink-2)", maxWidth: "54ch", marginTop: "1rem" }}>
-          Twelve positions on one claim: the demand curve for computation is growing faster
+          Eighteen positions on one claim: the demand curve for computation is growing faster
           than the fuel, land and grid that feed it can be rebuilt.
         </p>
       </header>

@@ -13,10 +13,10 @@
   --accent: #0B6B75;
   --gain: #2E7D5B;
   --loss: #B4382F;
-  --s1: #0F7BC0;
-  --s2: #AE6A12;
-  --s3: #7C4BC4;
-  --s4: #B23A52;
+  --s1: #AE6A12;
+  --s2: #0F7BC0;
+  --s3: #B02D6E;
+
 
   --font-display: Bahnschrift, "DIN Condensed", "Franklin Gothic Medium", "Arial Narrow", "Helvetica Neue", sans-serif;
   --font-body: Charter, "Bitstream Charter", "Iowan Old Style", "Source Serif 4", Georgia, serif;
@@ -38,10 +38,10 @@
     --accent: #4FB3BD;
     --gain: #59B98C;
     --loss: #E0736A;
-    --s1: #3D93D4;
-    --s2: #BE8829;
-    --s3: #9878DE;
-    --s4: #D2626E;
+    --s1: #BE8829;
+    --s2: #3D93D4;
+    --s3: #D45E9C;
+
   }
 }
 :root[data-theme="dark"] {
@@ -56,10 +56,10 @@
   --accent: #4FB3BD;
   --gain: #59B98C;
   --loss: #E0736A;
-  --s1: #3D93D4;
-  --s2: #BE8829;
-  --s3: #9878DE;
-  --s4: #D2626E;
+  --s1: #BE8829;
+  --s2: #3D93D4;
+  --s3: #D45E9C;
+
 }
 
 /* ----------------------------------------------------------------- base */
@@ -235,9 +235,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <p class="eyebrow">Global macro · single-book research note</p>
     <h1>The Power<br>Law Book<span class="thin">compute, and the energy it eats</span></h1>
     <p class="standfirst">
-      Twelve positions built on one claim: that the demand curve for computation is
+      Eighteen positions built on one claim: that the demand curve for computation is
       growing faster than the physical systems that feed it — fuel, molecules, land and grid —
-      can be rebuilt. Each sleeve is a different link in that chain, and each position
+      can be rebuilt. Each bucket is a different link in that chain, and each position
       carries the condition that would prove it wrong.
     </p>
     <div class="stamp" id="stamp"></div>
@@ -248,9 +248,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section>
     <div class="sec-head"><span class="eyebrow">01</span><h2>The argument</h2></div>
     <p class="lede prose">
-      The sleeves are ordered because they depend on each other. Fuel is upstream of
-      power; power and land are upstream of compute; and the fourth sleeve exists
-      because the first three could turn out to be one trade wearing three hats.
+      The buckets are ordered because they depend on each other. Fuel, molecules and
+      land are upstream of compute; and the third bucket exists because the first two
+      could turn out to be one trade wearing two hats.
     </p>
     <div class="chain" id="chain"></div>
   </section>
@@ -278,7 +278,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <figure>
       <div class="chart-box rel"><div id="alloc"></div><div class="tip" id="alloc-tip"></div></div>
       <ul class="legend" id="alloc-legend"></ul>
-      <figcaption>Weights as a share of notional. Sleeve totals shown above each block.</figcaption>
+      <figcaption>Weights as a share of notional. Bucket totals shown above each block.</figcaption>
     </figure>
   </section>
 
@@ -286,7 +286,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <div class="sec-head"><span class="eyebrow">04</span><h2>Year to date, in USD</h2></div>
     <p class="lede prose">
       Every position converted to the USD base at each day's rate. Bars are coloured by
-      direction, not by sleeve — this chart answers "what worked", and sleeve identity is
+      direction, not by bucket — this chart answers "what worked", and bucket identity is
       carried by the labels.
     </p>
     <figure>
@@ -335,14 +335,14 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     </p>
     <div class="cols">
       <ul class="note-list">
-        <li><h3>Three of twelve are not directly buyable</h3><p>
-          The KOSPI is an index, gold is a dated futures contract that expires 29 Dec 2026 and must be
-          rolled, and Anthropic is private. A real book would hold a tracking fund, manage the roll,
-          and have no way in at all to the third.</p></li>
-        <li><h3>The private mark is stale by construction</h3><p>
-          Anthropic is carried flat at its last primary round. It is excluded from the performance
-          curve entirely — holding a constant would have damped measured volatility and flattered
-          the book rather than describing it.</p></li>
+        <li><h3>One of eighteen is not directly buyable</h3><p>
+          The KOSPI is an index, so a real book expresses it through a tracking fund or futures and
+          eats the tracking error and FX. Gold is held as spot-backed shares rather than a dated
+          future, so there is no roll and no expiry to manage.</p></li>
+        <li><h3>Not every position covers the full window</h3><p id="coverage-note">
+          A fund that listed part-way through the year has no history before it existed. The curve
+          renormalises across whatever is trading on each date, so the headline return describes the
+          positions that were actually present — not always all eighteen.</p></li>
         <li><h3>Correlations are biased toward zero</h3><p>
           Taipei and Seoul close before New York opens, so daily returns for those lines are
           measured against a different information set. Cross-market correlations here read lower
@@ -353,7 +353,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
           The curve rebalances to target weight every session. A held book would drift with its
           winners, so this understates the concentration that would actually have built up.</p></li>
         <li><h3>No costs, no tax, no slippage</h3><p>
-          Gross of commission, spread, ETF expense, futures roll, withholding on Brazilian and Saudi
+          Gross of commission, spread, ETF expense, withholding on Brazilian and Saudi
           dividends, and the FX spread on five currencies. The lived return would be lower.</p></li>
         <li><h3>One window, chosen after the fact</h3><p>
           Twelve months, ending on the day the note was written, for positions selected today.
@@ -388,7 +388,7 @@ const DATA = __SNAPSHOT__;
 
 /* ------------------------------------------------------------- utilities */
 const $ = (id) => document.getElementById(id);
-const SLEEVE_VAR = { fuel: "--s1", ground: "--s2", compute: "--s3", ballast: "--s4" };
+const SLEEVE_VAR = { energy: "--s1", compute: "--s2", ballast: "--s3" };
 /**
  * Colours go into the SVG as `var(--token)`, not as resolved hex.
  *
@@ -453,13 +453,16 @@ function renderStats() {
 
 /* ----------------------------------------------------------------- chain */
 function renderChain() {
-  const order = ["fuel", "ground", "compute", "ballast"];
+  const order = Object.keys(SLEEVES);
   $("chain").innerHTML = order
     .map((id, i) => {
       const s = SLEEVES[id];
       const names = POS.filter((p) => p.sleeve === id).map((p) => p.ticker).join("  ·  ");
-      const arrow = i > 0 && i < 3 ? '<div class="arrow">↓</div>' : "";
-      const gap = i === 3 ? '<div class="arrow" style="margin-top:.4rem">⤶ counterweight to I–III</div>' : "";
+      const last = order.length - 1;
+      const arrow = i > 0 && i < last ? '<div class="arrow">↓</div>' : "";
+      const gap = i === last
+        ? '<div class="arrow" style="margin-top:.4rem">⤶ counterweight to I–' + SLEEVES[order[last - 1]].numeral + "</div>"
+        : "";
       return (
         arrow + gap +
         '<article class="link" style="--sleeve: var(' + SLEEVE_VAR[id] + ')">' +
@@ -562,7 +565,7 @@ function renderCurve() {
 function renderAlloc() {
   const host = $("alloc");
   host.innerHTML = "";
-  const order = ["fuel", "ground", "compute", "ballast"];
+  const order = Object.keys(SLEEVES);
   const W = 1000, H = 150, m = { t: 34, r: 2, b: 34, l: 2 };
   const iw = W - m.l - m.r, bh = H - m.t - m.b;
   const total = POS.reduce((a, p) => a + p.weight, 0);
@@ -620,8 +623,8 @@ function renderAlloc() {
   if (DATA.weightsProvisional) {
     $("alloc-notice").innerHTML =
       '<div class="notice"><b>Provisional weights</b><br>' +
-      "These allocations are a working draft built from the sleeve thesis, not a final book. " +
-      "Every figure that depends on weight — the performance curve, the sleeve totals, the " +
+      "These allocations follow the target buckets (Energy 38 / Compute 32 / Ballast 30), split equally within each. " +
+      "Every figure that depends on weight — the performance curve, the bucket totals, the " +
       "contribution column — moves when they are replaced.</div>";
   }
 }
@@ -744,7 +747,7 @@ function renderFx() {
 
 /* ---------------------------------------------------------------- tables */
 function renderTable() {
-  const order = ["fuel", "ground", "compute", "ballast"];
+  const order = Object.keys(SLEEVES);
   const head =
     "<thead><tr><th>Position</th><th>Venue</th><th>Wt</th><th>Last</th>" +
     "<th>YTD local</th><th>YTD USD</th><th>1y USD</th><th>Vol</th><th>Max DD</th></tr></thead>";
@@ -782,7 +785,7 @@ function renderTable() {
 }
 
 function renderDossier() {
-  const order = ["fuel", "ground", "compute", "ballast"];
+  const order = Object.keys(SLEEVES);
   const cards = order.flatMap((id) =>
     POS.filter((p) => p.sleeve === id).map((p) => {
       const tags = [p.kind];

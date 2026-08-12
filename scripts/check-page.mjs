@@ -34,7 +34,7 @@ const nonEmpty = (id, min = 1) => {
 nonEmpty("stamp", 3);
 nonEmpty("stats", 5);
 nonEmpty("chain", 4);
-nonEmpty("alloc-legend", 4);
+nonEmpty("alloc-legend", 2);
 nonEmpty("fx-legend", 2);
 
 const svgCount = (id) => document.querySelectorAll(`#${id} svg`).length;
@@ -42,16 +42,35 @@ for (const id of ["curve", "alloc", "ytd", "fx"]) {
   if (svgCount(id) !== 1) fail.push(`#${id} drew ${svgCount(id)} svg elements, expected 1`);
 }
 
-// The table must carry a row per position plus a header row per sleeve.
+// Counts come from the book itself, so adding or dropping a position updates
+// the expectation instead of breaking the test.
+const { HOLDINGS, SLEEVES } = await import("../lib/holdings.js");
+const nPositions = HOLDINGS.length;
+const nBuckets = Object.keys(SLEEVES).length;
+
+// The table carries a row per position plus a header row per bucket.
 const rows = document.querySelectorAll("#tbl tbody tr").length;
-if (rows !== 16) fail.push(`table rendered ${rows} rows, expected 16 (12 positions + 4 sleeves)`);
+const expectedRows = nPositions + nBuckets;
+if (rows !== expectedRows) {
+  fail.push(`table rendered ${rows} rows, expected ${expectedRows} (${nPositions} positions + ${nBuckets} buckets)`);
+}
 
 const cards = document.querySelectorAll("#dossier .card").length;
-if (cards !== 12) fail.push(`dossier rendered ${cards} cards, expected 12`);
+if (cards !== nPositions) fail.push(`dossier rendered ${cards} cards, expected ${nPositions}`);
 
 // Each dossier card must carry its falsification line -- the whole point.
 const breaks = document.querySelectorAll("#dossier .breaks").length;
-if (breaks !== 12) fail.push(`dossier rendered ${breaks} "what breaks it" blocks, expected 12`);
+if (breaks !== nPositions) {
+  fail.push(`dossier rendered ${breaks} "what breaks it" blocks, expected ${nPositions}`);
+}
+
+// Bucket weights must total 100, or the allocation chart is drawing a book
+// that does not exist.
+const total = HOLDINGS.reduce((a, h) => a + h.weight, 0);
+if (total !== 100) fail.push(`weights total ${total}%, expected 100%`);
+
+const legendItems = document.querySelectorAll("#alloc-legend li").length;
+if (legendItems !== nBuckets) fail.push(`allocation legend has ${legendItems} entries, expected ${nBuckets}`);
 
 // The refresh log is the page's evidence that it self-updates, so if the data
 // carries two or more runs the section must actually be visible.

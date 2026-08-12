@@ -12,10 +12,10 @@
   --accent: #0b6b75;
   --gain: #2e7d5b;
   --loss: #b4382f;
-  --s1: #0f7bc0;
-  --s2: #ae6a12;
-  --s3: #7c4bc4;
-  --s4: #b23a52;
+  --s1: #ae6a12;
+  --s2: #0f7bc0;
+  --s3: #b02d6e;
+
 
   --font-display: Bahnschrift, "DIN Condensed", "Franklin Gothic Medium", "Arial Narrow", sans-serif;
   --font-body: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
@@ -35,10 +35,10 @@
     --accent: #4fb3bd;
     --gain: #59b98c;
     --loss: #e0736a;
-    --s1: #3d93d4;
-    --s2: #be8829;
-    --s3: #9878de;
-    --s4: #d2626e;
+    --s1: #be8829;
+    --s2: #3d93d4;
+    --s3: #d45e9c;
+
   }
 }
 

@@ -1,16 +1,16 @@
-name: Refresh portfolio
+name: Daily refresh
 
-# Feeds the published page from public market data, without a machine of the
+# Feeds the published page from public market data without a machine of the
 # user's needing to be switched on.
 #
-# GitHub cron is UTC and has no DST. 20:45 UTC is ~45 minutes after the US
-# close (16:00 ET), by which point every market in the book has settled.
-# Scheduled runs on a busy queue can start late; that is normal and harmless
-# here, since the job snapshots a close rather than an intraday moment.
+# GitHub cron is UTC and has no DST. 22:00 UTC is two hours after the US close
+# (16:00 ET), by which point every exchange in the book has settled. Scheduled
+# runs can start late when GitHub's queue is busy; harmless here, since the job
+# snapshots a daily close rather than an intraday moment.
 on:
   schedule:
-    - cron: "45 20 * * 1-5"
-  workflow_dispatch: # lets you trigger a refresh by hand from the Actions tab
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch: # trigger a refresh by hand from the Actions tab
 
 permissions:
   contents: write # commit the refreshed snapshot + history back
@@ -18,9 +18,9 @@ permissions:
   id-token: write # required by deploy-pages
 
 # Never let two refreshes interleave: both write data/snapshot.json, and the
-# validator compares against it.
+# validator compares each candidate against it.
 concurrency:
-  group: refresh-portfolio
+  group: daily-refresh
   cancel-in-progress: false
 
 jobs:
@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       status: ${{ steps.refresh.outputs.status }}
-      summary: ${{ steps.refresh.outputs.summary }}
     steps:
       - uses: actions/checkout@v7
 
@@ -39,7 +38,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Refresh from public market data
+      - name: Fetch and validate daily closes
         id: refresh
         run: |
           set +e
@@ -57,35 +56,30 @@ jobs:
             *) status=crashed ;;
           esac
           echo "status=$status" >> "$GITHUB_OUTPUT"
-          echo "summary=$(tail -3 refresh.log | tr '\n' ' ' | cut -c1-400)" >> "$GITHUB_OUTPUT"
 
           {
             echo "### Refresh: \`$status\`"
             echo ""
             echo '```'
-            tail -25 refresh.log
+            tail -30 refresh.log
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
           # A rejected refresh is a successful defence, not a build failure --
-          # it means the guard did its job and the live page was left alone.
-          # Only a crash should go red.
+          # the guard did its job and the live page was left alone. Only a
+          # crash should go red.
           if [ "$status" = "crashed" ]; then exit 1; fi
 
-      - name: Commit refreshed data
+      - name: Commit daily closes
         if: steps.refresh.outputs.status == 'published'
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/snapshot.json data/history.json
-          # `git commit` fails on an empty diff; a weekend run legitimately
-          # produces one, so treat "nothing to commit" as success.
-          if git diff --staged --quiet; then
-            echo "no data change to commit"
-          else
-            git commit -m "refresh: market data $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
-            git push
-          fi
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "refresh: daily closes ${{ github.run_id }} [skip ci]"
+          # Only the data the next run needs as its validation baseline. out/ is
+          # gitignored and ships as a Pages artifact instead.
+          file_pattern: data/snapshot.json data/history.json
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Upload page
         if: steps.refresh.outputs.status == 'published'
@@ -95,8 +89,8 @@ jobs:
 
   deploy:
     needs: refresh
-    # Skipped entirely when the refresh was rejected: republishing an unchanged
-    # page would only obscure that the data never updated.
+    # Skipped when the refresh was rejected: redeploying an unchanged page would
+    # only obscure the fact that the data never updated.
     if: needs.refresh.outputs.status == 'published'
     runs-on: ubuntu-latest
     environment:

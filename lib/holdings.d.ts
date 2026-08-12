@@ -1,4 +1,4 @@
-export type SleeveId = "fuel" | "ground" | "compute" | "ballast";
+export type SleeveId = "energy" | "compute" | "ballast";
 
 export interface Sleeve {
   id: SleeveId;
@@ -29,6 +29,12 @@ export interface Holding {
   tradability?: "index" | "future" | "private";
   expiry?: string;
   manualMark?: ManualMark;
+  /** Share of the measured window this position actually traded in (0-1). */
+  coverage?: number;
+  /** True when coverage is below 95% -- a newer listing, not missing data. */
+  partial?: boolean;
+  fxMissing?: boolean;
+  currencyMismatch?: boolean;
 }
 
 export declare const SLEEVES: Record<SleeveId, Sleeve>;
