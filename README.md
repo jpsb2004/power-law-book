@@ -1,5 +1,8 @@
 # The Power Law Book
 
+**Live: https://jpsb2004.github.io/power-law-book/** — rebuilt from public market
+data every weekday after the US close, by the pipeline in this repo.
+
 A twelve-position global macro book, priced live, with the analysis and the
 limitations in the same document.
 

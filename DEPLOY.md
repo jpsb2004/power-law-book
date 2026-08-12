@@ -8,7 +8,7 @@ Everything is committed locally already. Create an **empty** repo on GitHub
 (no README, no .gitignore — this repo has both), then:
 
 ```bash
-git remote add origin https://github.com/YOUR-USERNAME/power-law-book.git
+git remote add origin https://github.com/jpsb2004/power-law-book.git
 git push -u origin main
 ```
 
@@ -28,7 +28,7 @@ The first run proves the whole chain before the schedule ever fires. When it
 finishes, the page is live at:
 
 ```
-https://YOUR-USERNAME.github.io/power-law-book/
+https://jpsb2004.github.io/power-law-book/
 ```
 
 That URL is the one to put on a CV — it is public, needs no login, and updates
