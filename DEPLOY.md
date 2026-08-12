@@ -9,7 +9,6 @@ Everything is committed locally already. Create an **empty** repo on GitHub
 
 ```bash
 git remote add origin https://github.com/YOUR-USERNAME/power-law-book.git
-git branch -M main
 git push -u origin main
 ```
 
