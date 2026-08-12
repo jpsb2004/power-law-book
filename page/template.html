@@ -821,23 +821,44 @@ function renderRefreshLog() {
     "<thead><tr><th>Run</th><th>Index</th><th>Change</th><th>Priced</th><th>Largest move</th></tr></thead><tbody>" +
     rows.map((r, i) => {
       const prev = rows[i + 1];
-      const delta = prev?.index && r.index ? ((r.index - prev.index) / prev.index) * 100 : null;
+      // The index is rebased when the book changes, so a level measured against
+      // a different set of positions is not comparable with the one before it.
+      // Showing the arithmetic difference would report a reallocation as a
+      // return, which is the most misleading number this page could print.
+      // Runs logged before fingerprinting existed carry no `book`, so fall back
+      // to the position count -- which is what actually changed across the one
+      // reallocation in the log.
+      const size = (x) => x.positions ?? x.priced;
+      const rebalanced =
+        prev != null &&
+        (r.book != null && prev.book != null ? r.book !== prev.book : size(r) !== size(prev));
+      const delta =
+        prev?.index && r.index && !rebalanced ? ((r.index - prev.index) / prev.index) * 100 : null;
       const bm = r.biggestMove;
       const failed = (r.failures ?? []).length;
+      // Runs predating the `positions` field belong to a smaller book; using
+      // today's count would report them as having failed to price six lines
+      // that did not exist yet.
+      const total = r.positions ?? r.priced;
       return "<tr>" +
         '<td class="t">' + new Date(r.at).toISOString().slice(0, 16).replace("T", " ") + " UTC</td>" +
         '<td class="n">' + (r.index == null ? "—" : r.index.toFixed(2)) + "</td>" +
-        '<td class="n ' + signClass(delta) + '">' + (delta == null ? "—" : pct(delta, 2)) + "</td>" +
-        '<td class="n' + (failed ? " neg" : "") + '">' + r.priced + "/12</td>" +
+        '<td class="n ' + signClass(delta) + '">' +
+          (rebalanced
+            ? '<span class="tag warn">rebased</span>'
+            : delta == null ? "—" : pct(delta, 2)) +
+        "</td>" +
+        '<td class="n' + (failed ? " neg" : "") + '">' + r.priced + "/" + total + "</td>" +
         '<td class="n" style="color:var(--ink-3)">' +
-          (bm ? escape(bm.ticker) + " " + pct(bm.move, 1) : "—") + "</td>" +
+          (bm && !rebalanced ? escape(bm.ticker) + " " + pct(bm.move, 1) : "—") + "</td>" +
         "</tr>";
     }).join("") + "</tbody>";
 
   const span = (h.at(-1).at - h[0].at) / 36e5;
   $("refresh-note").textContent =
     h.length + " runs logged over " + (span < 1 ? "under an hour" : span.toFixed(0) + " hours") +
-    ". A run that fails validation never reaches this table — it is rejected before publishing.";
+    ". A run that fails validation never reaches this table — it is rejected before publishing. " +
+    "“Rebased” marks a change to the book itself, after which a level is not comparable with the one before it.";
 }
 
 /* ------------------------------------------------------------------ boot */

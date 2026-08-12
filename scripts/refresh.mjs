@@ -22,6 +22,7 @@ import { existsSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 import { buildSnapshot, validateSnapshot } from "../lib/build-snapshot.js";
 
 const run = promisify(execFile);
@@ -32,6 +33,15 @@ const rootDir = fileURLToPath(root);
 const log = (s) => process.stderr.write(s + "\n");
 
 const HISTORY_LIMIT = 60;
+
+/** Short, stable digest of the book's tickers and weights. */
+function bookFingerprint(positions) {
+  const spec = positions
+    .map((p) => `${p.ticker}:${p.weight}`)
+    .sort()
+    .join("|");
+  return createHash("sha1").update(spec).digest("hex").slice(0, 10);
+}
 
 async function readJson(url) {
   try {
@@ -77,6 +87,12 @@ async function main() {
     index: next.curve.at(-1)?.c ?? null,
     ytd: next.curveStats.ytd,
     priced: next.positions.filter((p) => p.price != null).length,
+    // Fingerprint of the book itself. The index is rebased whenever the
+    // constituents change, so a level measured against a different set of
+    // positions is not comparable with the previous one -- the page uses this
+    // to refuse to show a "return" across a reallocation.
+    book: bookFingerprint(next.positions),
+    positions: next.positions.length,
     failures: next.failures.map((f) => f.ticker),
     biggestMove: moves.length
       ? moves.reduce((a, b) => (Math.abs(b.move) > Math.abs(a.move) ? b : a))
