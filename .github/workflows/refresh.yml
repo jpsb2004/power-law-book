@@ -1,0 +1,107 @@
+name: Refresh portfolio
+
+# Feeds the published page from public market data, without a machine of the
+# user's needing to be switched on.
+#
+# GitHub cron is UTC and has no DST. 20:45 UTC is ~45 minutes after the US
+# close (16:00 ET), by which point every market in the book has settled.
+# Scheduled runs on a busy queue can start late; that is normal and harmless
+# here, since the job snapshots a close rather than an intraday moment.
+on:
+  schedule:
+    - cron: "45 20 * * 1-5"
+  workflow_dispatch: # lets you trigger a refresh by hand from the Actions tab
+
+permissions:
+  contents: write # commit the refreshed snapshot + history back
+  pages: write # publish to GitHub Pages
+  id-token: write # required by deploy-pages
+
+# Never let two refreshes interleave: both write data/snapshot.json, and the
+# validator compares against it.
+concurrency:
+  group: refresh-portfolio
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.refresh.outputs.status }}
+      summary: ${{ steps.refresh.outputs.summary }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Refresh from public market data
+        id: refresh
+        run: |
+          set +e
+          node scripts/refresh.mjs 2>&1 | tee refresh.log
+          code=${PIPESTATUS[0]}
+          set -e
+
+          # The pipeline's exit code is the contract:
+          #   0 = validated and rebuilt, safe to publish
+          #   2 = rejected by validation, nothing was changed on purpose
+          #   1 = crashed
+          case $code in
+            0) status=published ;;
+            2) status=rejected ;;
+            *) status=crashed ;;
+          esac
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "summary=$(tail -3 refresh.log | tr '\n' ' ' | cut -c1-400)" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Refresh: \`$status\`"
+            echo ""
+            echo '```'
+            tail -25 refresh.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # A rejected refresh is a successful defence, not a build failure --
+          # it means the guard did its job and the live page was left alone.
+          # Only a crash should go red.
+          if [ "$status" = "crashed" ]; then exit 1; fi
+
+      - name: Commit refreshed data
+        if: steps.refresh.outputs.status == 'published'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/snapshot.json data/history.json
+          # `git commit` fails on an empty diff; a weekend run legitimately
+          # produces one, so treat "nothing to commit" as success.
+          if git diff --staged --quiet; then
+            echo "no data change to commit"
+          else
+            git commit -m "refresh: market data $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
+            git push
+          fi
+
+      - name: Upload page
+        if: steps.refresh.outputs.status == 'published'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: refresh
+    # Skipped entirely when the refresh was rejected: republishing an unchanged
+    # page would only obscure that the data never updated.
+    if: needs.refresh.outputs.status == 'published'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

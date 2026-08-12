@@ -1,0 +1,849 @@
+<title>The Power Law Book — a macro portfolio on compute and the energy it eats</title>
+<style>
+/* ---------------------------------------------------------------- tokens */
+:root {
+  --ground: #EFF1EE;
+  --surface: #F7F8F6;
+  --surface-2: #E7EAE6;
+  --ink: #14181A;
+  --ink-2: #454E52;
+  --ink-3: #6E7A7F;
+  --rule: #D3D9D4;
+  --rule-strong: #B4BDB7;
+  --accent: #0B6B75;
+  --gain: #2E7D5B;
+  --loss: #B4382F;
+  --s1: #0F7BC0;
+  --s2: #AE6A12;
+  --s3: #7C4BC4;
+  --s4: #B23A52;
+
+  --font-display: Bahnschrift, "DIN Condensed", "Franklin Gothic Medium", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-body: Charter, "Bitstream Charter", "Iowan Old Style", "Source Serif 4", Georgia, serif;
+  --font-mono: "Cascadia Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --measure: 66ch;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #101416;
+    --surface: #171C1F;
+    --surface-2: #1E2529;
+    --ink: #E8EDEA;
+    --ink-2: #A9B4B7;
+    --ink-3: #7C888C;
+    --rule: #2A3236;
+    --rule-strong: #3C464B;
+    --accent: #4FB3BD;
+    --gain: #59B98C;
+    --loss: #E0736A;
+    --s1: #3D93D4;
+    --s2: #BE8829;
+    --s3: #9878DE;
+    --s4: #D2626E;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #101416;
+  --surface: #171C1F;
+  --surface-2: #1E2529;
+  --ink: #E8EDEA;
+  --ink-2: #A9B4B7;
+  --ink-3: #7C888C;
+  --rule: #2A3236;
+  --rule-strong: #3C464B;
+  --accent: #4FB3BD;
+  --gain: #59B98C;
+  --loss: #E0736A;
+  --s1: #3D93D4;
+  --s2: #BE8829;
+  --s3: #9878DE;
+  --s4: #D2626E;
+}
+
+/* ----------------------------------------------------------------- base */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--gutter); }
+.prose { max-width: var(--measure); }
+
+h1, h2, h3, .display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+  margin: 0;
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.pos { color: var(--gain); }
+.neg { color: var(--loss); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+/* -------------------------------------------------------------- masthead */
+.masthead { padding: clamp(2.5rem, 7vw, 5rem) 0 2rem; border-bottom: 1px solid var(--rule); }
+.masthead h1 {
+  font-size: clamp(2.6rem, 8.5vw, 5.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.masthead h1 .thin { display: block; color: var(--ink-3); font-weight: 400; }
+.standfirst { font-size: clamp(1.05rem, 2.2vw, 1.3rem); color: var(--ink-2); margin-top: 1.4rem; max-width: 54ch; }
+.stamp {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem;
+  margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+/* ----------------------------------------------------------------- stats */
+.stats {
+  display: grid; gap: 1px; background: var(--rule);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border: 1px solid var(--rule); margin: 2.5rem 0;
+}
+.stat { background: var(--surface); padding: 1.1rem 1.2rem; }
+.stat .k { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.stat .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.75rem; line-height: 1.15; margin-top: 0.4rem; }
+.stat .n { font-size: 0.82rem; color: var(--ink-3); font-family: var(--font-body); }
+
+/* --------------------------------------------------------------- section */
+section { padding: clamp(3rem, 7vw, 5rem) 0; border-bottom: 1px solid var(--rule); }
+.sec-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 0.5rem; }
+.sec-head h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); text-transform: uppercase; letter-spacing: 0.01em; }
+.lede { color: var(--ink-2); margin: 0.9rem 0 2rem; }
+
+/* ----------------------------------------------------------------- chain */
+.chain { display: grid; gap: 0.75rem; margin: 2rem 0 0; }
+.link {
+  display: grid; grid-template-columns: 3.2rem 1fr; gap: 1.25rem;
+  background: var(--surface); border: 1px solid var(--rule);
+  border-left: 4px solid var(--sleeve); padding: 1.1rem 1.25rem;
+}
+.link .numeral {
+  font-family: var(--font-display); font-size: 2.1rem; line-height: 1;
+  color: var(--sleeve); letter-spacing: 0.02em;
+}
+.link h3 { font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.link .claim { color: var(--ink-2); font-size: 0.97rem; margin-top: 0.3rem; }
+.link .meta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-3); margin-top: 0.6rem; letter-spacing: 0.05em; }
+.arrow { justify-self: start; margin-left: 1.5rem; color: var(--rule-strong); font-size: 1.1rem; line-height: 1; }
+
+/* ---------------------------------------------------------------- charts */
+figure { margin: 0; }
+figcaption { font-size: 0.85rem; color: var(--ink-3); margin-top: 0.9rem; max-width: var(--measure); }
+.chart-box { background: var(--surface); border: 1px solid var(--rule); padding: 1.25rem 1rem 0.75rem; overflow-x: auto; }
+svg { display: block; max-width: 100%; height: auto; }
+/* Charts keep a legible floor and scroll inside their own box on narrow
+   screens. Letting them shrink to fit squashed the 12-row bar chart to ~9px
+   per row, which is a chart nobody can read. */
+.chart-box svg { min-width: 620px; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin: 0.9rem 0 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 0.45rem; }
+.swatch { width: 11px; height: 11px; border-radius: 2px; flex: none; }
+
+.tip {
+  position: absolute; pointer-events: none; opacity: 0; transition: opacity .12s;
+  background: var(--ink); color: var(--ground); padding: 0.5rem 0.65rem;
+  font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.5;
+  border-radius: 3px; white-space: nowrap; z-index: 5;
+}
+.tip.on { opacity: 1; }
+.rel { position: relative; }
+
+/* ---------------------------------------------------------------- tables */
+.tbl-scroll { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; min-width: 720px; }
+th, td { padding: 0.6rem 0.75rem; text-align: right; border-bottom: 1px solid var(--rule); }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 500;
+  position: sticky; top: 0; background: var(--surface-2);
+}
+tbody td.t { font-family: var(--font-mono); font-size: 0.82rem; }
+tbody tr:hover td { background: var(--surface-2); }
+td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.sleeve-row td {
+  background: var(--surface-2); font-family: var(--font-display);
+  text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; color: var(--ink-2);
+  border-left: 4px solid var(--sleeve);
+}
+
+/* --------------------------------------------------------------- dossier */
+.dossier { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 1.5rem; }
+.card { background: var(--surface); padding: 1.35rem 1.4rem; border-left: 4px solid var(--sleeve); }
+.card-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1rem; }
+.card-top .tk { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; }
+.card-top .nm { color: var(--ink-2); font-size: 0.95rem; }
+.card-top .w { margin-left: auto; font-family: var(--font-mono); font-size: 0.95rem; }
+.tag {
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  border: 1px solid var(--rule-strong); color: var(--ink-3); padding: 0.1rem 0.4rem; border-radius: 2px;
+}
+.tag.warn { border-color: var(--s2); color: var(--s2); }
+.card p { margin: 0.8rem 0 0; font-size: 0.95rem; }
+.card .breaks { color: var(--ink-2); border-top: 1px dashed var(--rule); padding-top: 0.7rem; margin-top: 0.85rem; }
+.card .breaks b {
+  font-family: var(--font-mono); font-size: 0.63rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--loss); display: block; margin-bottom: 0.25rem; font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- notice */
+.notice {
+  border: 1px solid var(--s2); border-left-width: 4px; background: var(--surface);
+  padding: 1rem 1.2rem; margin: 1.5rem 0; font-size: 0.92rem; color: var(--ink-2);
+}
+.notice b { color: var(--ink); font-family: var(--font-display); letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.8rem; }
+
+.cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.note-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.1rem; }
+.note-list h3 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); }
+.note-list p { margin: 0.35rem 0 0; font-size: 0.92rem; color: var(--ink-2); }
+
+footer { padding: 3rem 0 4rem; color: var(--ink-3); font-size: 0.85rem; }
+footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-height: 1.7; letter-spacing: 0.02em; margin-top: 1rem; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .link { grid-template-columns: 2.2rem 1fr; gap: 0.85rem; }
+  .stat .v { font-size: 1.4rem; }
+}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Global macro · single-book research note</p>
+    <h1>The Power<br>Law Book<span class="thin">compute, and the energy it eats</span></h1>
+    <p class="standfirst">
+      Twelve positions built on one claim: that the demand curve for computation is
+      growing faster than the physical systems that feed it — fuel, molecules, land and grid —
+      can be rebuilt. Each sleeve is a different link in that chain, and each position
+      carries the condition that would prove it wrong.
+    </p>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">01</span><h2>The argument</h2></div>
+    <p class="lede prose">
+      The sleeves are ordered because they depend on each other. Fuel is upstream of
+      power; power and land are upstream of compute; and the fourth sleeve exists
+      because the first three could turn out to be one trade wearing three hats.
+    </p>
+    <div class="chain" id="chain"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">02</span><h2>Performance</h2></div>
+    <p class="lede prose">
+      The book indexed to 100 twelve months ago, in USD, rebalanced daily to target weight.
+      This is a backward-looking simulation of the current weights, not a track record —
+      the positions were chosen with the benefit of knowing this window.
+    </p>
+    <figure>
+      <div class="chart-box rel"><div id="curve"></div><div class="tip" id="curve-tip"></div></div>
+      <figcaption id="curve-cap"></figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">03</span><h2>Allocation</h2></div>
+    <p class="lede prose">
+      Weight is the only real expression of conviction. Ballast carries the largest single
+      allocation, which is a deliberate statement that the book's own thesis might be wrong.
+    </p>
+    <div id="alloc-notice"></div>
+    <figure>
+      <div class="chart-box rel"><div id="alloc"></div><div class="tip" id="alloc-tip"></div></div>
+      <ul class="legend" id="alloc-legend"></ul>
+      <figcaption>Weights as a share of notional. Sleeve totals shown above each block.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">04</span><h2>Year to date, in USD</h2></div>
+    <p class="lede prose">
+      Every position converted to the USD base at each day's rate. Bars are coloured by
+      direction, not by sleeve — this chart answers "what worked", and sleeve identity is
+      carried by the labels.
+    </p>
+    <figure>
+      <div class="chart-box rel"><div id="ytd"></div><div class="tip" id="ytd-tip"></div></div>
+      <figcaption>Positive and negative share one axis and a common zero line.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">05</span><h2>What the currency did</h2></div>
+    <p class="lede prose">
+      Five of the twelve positions report in something other than dollars. The gap between
+      the two columns is pure FX — return that has nothing to do with whether the thesis
+      was right.
+    </p>
+    <figure>
+      <div class="chart-box rel"><div id="fx"></div><div class="tip" id="fx-tip"></div></div>
+      <ul class="legend" id="fx-legend"></ul>
+      <figcaption id="fx-cap"></figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">06</span><h2>The book</h2></div>
+    <p class="lede prose">Every line, with the case for it and the condition that kills it.</p>
+    <div class="tbl-scroll"><table id="tbl"></table></div>
+    <div id="dossier"></div>
+  </section>
+
+  <section id="refresh-section" hidden>
+    <div class="sec-head"><span class="eyebrow">07</span><h2>Refresh log</h2></div>
+    <p class="lede prose">
+      This page is rebuilt on a schedule from public market data. Each run re-fetches
+      every position, validates the result against the previous one, and is discarded
+      without publishing if it looks wrong — a stale page beats a corrupted one.
+    </p>
+    <div class="tbl-scroll"><table id="refresh-tbl"></table></div>
+    <p style="color: var(--ink-3); font-size: 0.85rem; margin-top: 0.9rem;" id="refresh-note"></p>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="eyebrow">08</span><h2>Method &amp; limitations</h2></div>
+    <p class="lede prose">
+      The parts of this that a careful reader should push on. They are here because
+      leaving them out would make the numbers above look more certain than they are.
+    </p>
+    <div class="cols">
+      <ul class="note-list">
+        <li><h3>Three of twelve are not directly buyable</h3><p>
+          The KOSPI is an index, gold is a dated futures contract that expires 29 Dec 2026 and must be
+          rolled, and Anthropic is private. A real book would hold a tracking fund, manage the roll,
+          and have no way in at all to the third.</p></li>
+        <li><h3>The private mark is stale by construction</h3><p>
+          Anthropic is carried flat at its last primary round. It is excluded from the performance
+          curve entirely — holding a constant would have damped measured volatility and flattered
+          the book rather than describing it.</p></li>
+        <li><h3>Correlations are biased toward zero</h3><p>
+          Taipei and Seoul close before New York opens, so daily returns for those lines are
+          measured against a different information set. Cross-market correlations here read lower
+          than the true economic relationship; weekly sampling would reduce it.</p></li>
+      </ul>
+      <ul class="note-list">
+        <li><h3>Daily rebalancing is a modelling choice</h3><p>
+          The curve rebalances to target weight every session. A held book would drift with its
+          winners, so this understates the concentration that would actually have built up.</p></li>
+        <li><h3>No costs, no tax, no slippage</h3><p>
+          Gross of commission, spread, ETF expense, futures roll, withholding on Brazilian and Saudi
+          dividends, and the FX spread on five currencies. The lived return would be lower.</p></li>
+        <li><h3>One window, chosen after the fact</h3><p>
+          Twelve months, ending on the day the note was written, for positions selected today.
+          That is the most flattering possible framing, and the reason the drawdown column matters
+          more than the return column.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Built as a research exercise: a live Next.js application fetching quotes from the
+      Yahoo Finance chart API, and this page — a frozen, dated snapshot generated from the
+      same data layer, so the two cannot disagree.
+    </p>
+    <p class="disclaimer" id="disclaimer"></p>
+  </footer>
+</div>
+
+<script>
+// Without a viewport meta a phone lays the page out at 980px and every
+// max-width rule below that is dead. The host skeleton normally supplies one;
+// this only fills the gap when it does not, so it can never conflict.
+if (!document.querySelector('meta[name="viewport"]')) {
+  const mv = document.createElement("meta");
+  mv.name = "viewport";
+  mv.content = "width=device-width, initial-scale=1";
+  document.head.appendChild(mv);
+}
+
+const DATA = __SNAPSHOT__;
+
+/* ------------------------------------------------------------- utilities */
+const $ = (id) => document.getElementById(id);
+const SLEEVE_VAR = { fuel: "--s1", ground: "--s2", compute: "--s3", ballast: "--s4" };
+/**
+ * Colours go into the SVG as `var(--token)`, not as resolved hex.
+ *
+ * Reading computed values would freeze whichever theme happened to be active
+ * when the chart was drawn, and force a full repaint on every theme change.
+ * Presentation attributes accept custom properties, so the browser re-resolves
+ * them itself and light/dark just works.
+ */
+const css = (v) => "var(" + v + ")";
+const NS = "http://www.w3.org/2000/svg";
+
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null) n.setAttribute(k, v);
+  if (text != null) n.textContent = text;
+  return n;
+};
+const pct = (v, d = 1) => (v == null ? "—" : (v > 0 ? "+" : "") + v.toFixed(d) + "%");
+const signClass = (v) => (v == null ? "" : v > 0 ? "pos" : v < 0 ? "neg" : "");
+const fmtDate = (t) =>
+  new Date(t).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const SLEEVES = DATA.sleeves;
+const POS = DATA.positions;
+const priced = POS.filter((p) => p.usdPoints && p.usdPoints.length > 1);
+
+/* ---------------------------------------------------------------- header */
+function renderStamp() {
+  const ccys = [...new Set(POS.map((p) => p.currency))];
+  $("stamp").innerHTML = [
+    "As of " + fmtDate(DATA.asOf) + ", " + new Date(DATA.asOf).toISOString().slice(11, 16) + " UTC",
+    POS.length + " positions",
+    ccys.length + " currencies → USD",
+    "Source: " + DATA.source,
+  ].map((s) => "<span>" + escape(s) + "</span>").join("");
+
+  $("disclaimer").textContent =
+    "Not investment advice, not a recommendation, and not an offer to buy or sell anything. " +
+    "A personal research exercise built to practise market analysis. Prices are delayed and " +
+    "sourced from a free public endpoint; they have not been reconciled against a paid vendor " +
+    "and may contain errors. Past performance says nothing about future returns.";
+}
+
+function renderStats() {
+  const s = DATA.curveStats;
+  const cards = [
+    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: "USD, rebalanced daily" },
+    { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
+    { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
+    { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
+    { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "the hedge against being wrong" },
+  ];
+  $("stats").innerHTML = cards
+    .map(
+      (c) =>
+        '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
+        c.v + '</div><div class="n">' + c.n + "</div></div>"
+    )
+    .join("");
+}
+
+/* ----------------------------------------------------------------- chain */
+function renderChain() {
+  const order = ["fuel", "ground", "compute", "ballast"];
+  $("chain").innerHTML = order
+    .map((id, i) => {
+      const s = SLEEVES[id];
+      const names = POS.filter((p) => p.sleeve === id).map((p) => p.ticker).join("  ·  ");
+      const arrow = i > 0 && i < 3 ? '<div class="arrow">↓</div>' : "";
+      const gap = i === 3 ? '<div class="arrow" style="margin-top:.4rem">⤶ counterweight to I–III</div>' : "";
+      return (
+        arrow + gap +
+        '<article class="link" style="--sleeve: var(' + SLEEVE_VAR[id] + ')">' +
+        '<div class="numeral">' + s.numeral + "</div><div>" +
+        "<h3>" + escape(s.name) + "</h3>" +
+        '<p class="claim">' + escape(s.claim) + "</p>" +
+        '<p class="meta">' + DATA.sleeveWeights[id] + "% of book  ·  " + escape(names) + "</p>" +
+        "</div></article>"
+      );
+    })
+    .join("");
+}
+
+/* -------------------------------------------------- chart: portfolio curve */
+function renderCurve() {
+  const host = $("curve");
+  host.innerHTML = "";
+  const pts = DATA.curve;
+  if (pts.length < 2) return;
+
+  const W = 1000, H = 320, m = { t: 16, r: 56, b: 28, l: 8 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xs = pts.map((p) => p.t), ys = pts.map((p) => p.c);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  const pad = (hi - lo) * 0.12 || 1;
+  lo -= pad; hi += pad;
+
+  const X = (t) => m.l + ((t - x0) / (x1 - x0)) * iw;
+  const Y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Portfolio index, 12 months, rebased to 100" });
+
+  // recessive gridlines + right-hand axis
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++) {
+    const v = lo + ((hi - lo) * i) / ticks;
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: css("--rule"), "stroke-width": 1 }));
+    svg.appendChild(
+      el("text", { x: m.l + iw + 8, y: Y(v) + 4, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, v.toFixed(0))
+    );
+  }
+  // the 100 baseline is the only reference that means anything
+  if (lo < 100 && hi > 100) {
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(100), y2: Y(100), stroke: css("--rule-strong"), "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  }
+
+  const line = pts.map((p, i) => (i ? "L" : "M") + X(p.t).toFixed(2) + " " + Y(p.c).toFixed(2)).join(" ");
+  const grad = el("linearGradient", { id: "cg", x1: 0, y1: 0, x2: 0, y2: 1 });
+  grad.appendChild(el("stop", { offset: "0%", "stop-color": css("--accent"), "stop-opacity": 0.28 }));
+  grad.appendChild(el("stop", { offset: "100%", "stop-color": css("--accent"), "stop-opacity": 0.02 }));
+  const defs = el("defs"); defs.appendChild(grad); svg.appendChild(defs);
+
+  svg.appendChild(el("path", { d: line + ` L ${X(x1)} ${Y(lo)} L ${X(x0)} ${Y(lo)} Z`, fill: "url(#cg)" }));
+  svg.appendChild(el("path", { d: line, fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round" }));
+
+  // emphasised endpoint
+  const last = pts[pts.length - 1];
+  svg.appendChild(el("circle", { cx: X(last.t), cy: Y(last.c), r: 4.5, fill: css("--accent"), stroke: css("--surface"), "stroke-width": 2 }));
+
+  // date ends
+  svg.appendChild(el("text", { x: m.l, y: H - 8, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, fmtDate(x0)));
+  const endLbl = el("text", { x: m.l + iw, y: H - 8, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "end" }, fmtDate(x1));
+  svg.appendChild(endLbl);
+
+  // crosshair
+  const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 });
+  const dot = el("circle", { r: 4, fill: css("--accent"), stroke: css("--surface"), "stroke-width": 2, opacity: 0 });
+  svg.appendChild(cross); svg.appendChild(dot);
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(hit);
+  host.appendChild(svg);
+
+  const tip = $("curve-tip");
+  const move = (ev) => {
+    const box = svg.getBoundingClientRect();
+    const px = ((ev.clientX - box.left) / box.width) * W;
+    const t = x0 + ((px - m.l) / iw) * (x1 - x0);
+    let best = pts[0];
+    for (const p of pts) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    cross.setAttribute("x1", X(best.t)); cross.setAttribute("x2", X(best.t)); cross.setAttribute("opacity", 0.4);
+    dot.setAttribute("cx", X(best.t)); dot.setAttribute("cy", Y(best.c)); dot.setAttribute("opacity", 1);
+    tip.classList.add("on");
+    tip.innerHTML = fmtDate(best.t) + "<br>Index " + best.c.toFixed(2) + " · " + pct(best.c - 100);
+    const hostBox = host.getBoundingClientRect();
+    tip.style.left = Math.min(Math.max(ev.clientX - hostBox.left + 12, 0), hostBox.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = ev.clientY - hostBox.top - 10 + "px";
+  };
+  hit.addEventListener("mousemove", move);
+  hit.addEventListener("mouseleave", () => {
+    tip.classList.remove("on"); cross.setAttribute("opacity", 0); dot.setAttribute("opacity", 0);
+  });
+
+  $("curve-cap").textContent =
+    "Index = 100 at " + fmtDate(x0) + ". Excludes " + DATA.excludedFromCurve.join(", ") +
+    " (no public price series). Gross of all costs.";
+}
+
+/* ------------------------------------------------------ chart: allocation */
+function renderAlloc() {
+  const host = $("alloc");
+  host.innerHTML = "";
+  const order = ["fuel", "ground", "compute", "ballast"];
+  const W = 1000, H = 150, m = { t: 34, r: 2, b: 34, l: 2 };
+  const iw = W - m.l - m.r, bh = H - m.t - m.b;
+  const total = POS.reduce((a, p) => a + p.weight, 0);
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Allocation by sleeve and position" });
+
+  let x = m.l;
+  const tip = $("alloc-tip");
+  for (const id of order) {
+    const members = POS.filter((p) => p.sleeve === id);
+    const sw = members.reduce((a, p) => a + p.weight, 0);
+    const blockW = (sw / total) * iw;
+    const colour = css(SLEEVE_VAR[id]);
+
+    svg.appendChild(el("text", { x: x, y: m.t - 18, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-display)", "letter-spacing": "0.08em" },
+      SLEEVES[id].numeral + "  " + SLEEVES[id].name.toUpperCase()));
+    svg.appendChild(el("text", { x: x, y: m.t - 4, fill: colour, "font-size": 13, "font-family": "var(--font-mono)" }, sw + "%"));
+
+    let ix = x;
+    members.forEach((p, i) => {
+      const w = (p.weight / total) * iw;
+      // 2px surface gap between adjacent segments
+      const seg = el("rect", {
+        x: ix, y: m.t, width: Math.max(w - 2, 1), height: bh,
+        fill: colour, opacity: 0.45 + 0.55 * (i / Math.max(members.length - 1, 1)),
+        rx: 2, style: "cursor:pointer",
+      });
+      seg.addEventListener("mousemove", (ev) => {
+        const hb = host.getBoundingClientRect();
+        tip.classList.add("on");
+        tip.innerHTML = p.ticker + " · " + p.weight + "%<br>" + escape(p.name);
+        tip.style.left = Math.min(ev.clientX - hb.left + 12, hb.width - tip.offsetWidth - 4) + "px";
+        tip.style.top = ev.clientY - hb.top - 10 + "px";
+      });
+      seg.addEventListener("mouseleave", () => tip.classList.remove("on"));
+      svg.appendChild(seg);
+
+      if (w > 46) {
+        svg.appendChild(el("text", {
+          x: ix + w / 2 - 1, y: m.t + bh / 2 + 4, fill: css("--surface"),
+          "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "middle",
+        }, p.ticker.replace(/\.(SA|SR|TW|L)$/, "").replace("^", "")));
+      }
+      ix += w;
+    });
+    x += blockW;
+  }
+  host.appendChild(svg);
+
+  $("alloc-legend").innerHTML = order
+    .map((id) =>
+      '<li><span class="swatch" style="background:var(' + SLEEVE_VAR[id] + ')"></span>' +
+      escape(SLEEVES[id].numeral + " " + SLEEVES[id].name) + " — " + DATA.sleeveWeights[id] + "%</li>"
+    ).join("");
+
+  if (DATA.weightsProvisional) {
+    $("alloc-notice").innerHTML =
+      '<div class="notice"><b>Provisional weights</b><br>' +
+      "These allocations are a working draft built from the sleeve thesis, not a final book. " +
+      "Every figure that depends on weight — the performance curve, the sleeve totals, the " +
+      "contribution column — moves when they are replaced.</div>";
+  }
+}
+
+/* ------------------------------------------------------------ chart: YTD */
+function renderYtd() {
+  const host = $("ytd");
+  host.innerHTML = "";
+  const rows = priced
+    .map((p) => ({ ticker: p.ticker, sleeve: p.sleeve, v: p.usd.ytd }))
+    .filter((r) => r.v != null)
+    .sort((a, b) => b.v - a.v);
+
+  const rowH = 30, W = 1000, m = { t: 10, r: 12, b: 26, l: 96 };
+  const H = m.t + rows.length * rowH + m.b;
+  const iw = W - m.l - m.r;
+  const max = Math.max(...rows.map((r) => Math.abs(r.v))) * 1.15;
+  const zero = m.l + (max / (2 * max)) * iw;
+  const X = (v) => m.l + ((v + max) / (2 * max)) * iw;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Year to date return by position, USD" });
+  svg.appendChild(el("line", { x1: zero, x2: zero, y1: m.t, y2: m.t + rows.length * rowH, stroke: css("--rule-strong"), "stroke-width": 1 }));
+
+  const tip = $("ytd-tip");
+  rows.forEach((r, i) => {
+    const y = m.t + i * rowH + 5;
+    const h = rowH - 12;
+    const up = r.v >= 0;
+    const colour = up ? css("--gain") : css("--loss");
+    const x = up ? zero : X(r.v);
+    const w = Math.max(Math.abs(X(r.v) - zero), 2);
+
+    const bar = el("rect", { x, y, width: w, height: h, fill: colour, rx: 3, style: "cursor:pointer" });
+    bar.addEventListener("mousemove", (ev) => {
+      const hb = host.getBoundingClientRect();
+      tip.classList.add("on");
+      tip.innerHTML = r.ticker + " · " + pct(r.v) + " YTD<br>" + escape(SLEEVES[r.sleeve].name);
+      tip.style.left = Math.min(ev.clientX - hb.left + 12, hb.width - tip.offsetWidth - 4) + "px";
+      tip.style.top = ev.clientY - hb.top - 10 + "px";
+    });
+    bar.addEventListener("mouseleave", () => tip.classList.remove("on"));
+    svg.appendChild(bar);
+
+    svg.appendChild(el("text", { x: m.l - 10, y: y + h / 2 + 4, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-mono)", "text-anchor": "end" }, r.ticker));
+    // direct label on every bar: 12 rows is few enough that a value axis would be noise
+    svg.appendChild(el("text", {
+      x: up ? x + w + 7 : x - 7, y: y + h / 2 + 4, fill: css("--ink-3"),
+      "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": up ? "start" : "end",
+    }, pct(r.v)));
+  });
+  host.appendChild(svg);
+}
+
+/* ------------------------------------------------- chart: FX slope chart */
+function renderFx() {
+  const host = $("fx");
+  host.innerHTML = "";
+  const rows = priced
+    .filter((p) => p.currency !== "USD" && p.local.ytd != null && p.usd.ytd != null)
+    .sort((a, b) => b.usd.ytd - a.usd.ytd);
+
+  if (!rows.length) return;
+
+  const W = 1000, H = 300, m = { t: 40, r: 150, b: 34, l: 150 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const all = rows.flatMap((r) => [r.local.ytd, r.usd.ytd]);
+  let lo = Math.min(...all), hi = Math.max(...all);
+  const pad = (hi - lo) * 0.18 || 1;
+  lo -= pad; hi += pad;
+  const Y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Local currency versus USD return, year to date" });
+
+  svg.appendChild(el("text", { x: m.l, y: m.t - 16, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "middle" }, "LOCAL CCY"));
+  svg.appendChild(el("text", { x: m.l + iw, y: m.t - 16, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "middle" }, "USD"));
+  for (const x of [m.l, m.l + iw]) {
+    svg.appendChild(el("line", { x1: x, x2: x, y1: m.t, y2: m.t + ih, stroke: css("--rule"), "stroke-width": 1 }));
+  }
+
+  const tip = $("fx-tip");
+  for (const r of rows) {
+    const helped = r.usd.ytd >= r.local.ytd;
+    const colour = helped ? css("--gain") : css("--loss");
+    const y1 = Y(r.local.ytd), y2 = Y(r.usd.ytd);
+
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1, y2, stroke: colour, "stroke-width": 2, opacity: 0.75 }));
+    for (const [cx, cy] of [[m.l, y1], [m.l + iw, y2]]) {
+      svg.appendChild(el("circle", { cx, cy, r: 4.5, fill: colour, stroke: css("--surface"), "stroke-width": 2 }));
+    }
+    svg.appendChild(el("text", { x: m.l - 12, y: y1 + 4, fill: css("--ink-2"), "font-size": 11.5, "font-family": "var(--font-mono)", "text-anchor": "end" },
+      r.ticker + "  " + pct(r.local.ytd)));
+
+    const g = el("text", { x: m.l + iw + 12, y: y2 + 4, "font-size": 11.5, "font-family": "var(--font-mono)", fill: css("--ink-2") });
+    g.appendChild(el("tspan", {}, pct(r.usd.ytd) + "  "));
+    g.appendChild(el("tspan", { fill: colour }, "(" + pct(r.usd.ytd - r.local.ytd) + " FX)"));
+    svg.appendChild(g);
+
+    const hit = el("rect", { x: m.l, y: Math.min(y1, y2) - 7, width: iw, height: Math.abs(y2 - y1) + 14, fill: "transparent", style: "cursor:pointer" });
+    hit.addEventListener("mousemove", (ev) => {
+      const hb = host.getBoundingClientRect();
+      tip.classList.add("on");
+      tip.innerHTML = r.ticker + " · " + r.currency + "<br>Local " + pct(r.local.ytd) + " → USD " + pct(r.usd.ytd) +
+        "<br>FX contributed " + pct(r.usd.ytd - r.local.ytd);
+      tip.style.left = Math.min(ev.clientX - hb.left + 12, hb.width - tip.offsetWidth - 4) + "px";
+      tip.style.top = ev.clientY - hb.top - 10 + "px";
+    });
+    hit.addEventListener("mouseleave", () => tip.classList.remove("on"));
+    svg.appendChild(hit);
+  }
+  host.appendChild(svg);
+
+  $("fx-legend").innerHTML =
+    '<li><span class="swatch" style="background:var(--gain)"></span>Currency added to the USD return</li>' +
+    '<li><span class="swatch" style="background:var(--loss)"></span>Currency subtracted from it</li>';
+
+  const rates = Object.entries(DATA.fx).filter(([c]) => c !== "USD")
+    .map(([c, f]) => c + " " + (f.quoted ?? 0).toFixed(c === "GBP" ? 4 : 2)).join("  ·  ");
+  $("fx-cap").textContent = "Converted at each day's rate, not today's. Closing rates: " + rates + ".";
+}
+
+/* ---------------------------------------------------------------- tables */
+function renderTable() {
+  const order = ["fuel", "ground", "compute", "ballast"];
+  const head =
+    "<thead><tr><th>Position</th><th>Venue</th><th>Wt</th><th>Last</th>" +
+    "<th>YTD local</th><th>YTD USD</th><th>1y USD</th><th>Vol</th><th>Max DD</th></tr></thead>";
+
+  const body = order.map((id) => {
+    const rows = POS.filter((p) => p.sleeve === id);
+    const header =
+      '<tr class="sleeve-row" style="--sleeve: var(' + SLEEVE_VAR[id] + ')"><td colspan="9">' +
+      SLEEVES[id].numeral + " · " + escape(SLEEVES[id].name) + " — " + DATA.sleeveWeights[id] + "%</td></tr>";
+
+    return header + rows.map((p) => {
+      const manual = p.manual;
+      const price = manual
+        ? p.manualMark.price.toLocaleString("en-GB") + " " + p.manualMark.unit
+        : (p.price ?? 0).toLocaleString("en-GB", { maximumFractionDigits: 2 }) + " " + p.currency;
+      const cell = (v, d = 1) =>
+        '<td class="n ' + signClass(v) + '">' + (v == null ? "—" : pct(v, d)) + "</td>";
+      return (
+        "<tr><td><span class='t'>" + escape(p.ticker) + "</span><br><span style='color:var(--ink-3);font-size:.8rem'>" +
+        escape(p.name) + "</span></td>" +
+        "<td style='text-align:left;color:var(--ink-3);font-size:.8rem'>" + escape(p.venue) + "</td>" +
+        '<td class="n">' + p.weight + "%</td>" +
+        '<td class="n">' + escape(price) + "</td>" +
+        (manual ? '<td colspan="5" style="color:var(--ink-3);font-size:.82rem;text-align:left">' +
+          "Private — marked at last round, " + escape(p.manualMark.asOf) + ". No series." + "</td>"
+          : cell(p.local.ytd) + cell(p.usd.ytd) + cell(p.usd.ret1y) +
+            '<td class="n">' + (p.usd.vol == null ? "—" : p.usd.vol.toFixed(0) + "%") + "</td>" +
+            '<td class="n neg">' + (p.usd.maxDrawdown == null ? "—" : p.usd.maxDrawdown.toFixed(0) + "%") + "</td>") +
+        "</tr>"
+      );
+    }).join("");
+  }).join("");
+
+  $("tbl").innerHTML = head + "<tbody>" + body + "</tbody>";
+}
+
+function renderDossier() {
+  const order = ["fuel", "ground", "compute", "ballast"];
+  const cards = order.flatMap((id) =>
+    POS.filter((p) => p.sleeve === id).map((p) => {
+      const tags = [p.kind];
+      if (p.tradability === "index") tags.push("not directly investable");
+      if (p.tradability === "future") tags.push("expires " + p.expiry);
+      if (p.tradability === "private") tags.push("illiquid · stale mark");
+      const tagHtml = tags.map((t, i) =>
+        '<span class="tag' + (i > 0 ? " warn" : "") + '">' + escape(t) + "</span>").join(" ");
+      return (
+        '<article class="card" style="--sleeve: var(' + SLEEVE_VAR[id] + ')">' +
+        '<div class="card-top"><span class="tk">' + escape(p.ticker) + '</span>' +
+        '<span class="nm">' + escape(p.name) + "</span>" + tagHtml +
+        '<span class="w">' + p.weight + "%</span></div>" +
+        "<p>" + escape(p.thesis) + "</p>" +
+        '<p class="breaks"><b>What breaks it</b>' + escape(p.breaks) + "</p>" +
+        "</article>"
+      );
+    })
+  );
+  $("dossier").innerHTML = '<div class="dossier">' + cards.join("") + "</div>";
+}
+
+/* ----------------------------------------------------------- refresh log */
+function renderRefreshLog() {
+  const h = DATA.history ?? [];
+  // A single entry is just "it was built once" -- not evidence of anything.
+  if (h.length < 2) return;
+
+  $("refresh-section").hidden = false;
+  const rows = [...h].reverse();
+
+  $("refresh-tbl").innerHTML =
+    "<thead><tr><th>Run</th><th>Index</th><th>Change</th><th>Priced</th><th>Largest move</th></tr></thead><tbody>" +
+    rows.map((r, i) => {
+      const prev = rows[i + 1];
+      const delta = prev?.index && r.index ? ((r.index - prev.index) / prev.index) * 100 : null;
+      const bm = r.biggestMove;
+      const failed = (r.failures ?? []).length;
+      return "<tr>" +
+        '<td class="t">' + new Date(r.at).toISOString().slice(0, 16).replace("T", " ") + " UTC</td>" +
+        '<td class="n">' + (r.index == null ? "—" : r.index.toFixed(2)) + "</td>" +
+        '<td class="n ' + signClass(delta) + '">' + (delta == null ? "—" : pct(delta, 2)) + "</td>" +
+        '<td class="n' + (failed ? " neg" : "") + '">' + r.priced + "/12</td>" +
+        '<td class="n" style="color:var(--ink-3)">' +
+          (bm ? escape(bm.ticker) + " " + pct(bm.move, 1) : "—") + "</td>" +
+        "</tr>";
+    }).join("") + "</tbody>";
+
+  const span = (h.at(-1).at - h[0].at) / 36e5;
+  $("refresh-note").textContent =
+    h.length + " runs logged over " + (span < 1 ? "under an hour" : span.toFixed(0) + " hours") +
+    ". A run that fails validation never reaches this table — it is rejected before publishing.";
+}
+
+/* ------------------------------------------------------------------ boot */
+function renderAll() {
+  renderStamp(); renderStats(); renderChain();
+  renderCurve(); renderAlloc(); renderYtd(); renderFx();
+  renderTable(); renderDossier(); renderRefreshLog();
+}
+renderAll();
+// No theme listener needed: every colour in the charts is a live `var(--token)`
+// reference, so the browser re-resolves them when the theme changes.
+</script>
