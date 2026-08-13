@@ -1,0 +1,39 @@
+version: 2
+
+# The Node 20 deprecation that surfaced on this repo was avoidable: the pinned
+# actions had simply gone stale. These updates surface that as a PR rather than
+# as a warning nobody reads, and eventually a red build.
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    groups:
+      # One PR a month rather than six. Actions move together and are trivially
+      # verifiable by running the workflow.
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "deps"
+    groups:
+      dev:
+        dependency-type: development
+    ignore:
+      # Next.js majors change rendering semantics; that is a deliberate upgrade
+      # with a docs read, not a dependency bump.
+      - dependency-name: next
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "deps"

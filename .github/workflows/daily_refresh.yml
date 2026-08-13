@@ -107,7 +107,7 @@ jobs:
 
       - name: Commit daily closes
         if: steps.refresh.outputs.status == 'published'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "refresh: daily closes ${{ github.run_id }} [skip ci]"
           # Only the data the next run needs as its validation baseline, plus

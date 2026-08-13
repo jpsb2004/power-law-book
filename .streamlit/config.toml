@@ -1,0 +1,19 @@
+# Dashboard theme, matched to the published static page so the two read as one
+# project. The bucket hues (#AE6A12 / #0F7BC0 / #B02D6E) live in app.py, where
+# the charts are; these are the chrome.
+[theme]
+base = "light"
+primaryColor = "#0B6B75"          # teal accent — chrome only, never a data colour
+backgroundColor = "#EFF1EE"       # cool off-white, matches page/template.html
+secondaryBackgroundColor = "#E7EAE6"
+textColor = "#14181A"
+font = "serif"
+
+[server]
+# The dashboard reads committed artifacts and never fetches on interaction, so
+# there is nothing to upload and no reason to accept uploads.
+maxUploadSize = 1
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
