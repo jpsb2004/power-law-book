@@ -29,9 +29,21 @@ from datetime import datetime, timezone
 from .ontology import Book, Entity
 from .scenarios import SCENARIOS, apply_scenario
 
-MODEL = "claude-sonnet-5"
+MODEL = "claude-opus-5"
 SIGMA_ALERT = 2.0
 MAX_WORKERS = 6
+
+# Thinking is on by default on this model, and `max_tokens` caps thinking AND
+# response text together. Budgets sized for a text-only reply get consumed by
+# reasoning and truncate the answer mid-sentence, so both are generous.
+WORKER_MAX_TOKENS = 2000
+ORCHESTRATOR_MAX_TOKENS = 16000
+
+# Safety classifiers can decline a request; `fallbacks: "default"` re-runs it on
+# Anthropic's recommended substitute server-side, routed by refusal category,
+# rather than handing back a refusal. A macro note quoting security and energy
+# headlines is exactly the benign-but-adjacent content that can trip them.
+FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
 HOUSE_STYLE = (
     "You are writing for an institutional equity research daily note. Use the "
@@ -52,6 +64,48 @@ def _client():
     except ImportError:
         return None
     return Anthropic(api_key=key)
+
+
+class Refused(RuntimeError):
+    """The model declined the request rather than answering it."""
+
+
+def _ask(client, prompt: str, max_tokens: int) -> str:
+    """
+    One call, with the response read defensively.
+
+    Two things this must not do naively. Thinking is on by default, so
+    `content[0]` is often a thinking block rather than the answer — the text has
+    to be selected by block type. And a refusal returns HTTP 200 with
+    `stop_reason == "refusal"` and empty or partial content, so the stop reason
+    is checked before the content is read at all.
+    """
+    kwargs = {
+        "model": MODEL,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+
+    try:
+        resp = client.beta.messages.create(
+            betas=[FALLBACK_BETA], fallbacks="default", **kwargs
+        )
+    except TypeError:
+        # Older SDK without the parameter typed: send it through the raw body.
+        resp = client.beta.messages.create(
+            betas=[FALLBACK_BETA], extra_body={"fallbacks": "default"}, **kwargs
+        )
+
+    if getattr(resp, "stop_reason", None) == "refusal":
+        detail = getattr(getattr(resp, "stop_details", None), "category", None)
+        raise Refused(f"declined{f' ({detail})' if detail else ''}")
+
+    text = "\n".join(
+        block.text for block in resp.content if getattr(block, "type", None) == "text"
+    ).strip()
+    if not text:
+        raise RuntimeError(f"no text in response (stop_reason={resp.stop_reason})")
+    return text
 
 
 def select_signals(book: Book, limit: int = MAX_WORKERS) -> list[Entity]:
@@ -129,12 +183,7 @@ def run_worker(client, entity: Entity) -> str:
         f"{_entity_brief(entity)}"
     )
     try:
-        resp = client.messages.create(
-            model=MODEL,
-            max_tokens=350,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return resp.content[0].text.strip()
+        return _ask(client, prompt, WORKER_MAX_TOKENS)
     except Exception as exc:  # noqa: BLE001 - a failed worker must not kill the run
         return _deterministic_worker(entity) + f"\n\n_(model call failed: {exc})_"
 
@@ -233,18 +282,17 @@ def build(book: Book, scenario_key: str = "grid") -> str:
     )
 
     try:
-        resp = client.messages.create(
-            model=MODEL,
-            max_tokens=1800,
-            messages=[{"role": "user", "content": prompt}],
+        body = _ask(client, prompt, ORCHESTRATOR_MAX_TOKENS)
+        return header + body + _render_footer(
+            book, generated_by=f"{MODEL} via an orchestrator-worker chain"
         )
-        body = resp.content[0].text.strip()
-        return header + body + _render_footer(book, generated_by=f"{MODEL} (orchestrator-worker)")
     except Exception as exc:  # noqa: BLE001
+        # The note still ships, written from the data. A failed synthesis must
+        # not mean no daily note.
         return (
             header
             + render_deterministic(book, notes, scenario)
-            + f"\n\n> Model synthesis unavailable ({exc}); rendered from data.\n"
+            + f"\n\n> Model synthesis unavailable ({exc}); rendered from the data pipeline.\n"
         )
 
 
@@ -341,4 +389,6 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
             )
     out.append("\n".join(watch) if watch else "- Nothing beyond threshold today.")
 
-    return "".join(out) + _render_footer(book, generated_by="deterministic renderer (no API key set)")
+    return "".join(out) + _render_footer(
+        book, generated_by="the data pipeline, rule-based (no model in the loop)"
+    )

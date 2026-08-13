@@ -15,7 +15,7 @@
 
 **NBIS** +34.1% (+4.1σ). Volume ran 3.04x its 50-day average. Most recent headline: "Nebius powers past estimates as customers race to secure AI computing power - reuters.com" (reuters.com). Falsification on watch: Classified here as a power consumer, which is a stretch — it is really a compute landlord. Capex-funded, customer-concentrated, and competing with hyperscalers who own their own silicon.
 
-**CRWV** +19.3% (+2.9σ). Volume ran 2.94x its 50-day average. Most recent headline: "CoreWeave (CRWV) Enters Defense AI While Opening Three Indonesia Data Centers - finance.yahoo.com" (finance.yahoo.com). 4 recent EDGAR filing(s). Falsification on watch: Debt-funded purchases of an asset that depreciates on a chip cycle. One anchor customer renegotiating resets the whole model, and it overlaps heavily with NBIS — this is one position expressed twice.
+**CRWV** +19.3% (+2.9σ). Volume ran 2.94x its 50-day average. Most recent headline: "CoreWeave (CRWV) Enters Defense AI While Opening Three Indonesia Data Centers - Yahoo Finance" (Yahoo Finance). 4 recent EDGAR filing(s). Falsification on watch: Debt-funded purchases of an asset that depreciates on a chip cycle. One anchor customer renegotiating resets the whole model, and it overlaps heavily with NBIS — this is one position expressed twice.
 
 **Compute (32%)**
 
@@ -35,6 +35,6 @@ Energy carried +5.97% on the day against Compute at +2.37%, a spread of +3.60pp.
 
 ---
 
-*Generated 2026-08-13 11:19 UTC by deterministic renderer (no API key set). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
+*Generated 2026-08-13 12:58 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
 
 *Not investment advice. A personal research exercise. Prices are delayed and sourced from a free public endpoint. Performance figures are a backward-looking simulation of current weights, not a track record.*
