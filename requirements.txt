@@ -6,7 +6,7 @@
 # the same return maths in two languages would drift, and the brief for this
 # work was explicitly "zero breakage to existing deviation math".
 streamlit>=1.40
-pandas>=2.2
+pandas>=3.0.5
 altair>=5.4
 feedparser>=6.0
 requests>=2.32
