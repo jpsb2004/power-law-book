@@ -2,7 +2,9 @@
 
 ## Beyond the Hyper-Scalers: Quantifying the Physical Bottlenecks of the Global AI CapEx Supercycle
 
-**Live page:** https://jpsb2004.github.io/power-law-book/ · **Daily note:** [`latest_briefing.md`](latest_briefing.md)
+**Live page:** https://jpsb2004.github.io/power-law-book/
+· **Interactive dashboard:** https://beyondthehyperscalersjpsb.streamlit.app/
+· **Daily note:** [`latest_briefing.md`](latest_briefing.md)
 
 ---
 
@@ -191,9 +193,14 @@ runs weekdays at 22:00 UTC — fetch → validate → generate note → commit v
 `stefanzweifel/git-auto-commit-action@v5` → deploy Pages. See
 [DEPLOY.md](DEPLOY.md).
 
-The Streamlit dashboard is not deployed by that workflow; GitHub Pages serves
-static files only. Deploy it free on Streamlit Community Cloud by pointing it at
-this repo and `app.py`.
+The Streamlit dashboard is deployed separately on Streamlit Community Cloud —
+GitHub Pages serves static files only and cannot run a Python process. The split
+is deliberate: Pages carries the static research note (instant, no cold start),
+Streamlit carries the interactive dashboard (stress toggles, filtering).
+
+Because the dashboard reads artifacts committed by CI rather than fetching
+anything, Streamlit Cloud's redeploy-on-push means the daily job feeds both
+deployments from one commit.
 
 ---
 
