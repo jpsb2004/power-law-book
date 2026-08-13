@@ -5,7 +5,7 @@
 # data/snapshot.json. This layer consumes that artifact. Two implementations of
 # the same return maths in two languages would drift, and the brief for this
 # work was explicitly "zero breakage to existing deviation math".
-streamlit>=1.40
+streamlit>=1.61.1
 pandas>=2.2
 altair>=5.4
 feedparser>=6.0
