@@ -109,7 +109,11 @@ export async function getBook(): Promise<Book> {
           ? toUsdSeries(points, rate?.points ?? [], rate?.invert ?? false)
           : [];
         const price = meta.regularMarketPrice ?? null;
-        const prev = meta.chartPreviousClose;
+        // The previous close comes from the series, NOT from
+        // `meta.chartPreviousClose`, which is relative to the requested range --
+        // on a 1y fetch it is the close from a year ago, which would turn this
+        // "Day" column into an annual change.
+        const prev = points.at(-2)?.c;
 
         return {
           ...h,

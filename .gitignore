@@ -9,3 +9,9 @@ data/snapshot.previous.json
 
 .env*
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

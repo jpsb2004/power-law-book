@@ -36,7 +36,14 @@ jobs:
           node-version: "22"
           cache: npm
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
       - run: npm ci
+
+      - run: pip install -r requirements.txt
 
       - name: Fetch and validate daily closes
         id: refresh
@@ -70,14 +77,42 @@ jobs:
           # crash should go red.
           if [ "$status" = "crashed" ]; then exit 1; fi
 
+      # The ER note is generated only from a snapshot that passed validation --
+      # writing commentary on data the pipeline just rejected would put a
+      # confident narrative on top of numbers we do not trust.
+      - name: Generate ER daily note
+        if: steps.refresh.outputs.status == 'published'
+        env:
+          # Optional. Without it the deterministic renderer produces the same
+          # note structure from the data alone, so CI never fails for want of a
+          # secret. Add it under Settings > Secrets > Actions to enable the
+          # orchestrator-worker synthesis.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set +e
+          python scripts/build_briefing.py 2>&1 | tee briefing.log
+          code=${PIPESTATUS[0]}
+          set -e
+          {
+            echo "### Briefing"
+            echo ""
+            echo '```'
+            tail -20 briefing.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          # A failed briefing must not block the market-data commit or the
+          # deploy: the page and the numbers are the primary artifact, and the
+          # note is commentary on top of them.
+          if [ $code -ne 0 ]; then echo "::warning::briefing generation failed (exit $code); keeping previous note"; fi
+
       - name: Commit daily closes
         if: steps.refresh.outputs.status == 'published'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "refresh: daily closes ${{ github.run_id }} [skip ci]"
-          # Only the data the next run needs as its validation baseline. out/ is
-          # gitignored and ships as a Pages artifact instead.
-          file_pattern: data/snapshot.json data/history.json
+          # Only the data the next run needs as its validation baseline, plus
+          # the note. out/ is gitignored and ships as a Pages artifact instead.
+          file_pattern: data/snapshot.json data/history.json latest_briefing.md
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
 

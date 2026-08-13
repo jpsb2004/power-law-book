@@ -1,0 +1,13 @@
+# Research layer: RSS ingestion, briefing synthesis, Streamlit dashboard.
+#
+# Market data is NOT fetched here. The Node pipeline (lib/analytics.js) remains
+# the single source of truth for prices, FX and deviation maths, and writes
+# data/snapshot.json. This layer consumes that artifact. Two implementations of
+# the same return maths in two languages would drift, and the brief for this
+# work was explicitly "zero breakage to existing deviation math".
+streamlit>=1.40
+pandas>=2.2
+altair>=5.4
+feedparser>=6.0
+requests>=2.32
+anthropic>=0.40
