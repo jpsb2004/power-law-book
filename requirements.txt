@@ -9,5 +9,5 @@ streamlit>=1.40
 pandas>=2.2
 altair>=5.4
 feedparser>=6.0
-requests>=2.32
+requests>=2.34.2
 anthropic>=0.40
