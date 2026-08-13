@@ -136,5 +136,20 @@
       "now": 45.2,
       "move": 0
     }
+  },
+  {
+    "at": 1786619933362,
+    "index": 147.3791,
+    "ytd": 31.445183420574523,
+    "priced": 18,
+    "book": "a94db5675a",
+    "positions": 18,
+    "failures": [],
+    "biggestMove": {
+      "ticker": "AINF.L",
+      "was": 8.447,
+      "now": 8.456,
+      "move": 0.1065467029714732
+    }
   }
 ]
