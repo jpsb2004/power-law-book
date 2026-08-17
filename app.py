@@ -20,6 +20,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+from research.discipline import CATALYSTS, VALUATION_RULES
 from research.ontology import BUCKET_ORDER, SchemaError, load_book
 from research.scenarios import SCENARIOS, combined
 
@@ -164,8 +165,33 @@ with tab_alloc:
         "bucket. Two classification notes worth arguing with: **NBIS and CRWV sit in Energy** "
         "but are compute landlords that consume power rather than supply it, and "
         "**RARA11.SA sits in Ballast** but is a concentrated, policy-driven rare-earth basket "
-        "that will likely fall with the book rather than against it."
+        "that tracks the same technology-materials cycle as the rest of the book, so in most "
+        "states it falls with the book rather than against it. The exception is an "
+        "export-control shock — toggle Geopolitical Shock under Stress Tests and it is the "
+        "largest positive contributor in the book."
     )
+
+    # Both blocks below share their text with the thesis PDF via
+    # research/discipline.py -- edit there, not here, or the two drift apart.
+    st.subheader("Valuation discipline & entry criteria")
+    st.caption(
+        "A weight target says how much to hold, not what price makes it worth holding. "
+        "These are the entry and trim rules attached to each bucket."
+    )
+    st.table(
+        pd.DataFrame(
+            [{"Bucket": label, "Initiation threshold & trim discipline": rule}
+             for label, rule in VALUATION_RULES]
+        ).set_index("Bucket")
+    )
+
+    st.subheader("Near-term monitoring catalysts (0–4 quarters)")
+    st.caption(
+        "The thesis runs on 3–5 year physical lead times, which daily price action cannot "
+        "validate. These resolve inside a few quarters, so the horizon mismatch has an answer."
+    )
+    for heading, body in CATALYSTS:
+        st.markdown(f"- **{heading}:** {body}")
 
 # ------------------------------------------------------------------- report
 with tab_note:
