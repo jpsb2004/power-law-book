@@ -2,9 +2,13 @@
 <style>
 /* ---------------------------------------------------------------- tokens */
 :root {
-  --ground: #EFF1EE;
-  --surface: #F7F8F6;
-  --surface-2: #E7EAE6;
+  /* Toned down from #EFF1EE / #F7F8F6 / #E7EAE6. The old surface sat at ~97%
+     luminance, which is near-paper-white on a backlit screen and glared badly
+     in a long read. Roughly 7pp comes off each level; the hue family, the ink
+     and the rules are unchanged, so contrast stays well clear of AA. */
+  --ground: #E2E6E2;
+  --surface: #EAEEEA;
+  --surface-2: #D8DDD8;
   --ink: #14181A;
   --ink-2: #454E52;
   --ink-3: #6E7A7F;

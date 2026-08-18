@@ -4,8 +4,8 @@
 [theme]
 base = "light"
 primaryColor = "#0B6B75"          # teal accent — chrome only, never a data colour
-backgroundColor = "#EFF1EE"       # cool off-white, matches page/template.html
-secondaryBackgroundColor = "#E7EAE6"
+backgroundColor = "#E2E6E2"       # cool off-white, matches page/template.html
+secondaryBackgroundColor = "#D8DDD8"
 textColor = "#14181A"
 font = "serif"
 
