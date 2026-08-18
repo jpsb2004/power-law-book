@@ -25,6 +25,7 @@ scenario and leave the other two qualitative.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -80,6 +81,8 @@ DISCLAIMER = ("Independent personal research. Not investment advice. "
 
 
 # ------------------------------------------------------------------ data
+POSITIONS = json.loads((ROOT / "data" / "positions.json").read_text(encoding="utf-8"))
+
 book = load_book()
 stats = book.curve_stats
 grid = apply_scenario(book, GRID_BOTTLENECK)
@@ -302,9 +305,32 @@ def boxed_header(text, width):
     return t
 
 
-def position(ticker, name, weight, text):
-    bucket = next((e.bucket_label for e in book.entities if e.ticker == ticker), "Energy")
-    return [Paragraph(f"<b>{ticker}: {name}</b> · ~{weight}", POS_HEAD[bucket], bulletText="•"),
+BUCKET_LABEL = {"energy": "Energy", "compute": "Compute", "ballast": "Ballast"}
+
+
+def positions_in(bucket):
+    """Active positions for one bucket, in roster order."""
+    return [p for p in POSITIONS["positions"]
+            if p["bucket"] == bucket and p.get("status", "active") == "active"]
+
+
+def position(p):
+    """
+    One rationale block, entirely derived from data/positions.json.
+
+    The weight used to be a hardcoded idealised equal-weight ("~5.4%") while the
+    book actually held integers -- all 18 disagreed with the dashboard. It now
+    reads the real weight, and the "~" is gone because the figure is exact.
+    """
+    label = BUCKET_LABEL[p["bucket"]]
+    # The SSOT stores plain text, not reportlab markup -- the app renders the
+    # same strings and would print a literal "&amp;". Escaping is the renderer's
+    # job, so a bare & becomes an entity only on the way into a Paragraph.
+    esc = lambda s: s.replace("&", "&amp;")
+    name = esc(p["memo"]["name"])
+    text = esc(p["memo"]["rationale"]).replace("{coverage}", RARA_COVER)
+    return [Paragraph(f"<b>{esc(p['ticker'])}: {name}</b> · {p['weight']:.1f}%",
+                      POS_HEAD[label], bulletText="•"),
             Paragraph(text, pos_body)]
 
 
@@ -448,83 +474,16 @@ story += [
     Paragraph("Position-Level Rationale", headline),
     Paragraph(f"Energy &amp; Power ({BUCKET_W['Energy']:.1f}%, {BUCKET_N['Energy']} positions)", sub_head),
 ]
-for args in [
-    ("URA", "Global X Uranium ETF", "5.4%",
-     "Nuclear is the fastest-permitting large-scale answer to hyperscaler 24/7 power demand; "
-     "the broadest, most liquid way to hold exposure to the fuel cycle."),
-    ("NLR", "VanEck Uranium &amp; Nuclear ETF", "5.4%",
-     "Deliberate overlap with URA on the nuclear theme rather than diversifying away from it. "
-     "Conviction is high enough to accept concentration in exchange for broader coverage across "
-     "the fuel cycle and regulated utilities."),
-    ("PETR4.SA", "Petrobras", "5.4%",
-     "A large, cash-generative conventional producer as a hedge against nuclear permitting "
-     "delays: thermal generation remains the marginal supplier during interim grid deficits."),
-    ("2222.SR", "Saudi Aramco", "5.4%",
-     "Same logic as PETR4.SA with a different sovereign and cost-curve position; diversifies "
-     "the conventional-energy leg across geography rather than concentrating it in one producer."),
-    ("LB", "LandBridge Company", "5.4%",
-     "Surface and water rights exposure in the Permian Basin: a direct read on "
-     "interconnection-queue monetization and data-centre land-siting, the physical layer "
-     "underneath the generation names."),
-    ("NBIS", "Nebius Group", "5.4%",
-     "Classified here as a power consumer, which is a stretch I flag rather than hide: Nebius "
-     "is a compute landlord: capex-funded, customer-concentrated, and competing with the "
-     "hyperscalers it sells to. It sits in Energy because its unit economics are gated by power "
-     "access, not because it generates power."),
-    ("CRWV", "CoreWeave", "5.4%",
-     "Same classification stretch as NBIS, and the two overlap enough operationally that this "
-     "is closer to one position expressed twice than two independent bets (see Section 4)."),
-]:
-    story.append(KeepTogether(position(*args)))
+for _p in positions_in("energy"):
+    story.append(KeepTogether(position(_p)))
 
 story.append(Paragraph(f"Compute &amp; Hardware ({BUCKET_W['Compute']:.1f}%, {BUCKET_N['Compute']} positions)", sub_head))
-for args in [
-    ("TSM", "Taiwan Semiconductor Manufacturing", "4.6%",
-     "The central foundry bottleneck and the counterweight the thesis has to survive: "
-     "near-monopoly on advanced-node and CoWoS packaging capacity captures the demand growth "
-     "directly if the rotation thesis is wrong or early."),
-    ("AMD", "Advanced Micro Devices", "4.6%",
-     "Second-source accelerator exposure, kept smaller than a conviction bet would be: this "
-     "bucket is insurance against the thesis, not a parallel thesis of its own."),
-    ("PLTR", "Palantir Technologies", "4.6%",
-     "Software/deployment-layer exposure, included so the bucket is not pure hardware and does "
-     "not miss the demand side entirely."),
-    ("VGT", "Vanguard Information Technology ETF", "4.6%",
-     "A broad, low-conviction sleeve that keeps the bucket from being a handful of single-name "
-     "bets on a theme this book is intentionally underweighting."),
-    ("2357.TW", "ASUSTeK Computer", "4.6%",
-     "Server assembly exposure: margin-thin and customer-concentrated, and the legacy PC cycle "
-     "still outweighs the AI server line in reported revenue. Held as a read on physical "
-     "assembly capacity, not a pure AI-server bet."),
-    ("^KS11", "KOSPI Composite Index", "4.6%",
-     "An index proxy for Korea's memory manufacturing exposure to the buildout, avoiding having "
-     "to pick between the two dominant memory makers."),
-    ("AINF.L", "AI Infrastructure UCITS ETF (LSE)", "4.6%",
-     "A packaged, diversified sleeve of infrastructure and connectivity names as a "
-     "lower-maintenance complement to the single-name bets elsewhere in the bucket."),
-]:
-    story.append(KeepTogether(position(*args)))
+for _p in positions_in("compute"):
+    story.append(KeepTogether(position(_p)))
 
 story.append(Paragraph(f"Macro Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
-for args in [
-    ("GLD", "SPDR Gold Shares", "7.5%",
-     "Classic drawdown hedge, uncorrelated to the CapEx cycle either way. Held to reduce "
-     "portfolio volatility, not to express a view."),
-    ("AVDV", "Avantis Intl Small Cap Value ETF", "7.5%",
-     "Deliberately away from the AI theme entirely: developed-market, value-tilted, small-cap "
-     "exposure as a genuine diversifier rather than a disguised extra bet on the same trade."),
-    ("JPM", "JPMorgan Chase &amp; Co.", "7.5%",
-     "A quality financial with real exposure to the debt financing the CapEx cycle runs on, but "
-     "broad enough not to live or die on it."),
-    ("RARA11.SA", "Rare Earths / Critical Minerals ETF", "7.5%",
-     "The other classification stretch I flag openly: a concentrated, policy-driven basket that "
-     "tracks the same technology-materials cycle as the rest of the book, so in most states it "
-     "does less true ballasting than its bucket label implies. The exception is an "
-     "export-control shock, where it is the one line in the book that re-rates upward. It also "
-     f"traded in only about {RARA_COVER} of the measured window, which limits how much its "
-     "long-horizon return figures should be trusted."),
-]:
-    story.append(KeepTogether(position(*args)))
+for _p in positions_in("ballast"):
+    story.append(KeepTogether(position(_p)))
 
 # ======================================================== 4. DISCLOSURES
 story += [

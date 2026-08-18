@@ -10,7 +10,8 @@
     "snapshot": "node scripts/snapshot.mjs",
     "page": "node scripts/build-page.mjs",
     "check": "node scripts/check-page.mjs",
-    "refresh": "node scripts/refresh.mjs"
+    "refresh": "node scripts/refresh.mjs",
+    "check:book": "node scripts/check-book.mjs"
   },
   "dependencies": {
     "next": "16.2.12",
