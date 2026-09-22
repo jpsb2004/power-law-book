@@ -1,37 +1,37 @@
 # THESIS INITIATION REPORT
 ## Beyond the Hyper-Scalers: Quantifying Physical Bottlenecks of the Global AI CapEx Supercycle
 
-**Daily note — 18 September 2026**  
-*Data as of 2026-09-18 23:44 UTC · 18 positions · base USD · index 137.45*
+**Daily note — 22 September 2026**  
+*Data as of 2026-09-22 00:22 UTC · 18 positions · base USD · index 135.34*
 
 ---
 
 ## Summary
-No position moved beyond the 2σ alert threshold. The book sits at index 137.45, +31.4% year to date with 25.9% annualised volatility and a -14.3% maximum drawdown over the window.
+No position moved beyond the 2σ alert threshold. The book sits at index 135.34, +31.4% year to date with 25.8% annualised volatility and a -14.3% maximum drawdown over the window.
 
 ## Signals
 
 **Energy (38%)**
 
-**NLR** -2.6% (-0.9σ). Volume ran 1.14x its 50-day average. Most recent headline: "ICYMI: Nuclear developments around the nation this month -- ANS / Nuclear Newswire - American Nuclear Society" (American Nuclear Society). Falsification on watch: It is not really a uranium proxy — the utility weighting means it can drift with rates while the actual fuel thesis plays out.
-
-**URA** -2.4% (-0.7σ). Volume ran 1.31x its 50-day average. Most recent headline: "$414 Million US Financing Approval Opens New Route to Uranium Supply - Crux Investor" (Crux Investor). Falsification on watch: A restart of idled Kazakh and Namibian supply, or one high-profile reactor incident, resets sentiment far faster than mine supply can respond.
+**PETR4.SA** -1.0% (-0.6σ). Volume ran 0.67x its 50-day average. Most recent headline: "Petrobras vai anunciar descobertas ‘relevantes’ de gás na Colômbia, diz Magda - estadao.com.br" (estadao.com.br). Falsification on watch: Dividend policy is set by the controlling shareholder, and the controlling shareholder is the state. Fuel-price intervention ahead of an election ends the thesis without warning.
 
 **Compute (32%)**
 
-**AMD** +2.7% (+0.6σ). Volume ran 1.34x its 50-day average. Most recent headline: "Nvidia Will Still Beat AMD Through 2028. Here's the Data Behind My Conviction. - The Motley Fool" (The Motley Fool). 4 recent EDGAR filing(s). Falsification on watch: The moat is software, not silicon. If CUDA holds, competitive hardware still does not convert into share, and the share gains are already in the multiple.
+**^KS11** +3.9% (+1.1σ). Volume ran 0.03x its 50-day average. Most recent headline: "KOSPI regains 7,000 as Samsung Electronics shares surge on record chip exports - The Korea Times" (The Korea Times). Falsification on watch: Not directly investable — it is an index, so a real book expresses it through a fund or futures and eats tracking error and FX.
+
+**2357.TW** -1.5% (-0.5σ). Volume ran 0.49x its 50-day average. Most recent headline: "Tesla AI server order puts Pegatron back alongside Asus, 18 years after split - digitimes" (digitimes). Falsification on watch: Server assembly is margin-thin with real customer concentration, and the legacy PC cycle still swamps the AI line in reported revenue.
 
 ## Thesis check
-Energy carried -0.19% on the day against Compute at +0.97%, a spread of -1.16pp. On a single session that undercuts the bottleneck thesis, though one day of relative performance is not evidence of a structural constraint — the thesis turns on lead times, not daily prints.
+Energy carried -0.16% on the day against Compute at +0.30%, a spread of -0.47pp. On a single session that undercuts the bottleneck thesis, though one day of relative performance is not evidence of a structural constraint — the thesis turns on lead times, not daily prints.
 
 ## Scenario on deck
 **Grid Bottleneck** — Interconnection queues and transformer lead times, not chips, become the binding constraint on new capacity. Announced data-centre build slips. Modelled portfolio impact **-1.6%**, with Energy +0.4%, Compute -2.6%, Ballast +0.6%. The thesis trade working: the bottleneck is physical, and the book is long the bottleneck. These shocks are stated assumptions, not estimates from a covariance matrix.
 
 ## Watch
-- **RARA11.SA** — only 16% of the measured window; longer-horizon figures exclude it.
+- **RARA11.SA** — only 17% of the measured window; longer-horizon figures exclude it.
 
 ---
 
-*Generated 2026-09-18 23:44 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
+*Generated 2026-09-22 00:22 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
 
 *Not investment advice. A personal research exercise. Prices are delayed and sourced from a free public endpoint. Performance figures are a backward-looking simulation of current weights, not a track record.*
