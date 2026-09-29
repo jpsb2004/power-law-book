@@ -1,37 +1,39 @@
 # THESIS INITIATION REPORT
 ## Beyond the Hyper-Scalers: Quantifying Physical Bottlenecks of the Global AI CapEx Supercycle
 
-**Daily note — 26 September 2026**  
-*Data as of 2026-09-26 00:15 UTC · 18 positions · base USD · index 139.97*
+**Daily note — 29 September 2026**  
+*Data as of 2026-09-29 01:21 UTC · 18 positions · base USD · index 138.98*
 
 ---
 
 ## Summary
-No position moved beyond the 2σ alert threshold. The book sits at index 139.97, +35.2% year to date with 25.9% annualised volatility and a -14.3% maximum drawdown over the window.
+No position moved beyond the 2σ alert threshold. The book sits at index 138.98, +35.2% year to date with 26.0% annualised volatility and a -14.3% maximum drawdown over the window.
 
 ## Signals
 
 **Energy (38%)**
 
-**PETR4.SA** -2.6% (-1.5σ). Volume ran 0.81x its 50-day average. Most recent headline: "Luchsinger, Lulinha e Marcola atuaram por contrato com Petrobras, diz PF - Poder360" (Poder360). Falsification on watch: Dividend policy is set by the controlling shareholder, and the controlling shareholder is the state. Fuel-price intervention ahead of an election ends the thesis without warning.
-
-**2222.SR** +0.5% (+0.6σ). Volume ran 1.13x its 50-day average. Most recent headline: "Saudi Aramco chief says any interruption can be fixed 'within days' - Nikkei Asia" (Nikkei Asia). Falsification on watch: Free float is thin and the payout leans on the state budget. A sustained sub-$60 Brent forces a choice between the dividend and Vision 2030.
+**PETR4.SA** +1.4% (+0.8σ). Volume ran 0.00x its 50-day average. Most recent headline: "Juiz condena MPF por ‘má-fé’ em caso da Petrobras na Foz do Amazonas - Capital Reset" (Capital Reset). Falsification on watch: Dividend policy is set by the controlling shareholder, and the controlling shareholder is the state. Fuel-price intervention ahead of an election ends the thesis without warning.
 
 **Compute (32%)**
 
-**^KS11** +0.9% (+0.3σ). Volume ran 0.72x its 50-day average. Most recent headline: "KOSPI regains 7,000 as Samsung Electronics shares surge on record chip exports - The Korea Times" (The Korea Times). Falsification on watch: Not directly investable — it is an index, so a real book expresses it through a fund or futures and eats tracking error and FX.
+**^KS11** -3.2% (-0.9σ). Volume ran 0.20x its 50-day average. Most recent headline: "South Korea's KOSPI Falls Below 7,000 After Chuseok Holiday as Semiconductor Heavyweights Slide - finance.biggo.com" (finance.biggo.com). Falsification on watch: Not directly investable — it is an index, so a real book expresses it through a fund or futures and eats tracking error and FX.
+
+**Ballast (30%)**
+
+**RARA11.SA** -2.5% (-1.1σ). Volume ran 0.00x its 50-day average. Most recent headline: "Consultor defende concorrência para a exploração de minerais estratégicos e metais de terras raras - Portal da Câmara dos Deputados" (Portal da Câmara dos Deputados). Falsification on watch: This is not ballast. It is a concentrated, policy-driven, high-beta commodity-equity basket that will likely fall with the rest of the book rather than against it — and it is a thin BRL listing carrying currency risk on top.
 
 ## Thesis check
-Energy carried -0.32% on the day against Compute at +0.05%, a spread of -0.37pp. On a single session that undercuts the bottleneck thesis, though one day of relative performance is not evidence of a structural constraint — the thesis turns on lead times, not daily prints.
+Energy carried +0.21% on the day against Compute at -0.34%, a spread of +0.56pp. On a single session that supports the bottleneck thesis, though one day of relative performance is not evidence of a structural constraint — the thesis turns on lead times, not daily prints.
 
 ## Scenario on deck
 **Grid Bottleneck** — Interconnection queues and transformer lead times, not chips, become the binding constraint on new capacity. Announced data-centre build slips. Modelled portfolio impact **-1.6%**, with Energy +0.4%, Compute -2.6%, Ballast +0.6%. The thesis trade working: the bottleneck is physical, and the book is long the bottleneck. These shocks are stated assumptions, not estimates from a covariance matrix.
 
 ## Watch
-- **RARA11.SA** — only 18% of the measured window; longer-horizon figures exclude it.
+- **RARA11.SA** — only 19% of the measured window; longer-horizon figures exclude it.
 
 ---
 
-*Generated 2026-09-26 00:15 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
+*Generated 2026-09-29 01:21 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
 
 *Not investment advice. A personal research exercise. Prices are delayed and sourced from a free public endpoint. Performance figures are a backward-looking simulation of current weights, not a track record.*
