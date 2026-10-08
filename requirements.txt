@@ -8,6 +8,6 @@
 streamlit>=1.65  # width="stretch" replaces the removed use_container_width
 pandas>=2.2
 altair>=5.4
-feedparser>=6.0
+feedparser>=6.0.14
 requests>=2.32
 anthropic>=0.40
