@@ -1,9 +1,9 @@
 """
-Build the thesis PDF — "Beyond the Hyper-Scalers".
+Build the thesis PDF — "The Power Law Book".
 
     python scripts/make_pdf.py
 
-Output: <repo root>/Beyond_the_Hyper-Scalers_Thesis.pdf
+Output: <repo root>/The_Power_Law_Book_Thesis.pdf
 
 This is a reconstruction. The original generator was lost, leaving a 5-page PDF
 nobody could edit; the layout here was measured back off that file (frames,
@@ -46,7 +46,7 @@ from research.discipline import CATALYSTS, VALUATION_RULES  # noqa: E402
 from research.ontology import load_book  # noqa: E402
 from research.scenarios import GRID_BOTTLENECK, apply_scenario  # noqa: E402
 
-OUTPUT = ROOT / "Beyond_the_Hyper-Scalers_Thesis.pdf"
+OUTPUT = ROOT / "The_Power_Law_Book_Thesis.pdf"
 
 # ---------------------------------------------------------------- palette
 INK = colors.HexColor("#1A1A1A")       # body text
@@ -91,6 +91,12 @@ grid_buckets = grid["by_bucket"]
 _thin = {e.ticker: e.coverage for e in book.entities
          if e.coverage is not None and e.coverage < 0.95}
 RARA_COVER = f"{100 * _thin.get('RARA11.SA', 0.0):.0f}%"
+
+N_POSITIONS = len(book.entities)
+_rara = next((e for e in book.entities if e.ticker == "RARA11.SA"), None)
+RARA_W = _rara.weight if _rara else 0.0
+RARA_WEEKS = round(52 * (_rara.coverage or 0)) if _rara else 0
+N_CURRENCIES = len({e.currency for e in book.entities})
 
 BUCKET_N = {}
 BUCKET_W = {}
@@ -263,7 +269,7 @@ def draw_cover(c, doc):
     _spine(c)
     c.setFillColor(INK)
     c.setFont("Times-Bold", 22)
-    c.drawString(COVER_L, PAGE_H - 29.6, "Beyond the Hyper-Scalers")
+    c.drawString(COVER_L, PAGE_H - 29.6, "The Power Law Book")
     c.setFillColor(BLUE)
     c.setFont("Helvetica-Bold", 8.5)
     c.drawString(COVER_L, PAGE_H - 43.4, "INDEPENDENT THEMATIC RESEARCH")
@@ -279,7 +285,7 @@ def draw_body(c, doc):
     _spine(c)
     c.setFillColor(INK)
     c.setFont("Times-Bold", 11.5)
-    c.drawString(L, PAGE_H - 36.8, "Beyond the Hyper-Scalers")
+    c.drawString(L, PAGE_H - 36.8, "The Power Law Book")
     c.setFillColor(BLUE)
     c.setFont("Helvetica-Bold", 7.5)
     c.drawString(L, PAGE_H - 49.5, "INDEPENDENT THEMATIC RESEARCH")
@@ -342,7 +348,7 @@ story += [
     Paragraph("Quantifying the Physical Bottlenecks<br/>of the Global AI CapEx Supercycle", cover_head),
     Paragraph(
         "Overweight Energy, hold Compute as a counterweight, and size Ballast to absorb "
-        "drawdown. 18 positions across six exchanges express a rotation out of hyperscaler "
+        f"drawdown. {N_POSITIONS} positions in {N_CURRENCIES} currencies express a rotation out of hyperscaler "
         "beta and into the physical infrastructure that gates it.", deck),
 ]
 for lead, rest in [
@@ -497,7 +503,7 @@ story += [
     Paragraph(
         "<b>Neocloud classification overlap.</b> NBIS and CRWV are functionally "
         "compute-infrastructure lessors, not power generators, and their high operational "
-        "correlation compresses the 18-position book closer to 17 independent bets.", weakness),
+        f"correlation compresses the {N_POSITIONS}-position book closer to {N_POSITIONS - 1} independent bets.", weakness),
     Paragraph(
         "<b>Ballast misclassification and liquidity drag.</b> RARA11.SA is assigned to Ballast "
         "but is correlated with the same technology-materials cycle the rest of the book is "
@@ -529,7 +535,7 @@ story += [
     Paragraph("Scenario Stress-Testing", headline),
     Paragraph(
         "An empirical covariance matrix, estimated over a year of daily data across six "
-        "currencies (one with three weeks of trading history), would look statistically rigorous "
+        f"currencies (one with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
         "while being almost entirely noise. The portfolio uses stated-assumption scenario shocks "
         "instead.", body),
 ]
@@ -557,8 +563,8 @@ story += [gt, Spacer(1, 8), Paragraph(
     "interrupted and export controls tighten on strategic materials. The tail scenario the "
     "portfolio is least hedged against: TSM, 2357.TW and ^KS11 all sit in the impact zone and "
     "are closer to one bet than three. RARA11.SA is the one line that works here, since the same "
-    "export controls that interrupt foundry output bid rare earths up, but at 7.5% it cannot "
-    "offset a Compute bucket four times its size. Also left unmodelled rather than assigned a "
+    f"export controls that interrupt foundry output bid rare earths up, but at {RARA_W:.0f}% it cannot "
+    f"offset a Compute bucket {BUCKET_W['Compute'] / (RARA_W or 1):.0f} times its size. Also left unmodelled rather than assigned a "
     "manufactured number.", body)]
 
 callout = Table([[Paragraph(
@@ -612,7 +618,10 @@ disc = Table([[boxed_header("IMPORTANT DISCLOSURES", R - L)],
                   "advisor. Market data is delayed and sourced from free public endpoints. "
                   "Performance figures are a backward-looking simulation of current portfolio "
                   "weights over a window ending on the report date and do not represent a live "
-                  "track record.", disc_body)]], colWidths=[R - L])
+                  "track record. The thesis, positions and weights are the author's; all "
+                  "software behind this report, the data pipeline and the published page was "
+                  "written by Claude Code, Anthropic's AI coding agent, under the author's "
+                  "direction.", disc_body)]], colWidths=[R - L])
 disc.setStyle(TableStyle([
     ("BOX", (0, 1), (-1, 1), 0.5, RULE),
     ("LEFTPADDING", (0, 0), (-1, 0), 0),
@@ -624,12 +633,14 @@ disc.setStyle(TableStyle([
     ("TOPPADDING", (0, 1), (-1, 1), 14),
     ("BOTTOMPADDING", (0, 1), (-1, 1), 12),
 ]))
-story += [Spacer(1, 14), disc]
+# Kept whole: split, its header strands at the foot of one page and its text
+# opens the next.
+story += [Spacer(1, 14), KeepTogether(disc)]
 
 
 def build(output=OUTPUT):
     doc = BaseDocTemplate(str(output), pagesize=letter,
-                          title="Beyond the Hyper-Scalers: Independent Thematic Research",
+                          title="The Power Law Book: Independent Thematic Research",
                           author="João", subject="Global Equity: Thematic Portfolio")
     cover_main = Frame(COVER_L, 54, COVER_R - COVER_L, 674, id="cover_main",
                        leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)

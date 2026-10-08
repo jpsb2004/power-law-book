@@ -1,10 +1,18 @@
-# THESIS INITIATION REPORT
+# The Power Law Book
 
-## Beyond the Hyper-Scalers: Quantifying the Physical Bottlenecks of the Global AI CapEx Supercycle
+## Thesis initiation report: quantifying the physical bottlenecks of the global AI CapEx supercycle
 
 **Live page:** https://jpsb2004.github.io/power-law-book/
 · **Interactive dashboard:** https://beyondthehyperscalersjpsb.streamlit.app/
 · **Daily note:** [`latest_briefing.md`](latest_briefing.md)
+
+> **Built entirely with [Claude Code](https://claude.com/claude-code).** The thesis,
+> the twenty positions, the weights and the condition that would prove each one
+> wrong are mine. Every line of code — data pipeline, validation, statistics, page,
+> dashboard — was written by Claude Code, Anthropic's AI coding agent, under my
+> direction. I am not a programmer, and this project does not claim I am. What it
+> shows is using AI to build the tools that test my own thesis — and then acting on
+> what those tools found (see [How this was built](#how-this-was-built)).
 
 ---
 
@@ -25,9 +33,10 @@ trade wearing three hats.
 |---|---|---|---|
 | **I · Energy** | 38% | The buildout is constrained by fuel, molecules and the ground it stands on | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV |
 | **II · Compute** | 32% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, ^KS11, AINF.L |
-| **III · Ballast** | 30% | What survives if the first two are the same bet | GLD, AVDV, JPM, RARA11.SA |
+| **III · Ballast** | 30% | What survives if the first two are the same bet | GLD, AVDV, JPM, RARA11.SA, SGOV, XLP |
 
 Equal weight within each bucket, integer remainder to the most liquid names.
+Bucket weights are fixed; there is no "provisional" allocation.
 Every position carries a thesis **and its falsification condition** in
 [`lib/holdings.js`](lib/holdings.js). Three the author disagrees with, stated in
 the repo rather than buried:
@@ -81,7 +90,7 @@ blanks.
 
 ### Multi-exchange normalisation
 
-18 instruments, 7 venues, 6 currencies, no API key.
+20 instruments, 7 venues, 6 currencies, no API key.
 
 FX is applied **date by date, not at today's spot** — converting a year of
 Korean prices at the current KRW rate would book twelve months of currency moves
@@ -115,6 +124,14 @@ alone.
 `sigma` is the day's move in standard deviations of that position's **own**
 trailing return distribution. It is the only honest way to compare a 3% day in
 GLD with a 3% day in CRWV. The dashboard alerts at ±2σ.
+
+### Total return
+
+Every series is the **dividend-adjusted** close, so returns include reinvested
+distributions and are net of each fund's own fee. Price-only closes read a
+T-bill fund paying ~4% a year as flat and understate high-payout lines like
+PETR4 and 2222.SR by their whole yield. Indices (^KS11) have no dividends to
+adjust and use the plain close.
 
 ### Index construction
 
@@ -195,8 +212,8 @@ Orchestrator-worker, with the filter **before** the model calls:
 
 1. **Select** — only positions that earn attention: a ≥2σ move, a data-quality
    fault, or a failed quote. On a quiet day this is three positions, not
-   eighteen. Asking a model to summarise eighteen streams of nothing produces
-   eighteen paragraphs of nothing.
+   twenty. Asking a model to summarise twenty streams of nothing produces
+   twenty paragraphs of nothing.
 2. **Workers** — one call per selected position, seeing only its own entity.
    Bounded context per call.
 3. **Orchestrator** — the only call that sees the whole book. Receives worker
@@ -259,19 +276,36 @@ deployments from one commit.
 
 ---
 
+## How this was built
+
+Entirely with [Claude Code](https://claude.com/claude-code). The division of
+labour:
+
+| Mine | Claude Code's |
+|---|---|
+| The thesis and the three-bucket structure | All code: Node data layer, Python research layer, Streamlit dashboard, this page |
+| Every position, its weight, and what would prove it wrong | FX normalisation, total-return series, validation gate, CI/CD |
+| Which questions to test (is Ballast really a hedge? what does KOSPI cost to hold?) | The statistics that answer them: factor regressions, tracking error, hedged returns |
+| Deciding what to do with the answers | Explaining the results in plain language so I could decide |
+
+The AI also found things I would not have: the headline index was
+price-weighted rather than return-weighted, understating the 1-year return by
+~8pp; returns ignored dividends; and the Ballast bucket, tested against tech and
+energy factors, turned out to be diversification rather than a hedge. Two
+positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
+
 ## CV summary
 
-> **Global Macro Research Engine** — an 18-position, 3-bucket thesis portfolio
-> across 7 exchanges and 6 currencies, with an automated daily research
-> pipeline. Node data layer (FX-normalised returns and deviation metrics, with a
-> validation gate that rejects suspect data rather than publishing it), Python
-> research layer (ontology-mapped RSS ingestion from Google News, SEC EDGAR and
-> CVM; orchestrator-worker LLM synthesis into an ER-format daily note), and a
-> Streamlit dashboard with scenario stress-testing. Runs unattended on GitHub
-> Actions and deploys itself.
+> **The Power Law Book** — a 20-position, 3-bucket thesis portfolio on the
+> physical bottlenecks of AI infrastructure, across 7 exchanges and 6
+> currencies, refreshed and published automatically every weekday. I designed
+> the thesis, the positions, the risk framework and the falsification
+> conditions, and used Claude Code to build the tooling that tests them: total
+> returns in USD with hedged and unhedged views, factor exposure, proxy tracking
+> error and scenario stress tests. Acting on those tests changed the book.
 >
-> Skills: financial data engineering · multi-currency normalisation · data
-> quality gating · LLM orchestration · CI/CD · Next.js / TypeScript / Python.
+> Skills: investment thesis construction · portfolio and risk design ·
+> AI-assisted research and tooling (Claude Code).
 
 Do **not** quote the performance figures as a track record. They are a
 backward-looking simulation of the current weights over a window ending today —

@@ -76,7 +76,7 @@ except SchemaError as exc:
     st.stop()
 
 # ----------------------------------------------------------------- masthead
-st.title("Beyond the Hyper-Scalers")
+st.title("The Power Law Book")
 st.caption(
     "Quantifying the physical bottlenecks of the global AI CapEx supercycle · "
     f"{len(book.entities)} positions · base {book.base} · "
@@ -136,7 +136,7 @@ with tab_alloc:
                 tooltip=["Bucket", alt.Tooltip("Weight:Q", format=".0f", title="Weight %")],
             )
             .properties(height=300),
-            use_container_width=True,
+            width="stretch",
         )
 
     with right:
@@ -157,7 +157,7 @@ with tab_alloc:
                 tooltip=["Ticker", "Name", "Bucket", alt.Tooltip("Weight:Q", format=".0f")],
             )
             .properties(height=460),
-            use_container_width=True,
+            width="stretch",
         )
 
     st.info(
@@ -236,7 +236,7 @@ with tab_dev:
             ],
         )
         .properties(height=460),
-        use_container_width=True,
+        width="stretch",
     )
 
     st.subheader("Full metrics")
@@ -258,7 +258,7 @@ with tab_dev:
             },
             na_rep="—",
         ),
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -311,7 +311,7 @@ with tab_stress:
                 tooltip=["Bucket", alt.Tooltip("Impact:Q", format="+.2f")],
             )
             .properties(height=240),
-            use_container_width=True,
+            width="stretch",
         )
 
         rows = pd.DataFrame(result["rows"])
@@ -334,7 +334,7 @@ with tab_stress:
                 ],
             )
             .properties(height=460),
-            use_container_width=True,
+            width="stretch",
         )
         st.caption(result["scenario"].note)
 

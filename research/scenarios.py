@@ -66,6 +66,9 @@ GRID_BOTTLENECK = Scenario(
         "RARA11.SA": 8.0,
         "JPM": -2.0,
         "AVDV": -1.0,
+        # Bills hold par; staples pay a little more for energy and freight.
+        "SGOV": 0.0,
+        "XLP": -1.0,
     },
     note="The thesis trade working: the bottleneck is physical, and the book is long the bottleneck.",
 )
@@ -99,6 +102,10 @@ CAPEX_RETRENCHMENT = Scenario(
         "AVDV": -4.0,
         "JPM": -12.0,
         "RARA11.SA": -15.0,
+        # Bills hold par; money leaving AI rotates into staples, as it did in
+        # the book's Jun-Jul 2026 drawdown (+7.5%) and on the DeepSeek day (+2.7%).
+        "SGOV": 0.0,
+        "XLP": 6.0,
     },
     note="The book's central risk. Note ballast is only 30% — it cushions, it does not rescue.",
 )
@@ -132,6 +139,10 @@ GEOPOLITICAL_SHOCK = Scenario(
         "GLD": 18.0,
         "AVDV": -12.0,
         "JPM": -15.0,
+        # Bills hold par; staples are still equity and fall with the market,
+        # less than it (-5.9% in the spring 2025 tariff sell-off).
+        "SGOV": 0.0,
+        "XLP": -8.0,
     },
     note="Concentrated single-point risk: TSM, 2357.TW and ^KS11 are one bet, not three.",
 )
