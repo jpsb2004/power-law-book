@@ -51,7 +51,8 @@ carries a source saying where it came from and when. Nothing floats free.
                           |                  thesis, falsification
                           v
    lib/analytics.js  <--  lib/build-snapshot.js  --> data/snapshot.json
-   returns, FX, deviations   fetch + validate           (the contract)
+   returns, FX, hedging,     fetch + validate           (the contract)
+   deviations, factors
                           |                                  |
         +-----------------+                                  |
         |                                                    v
@@ -114,6 +115,60 @@ alone.
 `sigma` is the day's move in standard deviations of that position's **own**
 trailing return distribution. It is the only honest way to compare a 3% day in
 GLD with a 3% day in CRWV. The dashboard alerts at ±2σ.
+
+### Index construction
+
+The curve is the weight-averaged **daily return** of the legs, compounded:
+rebalanced to target weight every session, renormalised over whatever is
+trading. An earlier version averaged weighted *prices* instead. That is a
+price-weighted index, where a $400 GLD share outvoted a $5 KOSPI point (in USD)
+eighty to one and a fund listing mid-window moved the level by its price alone.
+It understated the 1-year return by ~8pp. The method is folded into the refresh
+log's book fingerprint, so the switch shows as **rebased**, not as a day's
+return.
+
+---
+
+## Analysis layers
+
+All computed in `lib/analytics.js` + `lib/build-snapshot.js`, written to
+`data/snapshot.json`, rendered on the page. Each is **non-fatal**: a failed
+fetch is recorded and the refresh still publishes, because the book itself is
+unaffected.
+
+### FX-hedged view
+
+A toggle switches the curve, headline stats, YTD chart and table between
+**unhedged USD** and **FX-hedged USD**.
+
+Hedged is *not* the local return. A rolled forward hedge earns or pays the rate
+differential, so hedged ≈ local + (r<sub>USD</sub> − r<sub>CCY</sub>), accrued
+daily. For reais that costs ~10pp a year (Selic 13.75% vs Fed ~3.9%), which is
+most of the FX gain on Petrobras. Rates are a dated table in
+`data/positions.json` (`fx_hedge`), held flat across the window; `check-book`
+fails if a book currency has no rate. Not modelled: cross-currency basis, the
+onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
+
+### ^KS11 → EWY
+
+The book holds the KOSPI because the index is the cleanest statement of the
+view. You cannot buy it. `EWY` is measured as the tradable stand-in: weekly
+tracking error, correlation, beta, tracking difference, average traded value,
+and the whole book re-run with EWY in place of the index.
+
+Seoul closes ~10 hours after one New York close and ~14 before the next, so each
+Seoul close is paired with the **previous** NY close (`clock_lag_sessions: 1`).
+Same-date pairing measures the time zone, not the fund. SOXX was considered and
+rejected: a US semiconductor basket is a different bet, not a Korea proxy.
+
+### Factor exposure
+
+Weekly USD returns of the book, each bucket and each Ballast line, regressed on
+a tech factor (VGT) and an energy factor (XLE), with t-stats, R² and correlation
+to Energy + Compute combined. It answers whether Ballast behaves differently
+from the thesis. It is **not** an alpha test: ~50 weekly observations cannot
+distinguish an annualised intercept from zero, and the page says so. VGT is also
+a Compute holding, so that bucket's tech beta is partly mechanical.
 
 ---
 

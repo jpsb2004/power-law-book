@@ -6,6 +6,26 @@
     "compute": 32,
     "ballast": 30
   },
+  "fx_hedge": {
+    "note": "Policy rates used to model a rolled FX hedge back to USD. Held flat across the window; they stand in for forward points, so cross-currency basis and onshore/offshore gaps are ignored. Update with the as_of date when a central bank moves.",
+    "as_of": "2026-10-08",
+    "rates_pct": {
+      "USD": 3.875,
+      "BRL": 13.75,
+      "SAR": 4.5,
+      "KRW": 3.0,
+      "TWD": 2.0,
+      "GBP": 3.75
+    },
+    "sources": {
+      "USD": "FOMC target range 3.75-4.00%, midpoint",
+      "BRL": "Copom Selic",
+      "SAR": "SAMA repo",
+      "KRW": "Bank of Korea base rate",
+      "TWD": "CBC discount rate",
+      "GBP": "Bank of England Bank Rate"
+    }
+  },
   "positions": [
     {
       "ticker": "URA",
@@ -285,7 +305,15 @@
         "br_retail": false,
         "blocker": "Index, not a tradable instrument",
         "proxy_for": null,
-        "tracking_notes": null
+        "tracking_notes": "MSCI Korea 25/50 caps single names, so Samsung and SK Hynix are held below their KOSPI weight; EWY also trades in New York hours against a Seoul close, and carries a 0.59% expense ratio.",
+        "proxy": {
+          "ticker": "EWY",
+          "name": "iShares MSCI South Korea ETF",
+          "venue": "NYSE Arca",
+          "currency": "USD",
+          "expense_ratio_pct": 0.59,
+          "clock_lag_sessions": 1
+        }
       },
       "status": "active",
       "tradability": "index",

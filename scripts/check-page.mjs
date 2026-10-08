@@ -102,6 +102,57 @@ const inlineHex = [...document.querySelectorAll("svg [fill], svg [stroke]")].fil
 ).length;
 if (inlineHex) fail.push(`${inlineHex} svg nodes use a hard-coded hex instead of a token`);
 
+// The analysis sections are optional per snapshot, so each is checked against
+// what the bundled snapshot actually carries.
+const snap = JSON.parse(await readFile(new URL("../data/snapshot.json", import.meta.url), "utf8"));
+
+const goodProxy = (snap.proxies ?? []).some((p) => !p.error);
+const proxySection = document.getElementById("proxy-section");
+if (goodProxy) {
+  if (proxySection.hidden) fail.push("snapshot carries a proxy but the proxy section is hidden");
+  if (document.querySelectorAll("#proxy-kv > div").length !== 5) fail.push("proxy key figures did not render 5 tiles");
+  if (document.querySelectorAll("#proxy-tbl tbody tr").length !== 6) fail.push("proxy table did not render 6 rows");
+} else if (!proxySection.hidden) {
+  fail.push("proxy section is visible without proxy data");
+}
+
+const factorRows = snap.factors?.rows?.length ?? 0;
+const factorSection = document.getElementById("factor-section");
+if (factorRows) {
+  if (factorSection.hidden) fail.push("snapshot carries factor rows but the factor section is hidden");
+  const got = document.querySelectorAll("#factor-tbl tbody tr").length;
+  if (got !== factorRows) fail.push(`factor table rendered ${got} rows for ${factorRows} regressions`);
+} else if (!factorSection.hidden) {
+  fail.push("factor section is visible without factor data");
+}
+
+// Section numbers are assigned at render time; visible ones must run 01..n.
+const nums = [...document.querySelectorAll("section:not([hidden]) .secnum")].map((n) => n.textContent);
+const expectedNums = nums.map((_, i) => String(i + 1).padStart(2, "0"));
+if (nums.join() !== expectedNums.join()) fail.push(`section numbers ${nums.join(",")} are not sequential`);
+
+// The currency toggle must actually switch the figures it claims to.
+let toggled = "not exercised";
+if (snap.curveHedged?.length > 1) {
+  const toggles = document.querySelectorAll(".fxview:not([hidden])");
+  if (toggles.length < 1) fail.push("snapshot carries a hedged curve but no currency toggle is visible");
+  const statText = () => document.querySelector("#stats .stat .v")?.textContent;
+  const before = statText();
+  const ytdHead = () => document.querySelector("#tbl thead th:nth-child(6)")?.textContent;
+  document.querySelector('.fxview button[data-view="hedged"]')?.click();
+  const after = statText();
+  if (snap.curveStats.ret1y?.toFixed(1) !== snap.curveHedgedStats.ret1y?.toFixed(1) && before === after) {
+    fail.push("currency toggle did not change the 1-year stat");
+  }
+  if (!/hedged/i.test(ytdHead() ?? "")) fail.push(`table header did not follow the toggle (got "${ytdHead()}")`);
+  if (svgCount("curve") !== 1) fail.push(`curve drew ${svgCount("curve")} svg elements after toggling, expected 1`);
+  const pressed = [...document.querySelectorAll('.fxview button[aria-pressed="true"]')].map((b) => b.dataset.view);
+  if (!pressed.length || pressed.some((v) => v !== "hedged")) fail.push("toggle buttons did not all switch to hedged");
+  document.querySelector('.fxview button[data-view="usd"]')?.click();
+  if (statText() !== before) fail.push("toggling back did not restore the unhedged stat");
+  toggled = `${before} ⇄ ${after}`;
+}
+
 if (errors.length) fail.push(...errors.map((e) => `script error: ${e}`));
 
 if (fail.length) {
@@ -111,5 +162,6 @@ if (fail.length) {
 
 console.error(
   `ok — ${rows} table rows, ${cards} dossier cards, 4 charts, ` +
-    `${document.querySelectorAll("#stats .stat").length} stat tiles, no script errors`
+    `${document.querySelectorAll("#stats .stat").length} stat tiles, ${factorRows} factor rows, ` +
+    `proxy ${goodProxy ? "on" : "off"}, toggle ${toggled}, no script errors`
 );

@@ -56,6 +56,13 @@ for (const [bucket, target] of Object.entries(book.bucket_targets)) {
     `got ${sums[bucket] ?? 0}`);
 }
 
+// --- hedging. A currency with no rate silently drops its positions out of the
+// hedged curve, which would then describe a different book from the headline.
+const rates = book.fx_hedge?.rates_pct ?? {};
+const unrated = [...new Set(active.map((p) => p.currency).concat(book.base_currency))].filter((c) => rates[c] == null);
+check("every book currency has a hedge rate", unrated.length === 0, unrated.join(", "));
+check("hedge rates carry an as_of date", Boolean(book.fx_hedge?.as_of), "fx_hedge.as_of missing");
+
 // --- documentation. A position with no rationale or no falsification metric
 // is exactly the kind of undocumented holding the change log is meant to stop.
 for (const field of ["factor_role", "falsification_metric"]) {
