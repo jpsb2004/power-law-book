@@ -141,22 +141,41 @@ with tab_alloc:
 
     with right:
         st.subheader("By position")
-        st.altair_chart(
-            alt.Chart(df.sort_values(["Bucket", "Weight"], ascending=[True, False]))
+        # Rows ordered by bucket, then weight. Height grows with the roster and
+        # labelOverlap is off: at a fixed height Vega silently dropped tick
+        # labels (JPM among them) once the book reached twenty lines.
+        by_pos = df.assign(
+            Order=lambda d: d["Bucket"].map({"Energy": 0, "Compute": 1, "Ballast": 2})
+        ).sort_values(["Order", "Weight", "Ticker"], ascending=[True, False, True])
+        y_enc = alt.Y(
+            "Ticker:N",
+            sort=list(by_pos["Ticker"]),
+            title=None,
+            axis=alt.Axis(labelOverlap=False, labelLimit=200),
+        )
+        bars = (
+            alt.Chart(by_pos)
             .mark_bar(cornerRadiusEnd=3)
             .encode(
-                y=alt.Y("Ticker:N", sort="-x", title=None),
+                y=y_enc,
                 x=alt.X("Weight:Q", title="Weight (%)"),
                 color=alt.Color(
                     "Bucket:N",
                     scale=alt.Scale(
                         domain=list(BUCKET_COLOUR), range=list(BUCKET_COLOUR.values())
                     ),
-                    legend=None,
+                    legend=alt.Legend(title=None, orient="bottom"),
                 ),
                 tooltip=["Ticker", "Name", "Bucket", alt.Tooltip("Weight:Q", format=".0f")],
             )
-            .properties(height=460),
+        )
+        labels = (
+            alt.Chart(by_pos)
+            .mark_text(align="left", dx=4, fontSize=11)
+            .encode(y=y_enc, x="Weight:Q", text=alt.Text("Weight:Q", format=".0f"))
+        )
+        st.altair_chart(
+            (bars + labels).properties(height=max(24 * len(by_pos), 300)),
             width="stretch",
         )
 
