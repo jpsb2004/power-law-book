@@ -40,3 +40,28 @@ export declare function correlation(
 export declare function toUsdSeries(points: Point[], fxPoints: Point[], invert: boolean): Point[];
 export declare function portfolioIndex(legs: { weight: number; points: Point[] }[]): Point[];
 export declare function describe(points: Point[]): Stats;
+export declare function hedgedSeries(
+  points: Point[],
+  currency: string,
+  ratesPct: Record<string, number>,
+  base?: string
+): Point[];
+export declare function weeklyReturns(points: Point[]): Map<string, number>;
+export declare function alignWeekly(...maps: Map<string, number>[]): { weeks: string[]; cols: number[][] };
+export declare function ols(
+  y: number[],
+  xs: number[][]
+): { n: number; coef: number[]; se: number[]; t: (number | null)[]; r2: number | null } | null;
+export declare const INDEX_METHOD: string;
+export declare function trackingStats(
+  target: Point[],
+  proxy: Point[],
+  opts?: { horizon?: number; lagSessions?: number }
+): {
+  windows: number;
+  horizon: number;
+  lagSessions: number;
+  trackingErrorPct: number;
+  correlation: number | null;
+  beta: number | null;
+} | null;

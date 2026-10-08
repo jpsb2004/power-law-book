@@ -24,6 +24,7 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { buildSnapshot, validateSnapshot } from "../lib/build-snapshot.js";
+import { INDEX_METHOD } from "../lib/analytics.js";
 
 const run = promisify(execFile);
 const root = new URL("../", import.meta.url);
@@ -34,11 +35,16 @@ const log = (s) => process.stderr.write(s + "\n");
 
 const HISTORY_LIMIT = 60;
 
-/** Short, stable digest of the book's tickers and weights. */
+/**
+ * Short, stable digest of the book's tickers and weights, and of the method
+ * that turns them into an index. A change to either makes successive levels
+ * incomparable, and the page reports it as a rebase rather than a return.
+ */
 function bookFingerprint(positions) {
   const spec = positions
     .map((p) => `${p.ticker}:${p.weight}`)
     .sort()
+    .concat(INDEX_METHOD)
     .join("|");
   return createHash("sha1").update(spec).digest("hex").slice(0, 10);
 }
