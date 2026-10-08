@@ -12,9 +12,6 @@ import { SLEEVES, HOLDINGS } from "../lib/holdings.js";
 
 const root = new URL("../", import.meta.url);
 
-/** Set false once the real target weights are in lib/holdings.js. */
-const WEIGHTS_PROVISIONAL = true;
-
 const sleeveWeights = Object.fromEntries(
   Object.keys(SLEEVES).map((id) => [
     id,
@@ -44,7 +41,6 @@ const payload = {
   ...snapshot,
   sleeves: SLEEVES,
   sleeveWeights,
-  weightsProvisional: WEIGHTS_PROVISIONAL,
   history: history.slice(-12),
 };
 
@@ -61,6 +57,5 @@ await writeFile(new URL("out/index.html", root), html);
 const kb = (html.length / 1024).toFixed(0);
 process.stderr.write(
   `wrote out/index.html — ${kb} KB, ${snapshot.positions.length} positions, ` +
-    `as of ${new Date(snapshot.asOf).toISOString()}\n` +
-    (WEIGHTS_PROVISIONAL ? "note: weights flagged provisional on the page\n" : "")
+    `as of ${new Date(snapshot.asOf).toISOString()}\n`
 );

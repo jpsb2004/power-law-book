@@ -58,6 +58,13 @@ if (rows !== expectedRows) {
 const cards = document.querySelectorAll("#dossier .card").length;
 if (cards !== nPositions) fail.push(`dossier rendered ${cards} cards, expected ${nPositions}`);
 
+// Same count is not the same book: every roster ticker must be on the page.
+// This is the check that catches a snapshot left behind a roster change,
+// which check-book deliberately only reports (it runs before the refresh).
+const shown = new Set([...document.querySelectorAll("#dossier .card .tk")].map((n) => n.textContent));
+const absent = HOLDINGS.map((h) => h.ticker).filter((t) => !shown.has(t));
+if (absent.length) fail.push(`roster positions missing from the page: ${absent.join(", ")}`);
+
 // Each dossier card must carry its falsification line -- the whole point.
 const breaks = document.querySelectorAll("#dossier .breaks").length;
 if (breaks !== nPositions) {

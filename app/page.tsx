@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getBook, sleeveOrder, sleeveWeightOf, SLEEVES } from "@/lib/quotes";
-import type { SleeveId } from "@/lib/holdings";
+import { HOLDINGS, type SleeveId } from "@/lib/holdings";
 import { Sparkline } from "@/components/Sparkline";
 
 const SLEEVE_VAR: Record<SleeveId, string> = {
@@ -25,7 +25,7 @@ export default function Page() {
           Law Book
         </h1>
         <p style={{ color: "var(--ink-2)", maxWidth: "54ch", marginTop: "1rem" }}>
-          Eighteen positions on one claim: the demand curve for computation is growing faster
+          {HOLDINGS.length} positions on one claim: the demand curve for computation is growing faster
           than the fuel, land and grid that feed it can be rebuilt.
         </p>
       </header>

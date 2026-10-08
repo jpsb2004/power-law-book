@@ -262,7 +262,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <p class="eyebrow">Global macro · single-book research note</p>
     <h1>The Power<br>Law Book<span class="thin">compute, and the energy it eats</span></h1>
     <p class="standfirst">
-      Eighteen positions built on one claim: that the demand curve for computation is
+      <span id="npos-word">Twenty</span> positions built on one claim: that the demand curve for computation is
       growing faster than the physical systems that feed it — fuel, molecules, land and grid —
       can be rebuilt. Each bucket is a different link in that chain, and each position
       carries the condition that would prove it wrong.
@@ -304,7 +304,6 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
       Weight is the only real expression of conviction. Ballast carries the largest single
       allocation, which is a deliberate statement that the book's own thesis might be wrong.
     </p>
-    <div id="alloc-notice"></div>
     <figure>
       <div class="chart-box rel"><div id="alloc"></div><div class="tip" id="alloc-tip"></div></div>
       <ul class="legend" id="alloc-legend"></ul>
@@ -394,7 +393,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     </p>
     <div class="cols">
       <ul class="note-list">
-        <li><h3>One of eighteen is not directly buyable</h3><p id="kospi-note">
+        <li><h3>One line is not directly buyable</h3><p id="kospi-note">
           The KOSPI is an index, so a real book expresses it through a tracking fund or futures and
           eats the tracking error and FX. Gold is held as spot-backed shares rather than a dated
           future, so there is no roll and no expiry to manage.</p></li>
@@ -405,7 +404,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
         <li><h3>Not every position covers the full window</h3><p id="coverage-note">
           A fund that listed part-way through the year has no history before it existed. The curve
           renormalises across whatever is trading on each date, so the headline return describes the
-          positions that were actually present — not always all eighteen.</p></li>
+          positions that were actually present — not always the whole book.</p></li>
         <li><h3>Correlations are biased toward zero</h3><p>
           Taipei and Seoul close before New York opens, so daily returns for those lines are
           measured against a different information set. Cross-market correlations here read lower
@@ -415,9 +414,10 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
         <li><h3>Daily rebalancing is a modelling choice</h3><p>
           The curve rebalances to target weight every session. A held book would drift with its
           winners, so this understates the concentration that would actually have built up.</p></li>
-        <li><h3>No costs, no tax, no slippage</h3><p>
-          Gross of commission, spread, ETF expense, withholding on Brazilian and Saudi
-          dividends, and the FX spread on five currencies. The lived return would be lower.</p></li>
+        <li><h3>Total return, before your costs</h3><p>
+          Returns include reinvested dividends and are net of each fund's own fee, which is already in
+          its price. They are gross of commission, spread, withholding on Brazilian and Saudi dividends,
+          and the FX spread on five currencies. The lived return would be lower.</p></li>
         <li><h3>One window, chosen after the fact</h3><p>
           Twelve months, ending on the day the note was written, for positions selected today.
           That is the most flattering possible framing, and the reason the drawdown column matters
@@ -428,9 +428,15 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
 
   <footer>
     <p>
-      Built as a research exercise: a live Next.js application fetching quotes from the
-      Yahoo Finance chart API, and this page — a frozen, dated snapshot generated from the
-      same data layer, so the two cannot disagree.
+      <b>How this was built.</b> The thesis, the positions, the weights and the conditions that would
+      prove each one wrong are the author's. Every line of code — the data pipeline, the validation,
+      the statistics and this page — was written by <a href="https://claude.com/claude-code">Claude Code</a>,
+      Anthropic's AI coding agent, working under the author's direction. The point of the project is to
+      use AI to test a thesis rigorously, not to demonstrate programming.
+    </p>
+    <p>
+      Prices are daily closes from the Yahoo Finance chart API, refreshed every weekday by a scheduled
+      job that rejects suspect data rather than publishing it.
     </p>
     <p class="disclaimer" id="disclaimer"></p>
   </footer>
@@ -507,6 +513,7 @@ function renderStamp() {
     ccys.length + " currencies → USD",
     "Source: " + DATA.source,
   ].map((s) => "<span>" + escape(s) + "</span>").join("");
+  $("npos-word").textContent = words(POS.length);
 
   $("disclaimer").textContent =
     "Not investment advice, not a recommendation, and not an offer to buy or sell anything. " +
@@ -522,7 +529,7 @@ function renderStats() {
     { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
     { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
     { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
-    { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "the hedge against being wrong" },
+    { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "what is left if the thesis is wrong" },
   ];
   $("stats").innerHTML = cards
     .map(
@@ -729,13 +736,6 @@ function renderAlloc() {
       escape(SLEEVES[id].numeral + " " + SLEEVES[id].name) + " — " + DATA.sleeveWeights[id] + "%</li>"
     ).join("");
 
-  if (DATA.weightsProvisional) {
-    $("alloc-notice").innerHTML =
-      '<div class="notice"><b>Provisional weights</b><br>' +
-      "These allocations follow the target buckets (Energy 38 / Compute 32 / Ballast 30), split equally within each. " +
-      "Every figure that depends on weight — the performance curve, the bucket totals, the " +
-      "contribution column — moves when they are replaced.</div>";
-  }
 }
 
 /* ------------------------------------------------------------ chart: YTD */

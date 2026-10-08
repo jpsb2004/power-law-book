@@ -6,14 +6,14 @@ Shape of the chain:
   workers       one per position that is actually interesting (a >=2σ move, a
                 fresh filing, a data-quality flag). Each condenses that
                 position's headlines into two or three sentences, seeing only
-                its own entity -- a bounded context per call, so 18 positions
+                its own entity -- a bounded context per call, so twenty positions
                 never collide in one prompt.
   orchestrator  receives the worker notes plus book-level aggregates and writes
                 the note. It is the only call that sees the whole book.
 
 Why filter before summarising: on a quiet day most positions have nothing to
-say, and asking a model to summarise eighteen streams of nothing produces
-eighteen paragraphs of nothing. The filter is deviation-based and runs before
+say, and asking a model to summarise twenty streams of nothing produces
+twenty paragraphs of nothing. The filter is deviation-based and runs before
 any model call, so a quiet day is cheap.
 
 No API key? `render_deterministic()` writes the same note structure from the
@@ -263,7 +263,7 @@ def build(book: Book, scenario_key: str = "grid") -> str:
     prompt = (
         f"{HOUSE_STYLE}\n\n"
         "You are the orchestrator writing today's daily note for a thesis titled "
-        '"Beyond the Hyper-Scalers: Quantifying Physical Bottlenecks of the Global '
+        '"The Power Law Book: Quantifying Physical Bottlenecks of the Global '
         'AI CapEx Supercycle". The thesis: computation demand is growing faster '
         "than the physical systems that feed it — fuel, molecules, land and grid — "
         "can be rebuilt.\n\n"
@@ -299,7 +299,7 @@ def build(book: Book, scenario_key: str = "grid") -> str:
 def _render_header(book: Book, scenario: dict) -> str:
     return (
         "# THESIS INITIATION REPORT\n"
-        "## Beyond the Hyper-Scalers: Quantifying Physical Bottlenecks of the "
+        "## The Power Law Book: Quantifying Physical Bottlenecks of the "
         "Global AI CapEx Supercycle\n\n"
         f"**Daily note — {book.as_of:%d %B %Y}**  \n"
         f"*Data as of {book.as_of:%Y-%m-%d %H:%M UTC} · {len(book.entities)} positions · "

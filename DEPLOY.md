@@ -46,7 +46,7 @@ intraday moment.
 
 Each run:
 
-1. `node scripts/refresh.mjs` — fetch 18 positions + 5 FX pairs, validate,
+1. `node scripts/refresh.mjs` — fetch every position + 5 FX pairs, validate,
    rebuild the page, smoke-test it in a DOM
 2. commit the refreshed `data/snapshot.json` and `data/history.json` back to the
    repo, so the next run has a baseline to validate against

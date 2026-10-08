@@ -73,6 +73,8 @@ QUERY_HINTS = {
     "GLD": "gold price central bank",
     "AVDV": "international small cap value",
     "JPM": "JPMorgan",
+    "SGOV": "Treasury bill yields Federal Reserve",
+    "XLP": "consumer staples stocks",
 }
 
 # CIK numbers for the US filers in the book. Only these have EDGAR filings;
