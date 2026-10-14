@@ -56,11 +56,11 @@ GREY = colors.HexColor("#5A5A5A")      # deck, sidebar labels
 FAINT = colors.HexColor("#8A8A8A")     # footer
 RULE = colors.HexColor("#C8CDD4")
 
-BUCKET_INK = {"Energy": colors.HexColor("#B5790A"),
+BUCKET_INK = {"Substrate": colors.HexColor("#B5790A"),
               "Compute": colors.HexColor("#1F6FB2"),
               "Materials": colors.HexColor("#65389F"),
               "Ballast": colors.HexColor("#A02060")}
-BUCKET_TINT = {"Energy": colors.HexColor("#FAF3E4"),
+BUCKET_TINT = {"Substrate": colors.HexColor("#FAF3E4"),
                "Compute": colors.HexColor("#EAF1F8"),
                "Materials": colors.HexColor("#F0EBF7"),
                "Ballast": colors.HexColor("#F9EAF1")}
@@ -179,7 +179,7 @@ disc_body = _p("disc_body", fontName="Helvetica", fontSize=7.4, leading=10.4, te
 # explicit leading keeps the oversized glyph from opening up the line.
 catalyst_style = _p("catalyst", leftIndent=14, spaceAfter=6,
                     bulletFontName="Helvetica-Bold", bulletFontSize=17,
-                    bulletColor=BUCKET_INK["Energy"], bulletIndent=4, bulletOffsetY=-3.4)
+                    bulletColor=BUCKET_INK["Substrate"], bulletIndent=4, bulletOffsetY=-3.4)
 
 
 # ---------------------------------------------------------------- charts
@@ -357,7 +357,7 @@ story += [
     Paragraph("EQUITY STRATEGY · PORTFOLIO INITIATION", eyebrow),
     Paragraph("Quantifying the Physical Bottlenecks<br/>of the Global AI CapEx Supercycle", cover_head),
     Paragraph(
-        "Overweight Energy, hold Compute as a counterweight, and size Ballast to absorb "
+        "Overweight Substrate, hold Compute as a counterweight, and size Ballast to absorb "
         f"drawdown. {N_POSITIONS} positions in {N_CURRENCIES} currencies express a rotation out of hyperscaler "
         "beta and into the physical infrastructure that gates it.", deck),
 ]
@@ -377,8 +377,7 @@ for lead, rest in [
      " A portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
      "construction than one that wins on the rotation but does not collapse if the rotation stalls."),
     ("Every position carries a standing falsification note:",
-     " the specific condition under which its inclusion in the thesis is wrong. The neocloud "
-     "classification is flagged as a stretch rather than smoothed over, and the critical-minerals "
+     " the specific condition under which its inclusion in the thesis is wrong. The critical-minerals "
      "ETF sits in its own Materials bucket rather than being counted as ballast. See Section 4."),
 ]:
     story.append(Paragraph(f"•&nbsp;<b>{lead}</b>{rest}", cover_body))
@@ -434,7 +433,7 @@ story += [
 
 rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Weight", "N", "Structural exposure")]]
 exposure = {
-    "Energy": "Baseload generation, transmission, fuel supply, land and<br/>interconnect rights: the most direct expression of the thesis",
+    "Substrate": "Fuel, generation, land, interconnect rights and grid equipment:<br/>the most direct expression of the thesis",
     "Compute": "The hardware layer itself: a counterweight against<br/>being wrong about the timing of the rotation",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
     "Ballast": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
@@ -454,8 +453,9 @@ bt.setStyle(TableStyle([
     ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
 ]))
 story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
-    "Energy is weighted above Compute deliberately: it is the more direct, less crowded "
-    "expression of the thesis. Compute is kept at close to a third of the book on purpose: a "
+    f"Substrate ({BUCKET_W.get('Substrate', 0):.0f}%) is weighted above Compute ({BUCKET_W.get('Compute', 0):.0f}%) "
+    "deliberately: fuel, land and the grid equipment that connects them are the more direct, less crowded "
+    "expression of the thesis. Compute is kept at about a third of the book on purpose: a "
     "portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
     "construction than one that wins on the rotation but does not collapse if the rotation "
     "stalls. Ballast is sized to absorb drawdown from the rest of the book rather than to add "
@@ -549,7 +549,7 @@ if _fu.get("valuation"):
 story += [
     Paragraph("3. MICROECONOMIC MAPPING", eyebrow),
     Paragraph("Position-Level Rationale", headline),
-    Paragraph(f"Energy &amp; Power ({BUCKET_W['Energy']:.1f}%, {BUCKET_N['Energy']} positions)", sub_head),
+    Paragraph(f"Substrate ({BUCKET_W['Substrate']:.1f}%, {BUCKET_N['Substrate']} positions)", sub_head),
 ]
 for _p in positions_in("energy"):
     story.append(KeepTogether(position(_p)))
@@ -578,9 +578,7 @@ story += [
         "the daily data pull. The intent is to make it structurally harder to only look for "
         "evidence that confirms the thesis. The open weaknesses, stated plainly:", body),
     Paragraph(
-        "<b>Neocloud classification overlap.</b> NBIS and CRWV are functionally "
-        "compute-infrastructure lessors, not power generators, and their high operational "
-        "correlation is one example of a wider problem: measured on weekly returns, the "
+        "<b>Concentration.</b> Measured on weekly returns, the "
         f"{N_POSITIONS}-position book behaves like "
         + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets, with "
            f"{(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
@@ -593,7 +591,7 @@ story += [
     Paragraph(
         "<b>Temporal horizon mismatch.</b> Daily deviation tracking compares short-term market "
         "noise against a multi-year infrastructure lead-time thesis (permitting and transformer "
-        "procurement run three to five years). Daily relative performance between Energy and "
+        "procurement run three to five years). Daily relative performance between Substrate and "
         "Compute is an operational monitoring routine, not statistical validation.", weakness),
 ]
 
@@ -640,7 +638,7 @@ if _sx:
     _pf = "; ".join(f"{g['name']} {g['capitalPct']:.0f}% of capital, {g['riskSharePct']:.0f}% of risk"
                     for g in _sx.get("pointsOfFailure", []))
     story.append(Paragraph(
-        f"<b>Twenty lines, {_sx['enb']:.1f} effective bets.</b> Splitting the book's weekly variance across its "
+        f"<b>{N_POSITIONS} lines, {_sx['enb']:.1f} effective bets.</b> Splitting the book's weekly variance across its "
         f"principal components, the first carries {_sx['firstPcSharePct']:.0f}% of it; the entropy-based effective "
         f"number of bets is {_sx['enb']:.1f} of {_sx['lines']} lines. Shared points of failure: {_pf}.", body))
 
@@ -649,9 +647,10 @@ _changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], re
 if _changes:
     _cl = [[Paragraph(h, tbl_head) for h in ("Date", "What changed", "Why")]]
     for c in _changes:
+        _why = c["why"] + (" <b>What breaks it:</b> " + c["breaks"].split("What breaks it: ", 1)[-1] if c.get("breaks") else "")
         _cl.append([Paragraph(c["date"], tbl_cell),
                     Paragraph(c["change"].replace("&", "&amp;"), tbl_cell),
-                    Paragraph(c["why"].replace("&", "&amp;"), tbl_cell)])
+                    Paragraph(_why.replace("&", "&amp;").replace("&amp;lt;", "&lt;"), tbl_cell)])
     clt = Table(_cl, colWidths=[62, 250, 178], repeatRows=1)
     clt.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), SPINE),

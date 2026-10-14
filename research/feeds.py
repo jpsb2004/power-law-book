@@ -74,7 +74,10 @@ QUERY_HINTS = {
     "AVDV": "international small cap value",
     "JPM": "JPMorgan",
     "SGOV": "Treasury bill yields Federal Reserve",
-    "XLP": "consumer staples stocks",
+    "ETN": "Eaton electrical equipment data center",
+    "HUBB": "Hubbell utility grid equipment",
+    "ASML": "ASML lithography export controls",
+    "IEUR": "European stocks MSCI Europe",
 }
 
 # CIK numbers for the US filers in the book. Only these have EDGAR filings;

@@ -7,7 +7,7 @@
 · **Daily note:** [`latest_briefing.md`](latest_briefing.md)
 
 > **Built entirely with [Claude Code](https://claude.com/claude-code).** The thesis,
-> the twenty positions, the weights and the condition that would prove each one
+> the twenty-three positions, the weights and the condition that would prove each one
 > wrong are mine. Every line of code — data pipeline, validation, statistics, page,
 > dashboard — was written by Claude Code, Anthropic's AI coding agent, under my
 > direction. I am not a programmer, and this project does not claim I am. What it
@@ -26,15 +26,15 @@ built.
 
 Chips are fungible on a two-year horizon. **Interconnection queues are not.** The
 book is positioned long the constraint and long the ground it stands on, with a
-quarter of the notional held against the possibility that the whole thesis is
+fifth of the notional held against the possibility that the whole thesis is
 one trade wearing three hats.
 
 | Bucket | Target | Claim | Positions |
 |---|---|---|---|
-| **I · Energy** | 38% | The buildout is constrained by fuel, molecules and the ground it stands on | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV |
-| **II · Compute** | 32% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L |
-| **III · Materials** | 5% | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
-| **IV · Ballast** | 25% | What survives if the rest of the book is the same bet | GLD, AVDV, JPM, SGOV, XLP |
+| **I · Substrate** | 42% | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV, ETN, HUBB |
+| **II · Compute** | 34% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L, ASML |
+| **III · Materials** | 2% | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
+| **IV · Ballast** | 22% | What survives if the rest of the book is the same bet | GLD, SGOV, AVDV, JPM, IEUR |
 
 Equal weight within each bucket, integer remainder to the most liquid names.
 Bucket weights are fixed; there is no "provisional" allocation.
@@ -42,8 +42,6 @@ Every position carries a thesis **and its falsification condition** in
 [`data/positions.json`](data/positions.json). Classification calls worth
 arguing with, stated in the repo rather than buried:
 
-- **NBIS and CRWV are classified in Energy but consume power rather than supply
-  it.** They are compute landlords. They are also the same trade twice.
 - **VGT overlaps half its own bucket** — it already holds AMD's peers and the
   megacaps, diluting single-name risk without adding a new bet.
 - **RARA11.SA is not ballast, so it has its own Materials bucket.** It is a
@@ -93,7 +91,7 @@ blanks.
 
 ### Multi-exchange normalisation
 
-20 instruments, 7 venues, 5 currencies, no API key.
+23 instruments, 7 venues, 5 currencies, no API key.
 
 FX is applied **date by date, not at today's spot** — converting a year of
 Korean prices at the current KRW rate would book twelve months of currency moves
@@ -298,7 +296,7 @@ year of daily data across five currencies, including a fund with a few months of
 history, cannot support an estimated correlation structure; one built on it
 would look rigorous and be noise. Sensitivities are set per position rather than
 per bucket, because the buckets are not internally uniform — a grid bottleneck
-is good for a uranium miner and bad for a neocloud, and both sit in Energy.
+is good for a uranium miner and bad for a neocloud, and both sit in Substrate.
 
 Combining scenarios sums the shocks, which assumes independence they do not
 have. The dashboard says so on screen.
@@ -388,7 +386,7 @@ positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
 
 ## CV summary
 
-> **The Power Law Book** — built a 20-position thematic equity portfolio on AI
+> **The Power Law Book** — built a 23-position thematic equity portfolio on AI
 > compute and the energy it consumes, across 7 exchanges and 5 currencies;
 > developed an FX-hedged USD return model, benchmark and risk-adjusted
 > comparison, factor regressions, risk-contribution, effective-bets and

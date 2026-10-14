@@ -1,18 +1,5 @@
 [
   {
-    "at": 1786557623509,
-    "index": 131.8906,
-    "ytd": 3.536100092553275,
-    "priced": 12,
-    "failures": [],
-    "biggestMove": {
-      "ticker": "LB",
-      "was": 76.77,
-      "now": 77.665,
-      "move": 1.1658199817637231
-    }
-  },
-  {
     "at": 1786559389999,
     "index": 131.9999,
     "ytd": 3.6219022326611756,
@@ -893,6 +880,23 @@
     "priced": 20,
     "book": "c398b21779",
     "positions": 20,
+    "failures": [],
+    "biggestMove": {
+      "ticker": "URA",
+      "was": 37.38,
+      "now": 37.38,
+      "move": 0
+    }
+  },
+  {
+    "at": 1792007803524,
+    "index": 136.6917,
+    "indexHedged": 135.0982,
+    "ytd": 44.90629283449466,
+    "ytdHedged": 43.24755330767353,
+    "priced": 23,
+    "book": "8e143aa2ba",
+    "positions": 23,
     "failures": [],
     "biggestMove": {
       "ticker": "URA",

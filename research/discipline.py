@@ -18,7 +18,7 @@ from __future__ import annotations
 # can be joined if a renderer wants to sit these beside live weights.
 VALUATION_RULES: tuple[tuple[str, str], ...] = (
     (
-        "Energy",
+        "Substrate",
         "**Initiation threshold:** Forward EV/EBITDA < 14x **or** FCF Yield > 5.0%. "
         "Position trimmed if NTM EV/EBITDA expands beyond 20x without corresponding "
         "reserve/interconnect capacity growth.",
@@ -31,7 +31,7 @@ VALUATION_RULES: tuple[tuple[str, str], ...] = (
     (
         # DRAFT for the author: written when RARA11.SA moved out of Ballast.
         "Materials",
-        "Held at the 5% bucket target. Add only when the fund trades at or below NAV; "
+        "Held at the 2% bucket target. Add only when the fund trades at or below NAV; "
         "cap the position at five sessions of average traded value on B3.",
     ),
     (

@@ -346,8 +346,8 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Allocation</h2></div>
     <p class="lede prose">
-      Sizing is near equal-weight by design: bucket targets carry the argument, and every
-      line inside a bucket gets the same slice, so no single stock call is asked to carry the thesis.
+      Sizing is near equal-weight by design: bucket targets carry the argument, and lines inside
+      a bucket get close to the same slice, so no single stock call is asked to carry the thesis.
       <span id="alloc-ballast">Ballast carries a large share of the book</span>, which is a deliberate
       statement that the book's own thesis might be wrong.
     </p>
@@ -411,7 +411,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   </section>
 
   <section id="bets-section" hidden>
-    <div class="sec-head"><span class="eyebrow secnum"></span><h2>How many bets twenty lines are</h2></div>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2 id="bets-head">How many bets the lines are</h2></div>
     <p class="lede prose" id="bets-lede"></p>
     <div class="kv" id="bets-kv"></div>
     <figure>
@@ -575,7 +575,8 @@ const el = (tag, attrs = {}, text) => {
 };
 const pct = (v, d = 1) => (v == null ? "—" : (v > 0 ? "+" : "") + v.toFixed(d) + "%");
 const WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
-  "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty"];
+  "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty",
+  "Twenty-one", "Twenty-two", "Twenty-three", "Twenty-four", "Twenty-five", "Twenty-six", "Twenty-seven", "Twenty-eight", "Twenty-nine", "Thirty"];
 const words = (n) => WORDS[n] ?? String(n);
 /** A difference between two percentages, in points. */
 const pp = (v, d = 1) => (v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "pp");
@@ -1337,8 +1338,9 @@ function renderBets() {
   const S = DATA.structure;
   if (!S) return;
   $("bets-section").hidden = false;
+  $("bets-head").textContent = "How many bets " + words(POS.length).toLowerCase() + " lines are";
   $("bets-lede").textContent =
-    "Twenty lines are not twenty independent bets. Weekly USD returns over " + S.weeks + " weeks: the effective number of " +
+    words(POS.length) + " lines are not " + words(POS.length).toLowerCase() + " independent bets. Weekly USD returns over " + S.weeks + " weeks: the effective number of " +
     "bets splits the book's variance across its principal components and asks how evenly it is spread: 1 if everything " +
     "rides one factor, " + S.lines + " if every line were its own bet.";
   const tiles = [
@@ -1461,7 +1463,8 @@ function renderChanges() {
       '<tr><td class="t" style="white-space:nowrap">' + escape(c.date) + "</td>" +
       '<td><span class="tag">' + escape(c.kind) + "</span></td>" +
       '<td style="font-size:.86rem">' + escape(c.change) + "</td>" +
-      '<td style="font-size:.86rem;color:var(--ink-2)">' + escape(c.why) + "</td></tr>"
+      '<td style="font-size:.86rem;color:var(--ink-2)">' + escape(c.why) +
+        (c.breaks ? "<br><b>What breaks it:</b> " + escape(c.breaks.split("What breaks it: ").pop()) : "") + "</td></tr>"
     ).join("") + "</tbody>";
 }
 

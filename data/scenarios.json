@@ -26,14 +26,18 @@
         "JPM": -2.0,
         "AVDV": -1.0,
         "SGOV": 0.0,
-        "XLP": -1.0
+        "ETN": 15.0,
+        "HUBB": 12.0,
+        "ASML": -8.0,
+        "IEUR": -1.0
       },
       "rationale": [
         "URA, NLR, LB, PETR4.SA, 2222.SR: owners of power and land capture scarcity rent.",
         "NBIS, CRWV: the neoclouds are the losers; they have signed for capacity they cannot energise, and their capex is already committed.",
         "Compute lines: demand is deferred, not destroyed.",
         "GLD, JPM, AVDV: Ballast roughly holds. RARA11.SA: rare earths bid on grid hardware demand.",
-        "SGOV, XLP: bills hold par; staples pay a little more for energy and freight."
+        "SGOV: bills hold par.",
+        "ETN, HUBB: grid equipment is the scarce input, so its makers take the rent. ASML: tool orders defer with the compute build. IEUR: Europe is a bystander."
       ]
     },
     {
@@ -61,13 +65,17 @@
         "JPM": -12.0,
         "RARA11.SA": -15.0,
         "SGOV": 0.0,
-        "XLP": 6.0
+        "ETN": -15.0,
+        "HUBB": -8.0,
+        "ASML": -28.0,
+        "IEUR": -4.0
       },
       "rationale": [
         "Compute and neocloud lines take the hit first.",
         "URA, NLR, LB, PETR4.SA, 2222.SR: fuel demand is a derivative of the buildout, so it goes too, just less, because reactors serve grids rather than data centres alone.",
         "GLD, AVDV, JPM, RARA11.SA: this is the scenario Ballast exists for.",
-        "SGOV, XLP: bills hold par; money leaving AI rotates into staples, as it did in the book's Jun-Jul 2026 drawdown (+7.5%) and on the DeepSeek day (+2.7%)."
+        "SGOV: bills hold par.",
+        "ETN, HUBB: data-centre electrical orders fall, utility orders hold up better. ASML: tool orders are cut with foundry capex. IEUR: falls with global equity, less than US tech."
       ]
     },
     {
@@ -95,13 +103,17 @@
         "AVDV": -12.0,
         "JPM": -15.0,
         "SGOV": 0.0,
-        "XLP": -8.0
+        "ETN": -8.0,
+        "HUBB": -5.0,
+        "ASML": -35.0,
+        "IEUR": -10.0
       },
       "rationale": [
         "TSM, 2357.TW, EWY: not a drawdown, an impairment. Three positions share one failure.",
         "PLTR: defence-adjacent software is the one compute line that can rise.",
         "Energy bids on supply fear; RARA11.SA bids hard on export controls.",
-        "SGOV, XLP: bills hold par; staples are still equity and fall with the market, less than it (-5.9% in the spring 2025 tariff sell-off)."
+        "SGOV: bills hold par.",
+        "ASML: export controls tighten and its largest customer's fabs stop. ETN, HUBB: industrial sell-off, orders intact. IEUR: risk-off and an ASML-heavy top holding."
       ]
     }
   ],

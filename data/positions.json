@@ -2,10 +2,10 @@
   "$schema_note": "Canonical roster. lib/holdings.js and scripts/make_pdf.py both read this; edit here only.",
   "base_currency": "USD",
   "bucket_targets": {
-    "energy": 38,
-    "compute": 32,
-    "materials": 5,
-    "ballast": 25
+    "energy": 42,
+    "compute": 34,
+    "materials": 2,
+    "ballast": 22
   },
   "book_changes_note": "Every change to what the book holds, its weights or the method that turns them into an index. Entries before 2026-10-14 are reconstructed from the repository history. Add a line here with every future change; the published page and the PDF render this list.",
   "book_changes": [
@@ -50,6 +50,13 @@
       "kind": "method",
       "change": "Bars keyed by each exchange's own trading date; hedge carry from dated USD and BRL rates; three-factor, three-year regressions on excess returns.",
       "why": "FX bars arrive stamped the day before, so every non-USD close had been converted at the next day's rate; an independent recomputation of PETR4.SA found it."
+    },
+    {
+      "date": "2026-10-14",
+      "kind": "composition",
+      "change": "Substrate (renamed from Energy) 42: adds ETN 2 and HUBB 2. Compute 34: adds ASML 2. Materials 2: RARA11.SA 5 -> 2. Ballast 22: AVDV 5 -> 4, JPM 5 -> 4, IEUR 4 added, XLP removed.",
+      "why": "Grid equipment is the bottleneck the thesis names, so it belongs in the bucket beside fuel and land; ASML is the one supplier every fab depends on. IEUR (MSCI Europe) replaces XLP as Ballast's equity line, chosen over EXSA for its lower ASML weight. RARA11 is cut to an option-sized line.",
+      "breaks": "Removed to fund the grid-equipment and European lines. What breaks it: a rotation out of AI into defensives, which XLP caught in the book's worst stretch (+7.5%, 2 Jun - 29 Jul 2026), now lands only on SGOV and GLD, and Ballast loses its one equity line that rose while the thesis fell."
     }
   ],
   "thesis": {
@@ -57,32 +64,79 @@
     "horizon": "Three to five years, matching transformer, switchgear and interconnection-queue lead times. Daily and monthly moves are monitored, not acted on.",
     "review_rules": "Reviewed each quarter against the portfolio falsifiers below and every line's own 'what breaks it'. A line is cut when its falsification condition is met, not on price alone; a line whose valuation breaches its bucket's trim rule is cut back to target. If two portfolio falsifiers trigger in the same quarter, the thesis itself is reconsidered, not just the lines.",
     "falsifiers": [
-      {"key": "capex", "name": "Hyperscaler capex cut", "test": "Two or more of Microsoft, Alphabet, Amazon and Meta cut next-year capital spending guidance in the same quarter.", "kind": "qualitative"},
-      {"key": "rotation", "name": "Compute keeps leading power", "test": "Compute out-returns Energy by more than 20 percentage points over twelve months.", "kind": "buckets", "threshold": 20},
-      {"key": "uranium", "name": "Uranium price breaks", "test": "Sprott Physical Uranium Trust (a holder of physical uranium) falls more than 25% over twelve months.", "kind": "drawdown12m", "ticker": "U-U.TO", "threshold": -25},
-      {"key": "memory", "name": "Memory pricing rolls over", "test": "Micron, the listed read on HBM pricing, trades more than 30% below its twelve-month high.", "kind": "fromHigh", "ticker": "MU", "threshold": -30},
-      {"key": "oil", "name": "Oil floor gives way", "test": "Brent trades below $60, the level at which Saudi Aramco and Petrobras payouts come under pressure.", "kind": "level", "ticker": "BZ=F", "threshold": 60}
+      {
+        "key": "capex",
+        "name": "Hyperscaler capex cut",
+        "test": "Two or more of Microsoft, Alphabet, Amazon and Meta cut next-year capital spending guidance in the same quarter.",
+        "kind": "qualitative"
+      },
+      {
+        "key": "rotation",
+        "name": "Compute keeps leading power",
+        "test": "Compute out-returns Substrate by more than 20 percentage points over twelve months.",
+        "kind": "buckets",
+        "threshold": 20
+      },
+      {
+        "key": "uranium",
+        "name": "Uranium price breaks",
+        "test": "Sprott Physical Uranium Trust (a holder of physical uranium) falls more than 25% over twelve months.",
+        "kind": "drawdown12m",
+        "ticker": "U-U.TO",
+        "threshold": -25
+      },
+      {
+        "key": "memory",
+        "name": "Memory pricing rolls over",
+        "test": "Micron, the listed read on HBM pricing, trades more than 30% below its twelve-month high.",
+        "kind": "fromHigh",
+        "ticker": "MU",
+        "threshold": -30
+      },
+      {
+        "key": "oil",
+        "name": "Oil floor gives way",
+        "test": "Brent trades below $60, the level at which Saudi Aramco and Petrobras payouts come under pressure.",
+        "kind": "level",
+        "ticker": "BZ=F",
+        "threshold": 60
+      }
     ]
   },
   "concentration_groups": [
     {
       "name": "Taiwan",
-      "tickers": ["TSM", "2357.TW"],
+      "tickers": [
+        "TSM",
+        "2357.TW"
+      ],
       "why": "A Taiwan Strait event is an impairment, not a drawdown; nearly every accelerator in the book is fabricated by TSM, so AMD and the tech funds depend on it too."
     },
     {
       "name": "Korea memory",
-      "tickers": ["EWY"],
+      "tickers": [
+        "EWY"
+      ],
       "why": "HBM supply runs through two Korean makers; the same strait scenario tightens export controls on them."
     },
     {
       "name": "US AI capex",
-      "tickers": ["NBIS", "CRWV", "AMD", "PLTR", "VGT", "AINF.L"],
+      "tickers": [
+        "NBIS",
+        "CRWV",
+        "AMD",
+        "PLTR",
+        "VGT",
+        "AINF.L"
+      ],
       "why": "These lines are paid out of hyperscaler capital spending; one guidance cut moves all of them."
     },
     {
       "name": "Nuclear fuel",
-      "tickers": ["URA", "NLR"],
+      "tickers": [
+        "URA",
+        "NLR"
+      ],
       "why": "Two funds on one fuel cycle; a reactor incident or a supply restart hits both."
     }
   ],
@@ -246,7 +300,7 @@
       "weight": 5,
       "instrument_type": "Equity",
       "factor_role": "A neocloud: rents GPU capacity by the hour to firms that will not build their own. Sits in this bucket because the binding constraint on the business is contracted power and shell space, not chips.",
-      "falsification_metric": "Classified here as a power consumer, which is a stretch — it is really a compute landlord. Capex-funded, customer-concentrated, and competing with hyperscalers who own their own silicon.",
+      "falsification_metric": "Capex-funded, customer-concentrated, and competing with hyperscalers who own their own silicon.",
       "investable": {
         "br_retail": null,
         "blocker": null,
@@ -256,11 +310,8 @@
       "status": "active",
       "memo": {
         "name": "Nebius Group",
-        "rationale": "Classified here as a power consumer, which is a stretch I flag rather than hide: Nebius is a compute landlord: capex-funded, customer-concentrated, and competing with the hyperscalers it sells to. It sits in Energy because its unit economics are gated by power access, not because it generates power."
-      },
-      "classification_flags": [
-        "power consumer, not supplier"
-      ]
+        "rationale": "Nebius is a compute landlord: capex-funded, customer-concentrated, and competing with the hyperscalers it sells to. Its unit economics are gated by power access and shell space, not by chips."
+      }
     },
     {
       "ticker": "CRWV",
@@ -281,11 +332,52 @@
       "status": "active",
       "memo": {
         "name": "CoreWeave",
-        "rationale": "Same classification stretch as NBIS, and the two overlap enough operationally that this is closer to one position expressed twice than two independent bets (see Section 4)."
+        "rationale": "The two neoclouds overlap enough operationally that this is closer to one position expressed twice than two independent bets (see Section 4)."
+      }
+    },
+    {
+      "ticker": "ETN",
+      "name": "Eaton Corporation",
+      "bucket": "energy",
+      "exchange": "NYSE",
+      "currency": "USD",
+      "weight": 2,
+      "instrument_type": "Equity",
+      "factor_role": "Switchgear, transformers and power-distribution equipment: the grid hardware whose lead times set how fast new data-centre capacity can be energised.",
+      "falsification_metric": "Lead times normalise. If transformer and switchgear backlogs shrink as capacity is added, pricing power goes with them, and a multiple built on scarcity re-rates to an industrial one.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": null,
+        "tracking_notes": null
       },
-      "classification_flags": [
-        "power consumer, not supplier"
-      ]
+      "status": "active",
+      "memo": {
+        "name": "Eaton Corporation",
+        "rationale": "Owns the electrical equipment layer between the grid and the rack. Its order backlog and lead-time guidance are the most direct listed read on whether the interconnect bottleneck is binding."
+      }
+    },
+    {
+      "ticker": "HUBB",
+      "name": "Hubbell Incorporated",
+      "bucket": "energy",
+      "exchange": "NYSE",
+      "currency": "USD",
+      "weight": 2,
+      "instrument_type": "Equity",
+      "factor_role": "Utility transmission and distribution components: the poles-and-wires hardware utilities need to connect new load.",
+      "falsification_metric": "Utility capex disappoints. Hubbell sells to utilities, not to data centres, so a pause in rate-base growth or a regulatory squeeze on spending hits it before any AI demand shows up.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": null,
+        "tracking_notes": null
+      },
+      "status": "active",
+      "memo": {
+        "name": "Hubbell Incorporated",
+        "rationale": "The utility side of the same bottleneck as Eaton: connecting new load needs transmission and distribution hardware that utilities buy, and that is where its revenue sits."
+      }
     },
     {
       "ticker": "TSM",
@@ -484,6 +576,28 @@
       }
     },
     {
+      "ticker": "ASML",
+      "name": "ASML Holding (ADR)",
+      "bucket": "compute",
+      "exchange": "NASDAQ",
+      "currency": "USD",
+      "weight": 2,
+      "instrument_type": "Equity",
+      "factor_role": "Sole supplier of EUV lithography: every leading-edge fab in this book depends on its tools.",
+      "falsification_metric": "Export controls widen. China is a large share of its sales, and a tighter Dutch or US licence regime cuts revenue at once; a foundry capex pause defers orders the multiple assumes.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": null,
+        "tracking_notes": null
+      },
+      "status": "active",
+      "memo": {
+        "name": "ASML Holding",
+        "rationale": "The single point every advanced fab passes through. Held small because its fate is tied to the same foundry capex cycle as TSM, and the European index line already carries some of it."
+      }
+    },
+    {
       "ticker": "GLD",
       "name": "SPDR Gold Shares",
       "bucket": "ballast",
@@ -511,7 +625,7 @@
       "bucket": "ballast",
       "exchange": "NYSE Arca",
       "currency": "USD",
-      "weight": 5,
+      "weight": 4,
       "instrument_type": "ETF",
       "factor_role": "The deliberate opposite of the rest of the book: ex-US, small, cheap, profitable, and largely unowned by the AI trade. Here to be uncorrelated, not to be exciting.",
       "falsification_metric": "Value has underperformed growth for most of a decade. If the buildout simply keeps compounding, this is a permanent drag.",
@@ -533,7 +647,7 @@
       "bucket": "ballast",
       "exchange": "NYSE",
       "currency": "USD",
-      "weight": 5,
+      "weight": 4,
       "instrument_type": "Equity",
       "factor_role": "The lender to the buildout. Captures capital-markets activity and a steeper curve without taking a view on which operator wins.",
       "falsification_metric": "Imperfect ballast: it is levered to the same economy the rest of the book needs, so it fails in the scenario the hedge exists for. A credit cycle hits it and the neoclouds together.",
@@ -558,10 +672,10 @@
       "bucket": "materials",
       "exchange": "B3 São Paulo",
       "currency": "BRL",
-      "weight": 5,
+      "weight": 2,
       "instrument_type": "ETF",
       "factor_role": "The materials upstream of everything else here: magnets, motors, turbines. Exposure to export controls on rare earths, which is the supply chokepoint the compute bucket cannot design around.",
-      "falsification_metric": "A concentrated, policy-driven, high-beta commodity-equity basket that will likely fall with the rest of the book rather than against it — and it is a thin BRL listing carrying currency risk on top.",
+      "falsification_metric": "At 2% it is a sized option on export controls, not a bucket. It breaks if rare-earth export controls ease or Western supply (MP Materials, Lynas) closes the gap, and it can still fall with the rest of the book: a thin, policy-driven BRL listing carrying currency risk on top.",
       "investable": {
         "br_retail": null,
         "blocker": null,
@@ -597,6 +711,28 @@
       }
     },
     {
+      "ticker": "IEUR",
+      "name": "iShares Core MSCI Europe ETF",
+      "bucket": "ballast",
+      "exchange": "NYSE Arca",
+      "currency": "USD",
+      "weight": 4,
+      "instrument_type": "ETF",
+      "factor_role": "Broad European equity (MSCI Europe IMI, ~1,000 names): a market whose return does not run through US AI capex.",
+      "falsification_metric": "It is still equity: it falls with global markets in a broad sell-off, and its largest holding is ASML (4.34% on 13 Oct 2026), a direct link back to the semiconductor cycle the thesis is long.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": null,
+        "tracking_notes": null
+      },
+      "status": "active",
+      "memo": {
+        "name": "iShares Core MSCI Europe ETF",
+        "rationale": "Chosen over the STOXX Europe 600 fund (EXSA) because it holds less ASML: 4.34% against 4.41% in the issuer's holdings files for 13 Oct 2026. It tracks MSCI Europe IMI, not the STOXX index."
+      }
+    },
+    {
       "ticker": "XLP",
       "name": "State Street Consumer Staples Select Sector SPDR ETF",
       "bucket": "ballast",
@@ -612,11 +748,13 @@
         "proxy_for": null,
         "tracking_notes": null
       },
-      "status": "active",
+      "status": "removed",
       "memo": {
         "name": "State Street Consumer Staples Select Sector SPDR ETF",
         "rationale": "The defensive-equity leg the Ballast was missing. Over the past year it carried a slightly negative correlation with the Energy and Compute buckets, and it rose while they fell in the book's worst stretch."
-      }
+      },
+      "removed_on": "2026-10-14",
+      "removal_note": "Removed to fund the grid-equipment and European lines. What breaks it: a rotation out of AI into defensives, which XLP caught in the book's worst stretch (+7.5%, 2 Jun - 29 Jul 2026), now lands only on SGOV and GLD, and Ballast loses its one equity line that rose while the thesis fell."
     }
   ]
 }

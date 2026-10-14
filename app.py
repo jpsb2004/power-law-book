@@ -31,7 +31,7 @@ BRIEFING = ROOT / "latest_briefing.md"
 
 # Same hues as the published page, validated for colourblind separation and
 # contrast across all pairs rather than picked by eye.
-BUCKET_COLOUR = {"Energy": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65389F", "Ballast": "#B02D6E"}
+BUCKET_COLOUR = {"Substrate": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65389F", "Ballast": "#B02D6E"}
 # Display order, from the ontology rather than restated here.
 BUCKET_RANK = {BUCKET_LABELS[k]: i for i, k in enumerate(BUCKET_ORDER)}
 GAIN, LOSS, MUTED = "#2E7D5B", "#B4382F", "#6E7A7F"
@@ -221,10 +221,9 @@ with tab_alloc:
 
     targets = " / ".join(f"{BUCKET_LABELS[k]} {book.bucket_weight(k):.0f}" for k in BUCKET_ORDER)
     st.info(
-        f"Sizing is near equal-weight by design: bucket targets are {targets}, split equally within "
-        "each bucket, so no single stock call carries the thesis. One classification "
-        "note worth arguing with: **NBIS and CRWV sit in Energy** but are compute landlords that "
-        "consume power rather than supply it. **RARA11.SA has its own Materials bucket** rather "
+        f"Sizing is near equal-weight by design: bucket targets are {targets}, split close to "
+        "equally within each bucket, so no single stock call carries the thesis. "
+        "**RARA11.SA has its own Materials bucket** rather "
         "than sitting in Ballast: a concentrated, policy-driven rare-earth basket tracks the same "
         "technology-materials cycle as the rest of the book, so in most states it falls with the "
         "book rather than against it. The exception is an export-control shock — toggle "
@@ -497,7 +496,7 @@ with tab_thesis:
         )
     sx = book.structure
     if sx:
-        st.subheader("How many bets twenty lines are")
+        st.subheader(f"How many bets {len(book.entities)} lines are")
         c1, c2, c3 = st.columns(3)
         c1.metric("Effective bets", f"{sx['enb']:.1f}", f"of {sx['lines']} lines", delta_color="off")
         c2.metric("First component", f"{sx['firstPcSharePct']:.0f}%", "of book variance", delta_color="off")

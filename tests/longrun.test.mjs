@@ -25,8 +25,11 @@ test("levelOn reads the last print on or before a date", () => {
   assert.equal(levelOn(pts, "2025-01-06"), 12);
 });
 
-test("every stated scenario prices every active line, and every proxy names a ticker", () => {
-  for (const s of SCENARIO_FILE.scenarios) assert.equal(Object.keys(s.shocks).length, 20, s.key);
+test("every stated scenario prices every active line, and every proxy names a ticker", async () => {
+  const { HOLDINGS } = await import("../lib/holdings.js");
+  for (const s of SCENARIO_FILE.scenarios) {
+    for (const h of HOLDINGS) assert.ok(h.ticker in s.shocks, `${s.key} has no shock for ${h.ticker}`);
+  }
   for (const [k, v] of Object.entries(SCENARIO_FILE.proxies)) assert.ok(v.ticker && v.why, k);
   for (const w of SCENARIO_FILE.historical) assert.ok(w.start < w.end, w.key);
 });

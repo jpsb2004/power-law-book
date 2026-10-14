@@ -57,7 +57,7 @@ def test_bucket_weights(book):
 
 def test_scenario_buckets_follow_display_order_not_roster_order(book):
     result = apply_scenario(book, SCENARIOS["grid"])
-    assert list(result["by_bucket"]) == ["Energy", "Compute", "Materials", "Ballast"]
+    assert list(result["by_bucket"]) == ["Substrate", "Compute", "Materials", "Ballast"]
 
 
 def test_scenario_contribution_is_shock_times_weight(book):

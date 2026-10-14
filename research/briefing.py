@@ -363,7 +363,7 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
     spread = energy - compute
     direction = "supports" if spread > 0 else "undercuts"
     out.append(
-        f"Energy carried {energy:+.2f}% on the day against Compute at {compute:+.2f}%, a "
+        f"Substrate carried {energy:+.2f}% on the day against Compute at {compute:+.2f}%, a "
         f"spread of {spread:+.2f}pp. On a single session that {direction} the bottleneck "
         "thesis, though one day of relative performance is not evidence of a "
         "structural constraint — the thesis turns on lead times, not daily prints.\n"
