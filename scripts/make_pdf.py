@@ -383,7 +383,8 @@ story.append(FrameBreak())
 
 # ---- sidebar
 SIDE_W = SIDE_R - SIDE_L
-story.append(boxed_header("KEY METRICS", SIDE_W))
+story.append(boxed_header("BACKTEST METRICS", SIDE_W))
+_bk = next((r for r in (book.benchmarks or {}).get("rows", []) if r.get("key") == "book-usd"), None)
 metrics = [
     ("Index level", f"{book.index_level:.2f}"),
     ("YTD (USD)", pct(stats.get("ytd", 0.0))),
@@ -391,6 +392,8 @@ metrics = [
     ("Volatility (ann.)", f"{stats.get('vol', 0.0):.1f}%"),
     ("Max drawdown", pct(stats.get("maxDrawdown", 0.0))),
 ]
+if _bk and _bk.get("stats", {}).get("sharpe") is not None:
+    metrics.append(("Sharpe (vs T-bills)", f"{_bk['stats']['sharpe']:.2f}"))
 mt = Table([[Paragraph(k, side_label), Paragraph(v, side_value)] for k, v in metrics],
            colWidths=[SIDE_W * 0.58, SIDE_W * 0.42], rowHeights=[21] * len(metrics))
 mt.setStyle(TableStyle([
@@ -400,7 +403,10 @@ mt.setStyle(TableStyle([
     ("LEFTPADDING", (0, 0), (0, -1), 8),
     ("RIGHTPADDING", (-1, 0), (-1, -1), 8),
 ]))
-story += [mt, Spacer(1, 10), boxed_header("BUCKET ALLOCATION", SIDE_W), Spacer(1, 6),
+story += [mt, Spacer(1, 4), Paragraph(
+              "Hindsight backtest, not a track record: today's weights replayed over twelve months, "
+              f"rebalanced {(book.rebalancing or {}).get('base', 'daily')}, gross of costs.", side_body_i),
+          Spacer(1, 8), boxed_header("BUCKET ALLOCATION", SIDE_W), Spacer(1, 6),
           allocation_chart(SIDE_W, 88), Spacer(1, 12),
           boxed_header("AUTHOR", SIDE_W), Spacer(1, 7),
           Paragraph("<b>João</b>", side_body),
@@ -557,13 +563,40 @@ for heading, text in CATALYSTS:
         f"<b>{heading.replace('&', '&amp;')}.</b> {text.replace('**', '')}",
         catalyst_style, bulletText="•"))
 
+# ---- change log: every change to the book or its method, from positions.json
+_changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)
+if _changes:
+    _cl = [[Paragraph(h, tbl_head) for h in ("Date", "What changed", "Why")]]
+    for c in _changes:
+        _cl.append([Paragraph(c["date"], tbl_cell),
+                    Paragraph(c["change"].replace("&", "&amp;"), tbl_cell),
+                    Paragraph(c["why"].replace("&", "&amp;"), tbl_cell)])
+    clt = Table(_cl, colWidths=[62, 250, 178], repeatRows=1)
+    clt.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE),
+        ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story += [
+        Paragraph("Change Log", sub_head),
+        Paragraph(
+            "The figures in this note replay today's book, so every change below rewrites them; the live "
+            "record on the published page is chain-linked from its inception and is not rewritten. Entries "
+            "before 14 October 2026 are reconstructed from the repository history.", body),
+        clt,
+    ]
+
 # ============================================================== 5. RISK
 story += [
     Paragraph("5. RISK FRAMEWORK", eyebrow),
     Paragraph("Scenario Stress-Testing", headline),
     Paragraph(
-        "An empirical covariance matrix, estimated over a year of daily data across six "
-        f"currencies (one with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
+        f"An empirical covariance matrix, estimated over a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} "
+        f"currencies (one line with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
         "while being almost entirely noise. The portfolio uses stated-assumption scenario shocks "
         "instead.", body),
 ]
@@ -597,7 +630,7 @@ story += [gt, Spacer(1, 8), Paragraph(
 
 callout = Table([[Paragraph(
     "<b>Why stated assumptions instead of a fitted model.</b> A covariance matrix estimated "
-    "from a year of daily data across six currencies would look statistically rigorous and "
+    f"from a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} currencies would look statistically rigorous and "
     "would be almost entirely noise, given how little history several positions have. Stating "
     "one assumption directly and leaving the other two scenarios qualitative is less "
     "impressive-looking than assigning every scenario a precise number, and it is more honest "

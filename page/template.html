@@ -131,6 +131,13 @@ a { color: var(--accent); }
 .stat .k { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .stat .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.75rem; line-height: 1.15; margin-top: 0.4rem; }
 .stat .n { font-size: 0.82rem; color: var(--ink-3); font-family: var(--font-body); }
+/* The flag spans the row: every figure under it is a replay, not a result. */
+.stats .flag {
+  grid-column: 1 / -1; background: var(--surface-2); padding: 0.55rem 1.2rem;
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2);
+}
+.stats .flag b { color: var(--ink); font-weight: 600; }
+.stat.live { box-shadow: inset 3px 0 0 var(--accent); }
 
 /* --------------------------------------------------------------- section */
 section { padding: clamp(3rem, 7vw, 5rem) 0; border-bottom: 1px solid var(--rule); }
@@ -410,6 +417,12 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <div id="dossier"></div>
   </section>
 
+  <section id="changes-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>Change log</h2></div>
+    <p class="lede prose" id="changes-lede"></p>
+    <div class="tbl-scroll"><table class="mini" id="changes-tbl"></table></div>
+  </section>
+
   <section id="refresh-section" hidden>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Refresh log</h2></div>
     <p class="lede prose">
@@ -564,19 +577,35 @@ function renderStamp() {
 function renderStats() {
   const s = V().stats();
   const cards = [
-    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: (VIEW === "hedged" ? "FX-hedged USD" : "USD") + ", rebalanced " + (DATA.rebalancing?.base ?? "daily") },
+    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: (VIEW === "hedged" ? "FX-hedged USD" : "USD") + ", rebalanced " + (DATA.rebalancing?.base ?? "daily") + ", gross" },
     { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
     { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
     { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
     { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "what is left if the thesis is wrong" },
   ];
-  $("stats").innerHTML = cards
-    .map(
-      (c) =>
-        '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
-        c.v + '</div><div class="n">' + c.n + "</div></div>"
-    )
-    .join("");
+  // The forward-tracked series, kept apart from the replay above it.
+  const tr = DATA.track;
+  const key = VIEW === "hedged" ? "hedged" : "usd";
+  const tp = tr?.points ?? [];
+  const liveRet = tp.length > 1 && tp[0][key] && tp.at(-1)[key] ? (tp.at(-1)[key] / tp[0][key] - 1) * 100 : null;
+  const live = !tr
+    ? { k: "Live record", v: "—", c: "", n: "starts with the next scheduled refresh" }
+    : liveRet == null
+      ? { k: "Live since " + fmtDate(Date.parse(tr.inception)), v: "—", c: "", n: "inception day; no return yet" }
+      : { k: "Live since " + fmtDate(Date.parse(tr.inception)), v: pct(liveRet), c: signClass(liveRet),
+          n: (tp.length - 1) + " trading day" + (tp.length === 2 ? "" : "s") + ", chain-linked, never revised" };
+  $("stats").innerHTML =
+    '<div class="flag"><b>Hindsight backtest — not a track record.</b> Return, volatility and drawdown replay today\'s ' +
+    "weights over the past twelve months, with positions chosen knowing how that year went. The live record is the last tile.</div>" +
+    cards
+      .map(
+        (c) =>
+          '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
+          c.v + '</div><div class="n">' + c.n + "</div></div>"
+      )
+      .join("") +
+    '<div class="stat live"><div class="k">' + escape(live.k) + '</div><div class="v ' + live.c + '">' + live.v +
+    '</div><div class="n">' + escape(live.n) + "</div></div>";
 }
 
 /* ----------------------------------------------------------------- chain */
@@ -1148,6 +1177,27 @@ function renderProxy() {
   $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
 }
 
+/* ------------------------------------------------------------ change log */
+function renderChanges() {
+  const ch = DATA.bookChanges ?? [];
+  if (!ch.length) return;
+  $("changes-section").hidden = false;
+  const tr = DATA.track;
+  $("changes-lede").textContent =
+    "Every change to what the book holds, its weights, or the method that turns them into an index, newest first. " +
+    "The backtest above is always today's book replayed, so a change rewrites it; the live record " +
+    (tr ? "(since " + fmtDate(Date.parse(tr.inception)) + ") " : "") +
+    "is chain-linked and only ever moves forward. Entries before 14 Oct 2026 are reconstructed from the repository history.";
+  $("changes-tbl").innerHTML =
+    "<thead><tr><th>Date</th><th>Kind</th><th>What changed</th><th>Why</th></tr></thead><tbody>" +
+    [...ch].sort((a, b) => (a.date < b.date ? 1 : -1)).map((c) =>
+      '<tr><td class="t" style="white-space:nowrap">' + escape(c.date) + "</td>" +
+      '<td><span class="tag">' + escape(c.kind) + "</span></td>" +
+      '<td style="font-size:.86rem">' + escape(c.change) + "</td>" +
+      '<td style="font-size:.86rem;color:var(--ink-2)">' + escape(c.why) + "</td></tr>"
+    ).join("") + "</tbody>";
+}
+
 /* ----------------------------------------------------- rebalancing & costs */
 function renderRebalancing() {
   const RB = DATA.rebalancing;
@@ -1499,7 +1549,7 @@ function secNumberOf(id) {
 function renderAll() {
   renderStamp(); renderToggles(); renderStats(); renderChain();
   renderCurve(); renderAlloc(); renderYtd(); renderFx();
-  renderRebalancing(); renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderRefreshLog();
+  renderRebalancing(); renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderChanges(); renderRefreshLog();
   renderProxy(); numberSections();
 }
 renderAll();

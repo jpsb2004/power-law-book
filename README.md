@@ -192,6 +192,21 @@ Seoul close is paired with the **previous** NY close (`clock_lag_sessions: 1`).
 Same-date pairing measures the time zone, not the fund. SOXX was considered and
 rejected: a US semiconductor basket is a different bet, not a Korea proxy.
 
+### Backtest vs track record
+
+Every return, volatility and drawdown on the page, the dashboard and the PDF is
+a **hindsight backtest**: today's weights replayed over the past twelve months,
+with positions chosen knowing how that year went. Each is labelled so on the
+KPI row itself.
+
+The **live record** is separate (`data/track.json`, written by `extendTrack`):
+chain-linked forward from its inception, one entry per trading day every venue
+has closed, and never revised — a later change to the book changes only what
+comes after it. The first scheduled refresh that finds no file starts it, so
+its inception is the first run after the P0 changes were merged. Every change
+to the book or its method is dated in `book_changes` (`data/positions.json`)
+and rendered as a change log on the page and in the PDF.
+
 ### Benchmarks and risk-adjusted returns
 
 The book is shown beside VGT (US tech, also a holding), ACWI (global equity)
@@ -265,7 +280,7 @@ Three scenarios — Grid Bottleneck, CapEx Retrenchment, Geopolitical Shock —
 toggleable and combinable in the dashboard.
 
 The shocks are **stated assumptions, not estimates from a covariance matrix.** A
-year of daily data across six currencies, including a fund with three weeks of
+year of daily data across five currencies, including a fund with a few months of
 history, cannot support an estimated correlation structure; one built on it
 would look rigorous and be noise. Sensitivities are set per position rather than
 per bucket, because the buckets are not internally uniform — a grid bottleneck

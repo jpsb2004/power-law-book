@@ -3,8 +3,8 @@ Stress scenarios.
 
 These are **assumptions, not measurements.** Each scenario is a hand-specified
 shock in percent applied to individual positions, aggregated by weight. No
-covariance matrix is estimated, because a year of daily data across six
-currencies and a fund with three weeks of history cannot support one — a
+covariance matrix is estimated, because a year of daily data across several
+currencies and a fund with a few months of history cannot support one — a
 correlation matrix built on that would look rigorous and be noise.
 
 Sensitivities are attached at position level rather than bucket level, because

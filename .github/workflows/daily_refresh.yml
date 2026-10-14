@@ -129,7 +129,7 @@ jobs:
           commit_message: "refresh: daily closes ${{ github.run_id }} [skip ci]"
           # Only the data the next run needs as its validation baseline, plus
           # the note. out/ is gitignored and ships as a Pages artifact instead.
-          file_pattern: data/snapshot.json data/history.json latest_briefing.md
+          file_pattern: data/snapshot.json data/history.json data/track.json latest_briefing.md
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
 

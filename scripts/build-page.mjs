@@ -8,7 +8,7 @@
  *   npm run page
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { SLEEVES, HOLDINGS } from "../lib/holdings.js";
+import { SLEEVES, HOLDINGS, BOOK_CHANGES } from "../lib/holdings.js";
 
 const root = new URL("../", import.meta.url);
 
@@ -37,11 +37,21 @@ for (const p of snapshot.positions) {
   if (p.usdPoints?.length > 60) p.usdPoints = p.usdPoints.filter((_, i, a) => i % 5 === 0 || i === a.length - 1);
 }
 
+// The live track record, if the pipeline has started one (see extendTrack).
+let track = null;
+try {
+  track = JSON.parse(await readFile(new URL("data/track.json", root), "utf8"));
+} catch {
+  track = null;
+}
+
 const payload = {
   ...snapshot,
   sleeves: SLEEVES,
   sleeveWeights,
   history: history.slice(-12),
+  track,
+  bookChanges: BOOK_CHANGES,
 };
 
 const template = await readFile(new URL("page/template.html", root), "utf8");

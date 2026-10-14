@@ -140,6 +140,21 @@ if (benchRows.length) {
   fail.push("benchmark section is visible without benchmark data");
 }
 
+// Backtest vs record: the flag sits on the KPI row, the live tile closes it.
+if (!document.querySelector("#stats .flag")?.textContent.includes("not a track record")) {
+  fail.push("KPI row is missing the hindsight-backtest flag");
+}
+if (!document.querySelector("#stats .stat.live")) fail.push("KPI row is missing the live-record tile");
+
+// Change log: one row per entry in positions.json.
+const changes = (await import("../lib/holdings.js")).BOOK_CHANGES.length;
+const changesSection = document.getElementById("changes-section");
+if (changes) {
+  if (changesSection.hidden) fail.push("positions.json carries book changes but the change log is hidden");
+  const got = document.querySelectorAll("#changes-tbl tbody tr").length;
+  if (got !== changes) fail.push(`change log rendered ${got} rows for ${changes} entries`);
+}
+
 // Rebalancing variants and the reconciliation that ties them together.
 const rebalRows = snap.rebalancing?.usd?.rows?.length ?? 0;
 const rebalBlock = document.getElementById("rebal-block");

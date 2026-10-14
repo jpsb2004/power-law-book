@@ -4,6 +4,38 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-2 Backtest vs track record: labels, live record, change log
+
+**Decision (author):** the live record's inception is the first scheduled
+refresh after the P0 changes are merged.
+
+**What changed**
+
+- KPI row (page), dashboard caption and PDF cover now say **"Hindsight
+  backtest — not a track record"**; the PDF box is "Backtest metrics" and adds
+  the Sharpe ratio; the 1-year card names the rule and "gross".
+- `lib/analytics.js` — `extendTrack`: chain-linked, forward-only record.
+  Appends every day all venues have closed (the earliest last close among
+  lines no more than five days stale), linked by that day's move in the
+  current curve; never revises a recorded day; records the book fingerprint
+  on each point.
+- `scripts/refresh.mjs` — writes `data/track.json` after a validated refresh;
+  the workflow commits it alongside the snapshot. No file is committed from
+  this branch: the first CI run after merge creates it and sets the inception.
+- Page: a "Live since …" tile closes the KPI row (with "starts with the next
+  scheduled refresh" until then); a new **Change log** section. Dashboard and
+  PDF show the same.
+- `data/positions.json` — `book_changes`: six dated entries (composition and
+  method), the ones before 2026-10-14 reconstructed from git history.
+- Stale counts fixed: PDF, dashboard and docs said "six currencies" and "a
+  fund with three weeks of history"; now computed (five currencies; RARA11.SA
+  with ~12 weeks).
+- Tests: `tests/track.test.mjs` (5 cases); `check-page.mjs` checks the flag,
+  the live tile and the change log.
+
+**Numbers:** none of the backtest figures change in this item. The live
+record has no return until its second recorded day.
+
 ## 2026-10-14 — P0-5 Monthly rebalancing as the base case; buy-and-hold and net-of-cost series; reconciliation
 
 **What changed**

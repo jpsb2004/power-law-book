@@ -14,6 +14,7 @@ sitting next to them.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -97,12 +98,34 @@ if _age > timedelta(hours=80):
     )
 
 stats = book.curve_stats
+st.caption(
+    "**Hindsight backtest — not a track record.** The figures below replay today's weights over the past "
+    f"twelve months (rebalanced {book.rebalancing.get('base', 'daily')}, gross of costs), with positions "
+    "chosen knowing how that year went."
+)
 cols = st.columns(5)
 cols[0].metric("Index", f"{book.index_level:.2f}", f"{(book.index_level or 100) - 100:+.1f} vs base")
 cols[1].metric("YTD (USD)", f"{stats.get('ytd', 0):+.1f}%")
 cols[2].metric("1-year (USD)", f"{stats.get('ret1y', 0):+.1f}%")
 cols[3].metric("Volatility", f"{stats.get('vol', 0):.1f}%")
 cols[4].metric("Max drawdown", f"{stats.get('maxDrawdown', 0):+.1f}%")
+
+# The live record: chain-linked forward from its inception, written by the
+# pipeline (data/track.json) and never revised. Kept apart from the replay.
+_track_path = ROOT / "data" / "track.json"
+if _track_path.exists():
+    _track = json.loads(_track_path.read_text(encoding="utf-8"))
+    _pts = _track.get("points", [])
+    if len(_pts) > 1 and _pts[0].get("usd") and _pts[-1].get("usd"):
+        _live = (_pts[-1]["usd"] / _pts[0]["usd"] - 1) * 100
+        st.info(
+            f"**Live record since {_track['inception']}:** {_live:+.1f}% (unhedged USD, {len(_pts) - 1} trading "
+            "days, chain-linked, never revised)."
+        )
+    else:
+        st.info(f"**Live record** started {_track['inception']}; no return yet.")
+else:
+    st.info("**Live record** starts with the next scheduled refresh.")
 
 partial = [e for e in book.entities if e.partial]
 if partial:
@@ -432,11 +455,16 @@ with tab_bench:
 # ------------------------------------------------------------------- stress
 with tab_stress:
     st.subheader("Scenario shocks")
+    _ccys = len({e.currency for e in book.entities})
+    _young = [e for e in book.entities if e.partial]
+    _young_txt = (
+        " — including " + ", ".join(f"{e.ticker} with {round(52 * (e.coverage or 0))} weeks of history" for e in _young) + " —"
+        if _young else ""
+    )
     st.caption(
         "These are **stated assumptions, not estimates from a covariance matrix.** A year of "
-        "daily data across six currencies — including one fund with three weeks of history — "
-        "cannot support an estimated correlation structure, and one built on it would look "
-        "rigorous while being noise."
+        f"daily data across {_ccys} currencies{_young_txt} cannot support an estimated correlation "
+        "structure, and one built on it would look rigorous while being noise."
     )
 
     chosen = []
