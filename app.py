@@ -15,12 +15,26 @@ sitting next to them.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import altair as alt
 import pandas as pd
 import streamlit as st
+
+# Streamlit Cloud pulls a new commit into the running process and reruns this
+# script, but keeps the research package it imported at boot: a merge would
+# show new data under old bucket labels. Drop the package when its sources
+# change on disk so the rerun imports the committed version.
+_RESEARCH_STAMP = max(p.stat().st_mtime for p in (Path(__file__).resolve().parent / "research").glob("*.py"))
+if "research" in sys.modules and getattr(sys.modules["research"], "_stamp", None) != _RESEARCH_STAMP:
+    for _name in [m for m in sys.modules if m == "research" or m.startswith("research.")]:
+        del sys.modules[_name]
+
+import research  # noqa: E402
+
+research._stamp = _RESEARCH_STAMP
 
 from research.discipline import CATALYSTS, VALUATION_RULES
 from research.ontology import BUCKET_LABELS, BUCKET_ORDER, SchemaError, load_book
