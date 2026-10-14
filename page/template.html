@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>The Power Law Book — a macro portfolio on compute and the energy it eats</title>
 <style>
 /* ---------------------------------------------------------------- tokens */
@@ -301,8 +302,8 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Allocation</h2></div>
     <p class="lede prose">
-      Weight is the only real expression of conviction. Ballast carries the largest single
-      allocation, which is a deliberate statement that the book's own thesis might be wrong.
+      Weight is the only real expression of conviction. <span id="alloc-ballast">Ballast carries
+      a large share of the book</span>, which is a deliberate statement that the book's own thesis might be wrong.
     </p>
     <figure>
       <div class="chart-box rel"><div id="alloc"></div><div class="tip" id="alloc-tip"></div></div>
@@ -482,8 +483,11 @@ const words = (n) => WORDS[n] ?? String(n);
 /** A difference between two percentages, in points. */
 const pp = (v, d = 1) => (v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "pp");
 const signClass = (v) => (v == null ? "" : v > 0 ? "pos" : v < 0 ? "neg" : "");
+// UTC, like every timestamp the pipeline writes. Formatting in the reader's own
+// zone put a São Paulo reader's header a day behind its own UTC time ("13 Oct,
+// 00:44 UTC" for a run at 14 Oct 00:44 UTC), and shifted every curve date.
 const fmtDate = (t) =>
-  new Date(t).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  new Date(t).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 const SLEEVES = DATA.sleeves;
@@ -682,6 +686,15 @@ function renderAlloc() {
   const host = $("alloc");
   host.innerHTML = "";
   const order = Object.keys(SLEEVES);
+
+  // Stated from the weights, not written by hand: this sentence used to claim
+  // Ballast was the largest allocation while Energy held 38% against its 30%.
+  const sw = DATA.sleeveWeights;
+  const top = order.reduce((a, b) => (sw[b] > sw[a] ? b : a));
+  $("alloc-ballast").textContent =
+    top === "ballast"
+      ? "Ballast carries the largest single allocation (" + sw.ballast + "%)"
+      : "Ballast carries " + sw.ballast + "% of the book, against " + SLEEVES[top].name + "'s " + sw[top] + "%";
   const W = 1000, H = 150, m = { t: 34, r: 2, b: 34, l: 2 };
   const iw = W - m.l - m.r, bh = H - m.t - m.b;
   const total = POS.reduce((a, p) => a + p.weight, 0);
@@ -967,8 +980,14 @@ function renderRefreshLog() {
   $("refresh-section").hidden = false;
   const rows = [...h].reverse();
 
+  // The level follows the same view as the headline cards. Runs logged before
+  // the hedged level was recorded show "—" in the hedged view rather than the
+  // unhedged number, which would put the two series in one column.
+  const level = (r) => (VIEW === "hedged" ? r.indexHedged : r.index) ?? null;
+
   $("refresh-tbl").innerHTML =
-    "<thead><tr><th>Run</th><th>Index</th><th>Change</th><th>Priced</th><th>Largest move</th></tr></thead><tbody>" +
+    "<thead><tr><th>Run</th><th>Index (" + escape(V().short) + ")</th><th>Change</th><th>Priced</th>" +
+    "<th>Largest move since previous run</th></tr></thead><tbody>" +
     rows.map((r, i) => {
       const prev = rows[i + 1];
       // The index is rebased when the book changes, so a level measured against
@@ -982,8 +1001,9 @@ function renderRefreshLog() {
       const rebalanced =
         prev != null &&
         (r.book != null && prev.book != null ? r.book !== prev.book : size(r) !== size(prev));
-      const delta =
-        prev?.index && r.index && !rebalanced ? ((r.index - prev.index) / prev.index) * 100 : null;
+      const now = level(r);
+      const was = prev ? level(prev) : null;
+      const delta = was && now && !rebalanced ? ((now - was) / was) * 100 : null;
       const bm = r.biggestMove;
       const failed = (r.failures ?? []).length;
       // Runs predating the `positions` field belong to a smaller book; using
@@ -992,7 +1012,7 @@ function renderRefreshLog() {
       const total = r.positions ?? r.priced;
       return "<tr>" +
         '<td class="t">' + new Date(r.at).toISOString().slice(0, 16).replace("T", " ") + " UTC</td>" +
-        '<td class="n">' + (r.index == null ? "—" : r.index.toFixed(2)) + "</td>" +
+        '<td class="n">' + (now == null ? "—" : now.toFixed(2)) + "</td>" +
         '<td class="n ' + signClass(delta) + '">' +
           (rebalanced
             ? '<span class="tag warn">rebased</span>'
@@ -1008,7 +1028,9 @@ function renderRefreshLog() {
   $("refresh-note").textContent =
     h.length + " runs logged over " + (span < 1 ? "under an hour" : span.toFixed(0) + " hours") +
     ". A run that fails validation never reaches this table — it is rejected before publishing. " +
-    "“Rebased” marks a change to the book itself, after which a level is not comparable with the one before it.";
+    "“Rebased” marks a change to the book itself, after which a level is not comparable with the one before it. " +
+    "The largest move compares each position's last close with the previous run's, so after a weekend or a " +
+    "holiday it spans more than one session.";
 }
 
 /* ------------------------------------------------------ index → instrument */
@@ -1133,7 +1155,7 @@ document.addEventListener("click", (ev) => {
   const btn = ev.target.closest?.(".fxview button");
   if (!btn || btn.dataset.view === VIEW) return;
   VIEW = btn.dataset.view;
-  renderToggles(); renderStats(); renderCurve(); renderYtd(); renderTable();
+  renderToggles(); renderStats(); renderCurve(); renderYtd(); renderTable(); renderRefreshLog();
 });
 
 /* --------------------------------------------------------- section numbers */

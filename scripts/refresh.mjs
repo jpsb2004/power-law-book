@@ -90,8 +90,13 @@ async function main() {
   const history = (await readJson(path("data/history.json"))) ?? [];
   history.push({
     at: next.asOf,
+    // Both views, so the log can show the one the headline cards are showing.
+    // Logging only the unhedged level next to hedged cards made the two look
+    // inconsistent (135.39 in the log against 133.43 behind the KPIs).
     index: next.curve.at(-1)?.c ?? null,
+    indexHedged: next.curveHedged?.at(-1)?.c ?? null,
     ytd: next.curveStats.ytd,
+    ytdHedged: next.curveHedgedStats?.ytd ?? null,
     priced: next.positions.filter((p) => p.price != null).length,
     // Fingerprint of the book itself. The index is rebased whenever the
     // constituents change, so a level measured against a different set of

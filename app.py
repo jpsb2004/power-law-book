@@ -14,6 +14,7 @@ sitting next to them.
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import altair as alt
@@ -82,6 +83,16 @@ st.caption(
     f"{len(book.entities)} positions · base {book.base} · "
     f"data as of {book.as_of:%Y-%m-%d %H:%M UTC}"
 )
+
+# The dashboard only reads committed artifacts, so a stalled pipeline would
+# otherwise look exactly like a quiet market. Weekdays refresh nightly; allow a
+# weekend plus the delay GitHub's scheduler adds before complaining.
+_age = datetime.now(timezone.utc) - book.as_of
+if _age > timedelta(hours=80):
+    st.warning(
+        f"**Stale data.** The last refresh was {_age.days}d {_age.seconds // 3600}h ago "
+        f"({book.as_of:%Y-%m-%d %H:%M UTC}). Check the *Daily refresh* workflow in GitHub Actions."
+    )
 
 stats = book.curve_stats
 cols = st.columns(5)

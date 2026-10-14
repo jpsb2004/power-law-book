@@ -7,9 +7,15 @@ name: Daily refresh
 # (16:00 ET), by which point every exchange in the book has settled. Scheduled
 # runs can start late when GitHub's queue is busy; harmless here, since the job
 # snapshots a daily close rather than an intraday moment.
+#
+# Not on the hour: the top of the hour is when GitHub's scheduler is busiest,
+# and in practice runs scheduled at 22:00 started between 00:44 and 02:46 UTC
+# the next day, while Seoul and Taipei were already trading. An off-peak minute
+# starts closer to time; fetchSeries(completedOnly) handles the runs that are
+# still late.
 on:
   schedule:
-    - cron: "0 22 * * 1-5"
+    - cron: "17 22 * * 1-5"
   workflow_dispatch: # trigger a refresh by hand from the Actions tab
 
 permissions:
@@ -50,6 +56,11 @@ jobs:
       # bucket weights must still land on 38/32/30.
       - name: Check book invariants
         run: node scripts/check-book.mjs
+
+      # The maths the page publishes. A failing test stops the run before it
+      # can replace a correct snapshot with one built on broken code.
+      - name: Unit tests
+        run: npm test
 
       - name: Fetch and validate daily closes
         id: refresh
