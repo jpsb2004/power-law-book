@@ -1,0 +1,65 @@
+{
+  "asOf": "2026-10-14 19:08 UTC",
+  "snapshotAsOf": "2026-10-14 19:08 UTC",
+  "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
+  "rows": [
+    {
+      "ticker": "AMD",
+      "independent": {
+        "ytd": 170.967,
+        "ret1y": 177.6514,
+        "vol": 67.3646
+      },
+      "pipeline": {
+        "ytd": 170.967,
+        "ret1y": 177.6514,
+        "vol": 67.3646
+      },
+      "diffPp": {
+        "ytd": 0.0,
+        "ret1y": 0.0,
+        "vol": 0.0
+      },
+      "lastClose": "2026-10-13"
+    },
+    {
+      "ticker": "PETR4.SA",
+      "independent": {
+        "ytd": 117.8908,
+        "ret1y": 127.7337,
+        "vol": 30.4573
+      },
+      "pipeline": {
+        "ytd": 117.8907,
+        "ret1y": 127.7342,
+        "vol": 30.4573
+      },
+      "diffPp": {
+        "ytd": 0.0001,
+        "ret1y": -0.0004,
+        "vol": 0.0
+      },
+      "lastClose": "2026-10-13"
+    },
+    {
+      "ticker": "GLD",
+      "independent": {
+        "ytd": -4.1704,
+        "ret1y": 0.2311,
+        "vol": 29.678
+      },
+      "pipeline": {
+        "ytd": -4.1704,
+        "ret1y": 0.2311,
+        "vol": 29.678
+      },
+      "diffPp": {
+        "ytd": 0.0,
+        "ret1y": 0.0,
+        "vol": -0.0
+      },
+      "lastClose": "2026-10-13"
+    }
+  ],
+  "maxAbsDiffPp": 0.0004
+}

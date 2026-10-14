@@ -17,6 +17,20 @@ on:
   schedule:
     - cron: "17 22 * * 1-5"
   workflow_dispatch: # trigger a refresh by hand from the Actions tab
+  # A merge that changes the code or the book publishes at once, instead of
+  # leaving the page on the old code until the next scheduled run. The bot's
+  # own data commits carry [skip ci] and do not retrigger it.
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "page/**"
+      - "scripts/**"
+      - "research/**"
+      - "data/positions.json"
+      - "data/scenarios.json"
+      - "app.py"
+      - ".github/workflows/daily_refresh.yml"
 
 permissions:
   contents: write # commit the refreshed snapshot + history back
