@@ -1190,7 +1190,7 @@ function renderRefreshLog() {
         "</td>" +
         '<td class="n' + (failed ? " neg" : "") + '">' + r.priced + "/" + total + "</td>" +
         '<td class="n" style="color:var(--ink-3)">' +
-          (bm && !rebalanced ? escape(bm.ticker) + " " + pct(bm.move, 1) : "—") + "</td>" +
+          (bm && !rebalanced && Math.abs(bm.move) >= 0.05 ? escape(bm.ticker) + " " + pct(bm.move, 1) : "—") + "</td>" +
         "</tr>";
     }).join("") + "</tbody>";
 
