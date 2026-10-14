@@ -4,6 +4,244 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-2 Backtest vs track record: labels, live record, change log
+
+**Decision (author):** the live record's inception is the first scheduled
+refresh after the P0 changes are merged.
+
+**What changed**
+
+- KPI row (page), dashboard caption and PDF cover now say **"Hindsight
+  backtest — not a track record"**; the PDF box is "Backtest metrics" and adds
+  the Sharpe ratio; the 1-year card names the rule and "gross".
+- `lib/analytics.js` — `extendTrack`: chain-linked, forward-only record.
+  Appends every day all venues have closed (the earliest last close among
+  lines no more than five days stale), linked by that day's move in the
+  current curve; never revises a recorded day; records the book fingerprint
+  on each point.
+- `scripts/refresh.mjs` — writes `data/track.json` after a validated refresh;
+  the workflow commits it alongside the snapshot. No file is committed from
+  this branch: the first CI run after merge creates it and sets the inception.
+- Page: a "Live since …" tile closes the KPI row (with "starts with the next
+  scheduled refresh" until then); a new **Change log** section. Dashboard and
+  PDF show the same.
+- `data/positions.json` — `book_changes`: six dated entries (composition and
+  method), the ones before 2026-10-14 reconstructed from git history.
+- Stale counts fixed: PDF, dashboard and docs said "six currencies" and "a
+  fund with three weeks of history"; now computed (five currencies; RARA11.SA
+  with ~12 weeks).
+- Tests: `tests/track.test.mjs` (5 cases); `check-page.mjs` checks the flag,
+  the live tile and the change log.
+
+**Numbers:** none of the backtest figures change in this item. The live
+record has no return until its second recorded day.
+
+## 2026-10-14 — P0-5 Monthly rebalancing as the base case; buy-and-hold and net-of-cost series; reconciliation
+
+**What changed**
+
+- `lib/analytics.js` — `rebalancedIndex`: holdings tracked in value, rebalanced
+  to target on the first session of each period (`daily` / `monthly` /
+  `quarterly` / `never` = buy and hold), optionally net of costs; with
+  `daily` and no costs it reproduces the old index exactly (tested).
+  `dividendYields` reads each ex-date from the adjusted vs unadjusted close;
+  `fetchSeries` now keeps the unadjusted close (`p`) for that.
+- `data/positions.json` — `rebalance.base_case: "monthly"` and
+  `cost_assumptions` (trading 5 bps US / 15 bps elsewhere per dollar traded,
+  FX spread 10 bps on non-USD trades, withholding by listing currency: USD 30,
+  BRL 0, SAR 5, TWD 21, GBP 0), with their caveats. All stated assumptions.
+- `lib/build-snapshot.js` — the headline and every book-like curve (bucket
+  curves, the index re-run, the 60/40 blend) use the base rule;
+  `snapshot.rebalancing` carries five variants per view and the
+  reconciliation. `INDEX_METHOD` bumped, so the refresh log shows "rebased".
+- `page/template.html` — table of variants and a four-step reconciliation in
+  §Performance; KPI note, method notes and benchmark caption name the rule.
+- `app.py` — the same table in the Benchmarks tab. `README.md` updated.
+- Tests: `tests/rebalance.test.mjs` (5 cases); `check-page.mjs` covers it.
+
+**Numbers** — same market data; FX-hedged unless stated:
+
+| | Before (daily) | After (monthly base case) |
+|---|---|---|
+| 1y / YTD | +34.91% / +42.53% | +33.88% / +42.23% |
+| Unhedged 1y / YTD | +36.62% / +44.33% | +35.62% / +44.06% |
+| Volatility / max DD | 24.53% / −14.33% | 24.42% / −14.20% |
+| Index level (unhedged / hedged) | 136.62 / 134.91 | 135.62 / 133.88 |
+| Sharpe | 1.19 | 1.17 |
+| Excess vs VGT / ACWI / 60/40 | −1.4 / +16.4 / +24.9 pp | −2.4 / +15.4 / +24.0 pp |
+| IR vs VGT / ACWI / 60/40 | 0.00 / 1.02 / 1.37 | −0.06 / 0.96 / 1.33 |
+
+Variants over the window (hedged): daily +34.9% (309 rebalances, 241%
+turnover/yr); monthly +33.9% (12, 56%); buy and hold +31.7% (15%, the one
+trade being RARA11's listing). Net of costs: monthly +33.2% (trading −0.22pp,
+withholding −0.47pp); buy and hold +31.1%.
+
+Reconciliation: weighted sum of line returns +31.7% = buy and hold +31.7%;
+monthly rebalancing adds +2.2pp; daily adds a further +1.0pp. The review's
+rough estimate of a ~6pp gap compared a weighted YTD column with the headline
+YTD; measured over one window, the rebalancing effect is ~3pp.
+
+## 2026-10-14 — P0-4 Sizing rule stated; risk contribution table
+
+**Decision (author):** keep the weights; state the rule as near equal-weight
+by design instead of "weight is the only real expression of conviction".
+
+**What changed**
+
+- `page/template.html` — §Allocation now opens with the sizing rule in one
+  sentence, and adds "Equal capital is not equal risk": share of the book's
+  variance per bucket and per line, risk ÷ weight, weekly vol and correlation
+  to the book, with a computed lead sentence and method note.
+- `lib/analytics.js` — `riskContributions`: Euler decomposition, weight ×
+  cov(line, book) ÷ var(book), on weekly log returns; lines under 26 weeks of
+  history are flagged `short`.
+- `lib/build-snapshot.js` — `snapshot.risk` for both the unhedged and hedged
+  views, with bucket totals.
+- `app.py` — the same table in the Allocation tab; sizing sentence updated.
+- `scripts/make_pdf.py` — one computed sentence in §2 on capital vs risk.
+- Tests: 2 cases in `tests/risk.test.mjs`; `check-page.mjs` covers the block.
+
+**Numbers** (FX-hedged view, 52 weeks to 2026-10-13):
+
+| Bucket | Weight | Share of risk | Risk ÷ weight |
+|---|---|---|---|
+| Energy | 38% | 48.6% | 1.28 |
+| Compute | 32% | 40.4% | 1.26 |
+| Materials | 5% | 9.4% (11 weeks, indicative) | 1.88 |
+| Ballast | 25% | 5.0% | 0.20 |
+
+Largest lines: CRWV 17.0% of risk on 5% of capital, NBIS 15.7%, URA 10.2%.
+Negative (diversifying): PETR4.SA −2.8%, 2222.SR −0.2%, XLP −0.1%. Shares sum
+to 103% because RARA11.SA's covariance covers 11 weeks only.
+
+**For the author:** a few memo texts in `data/positions.json` still argue from
+conviction-sized weights that the book does not hold — AMD ("kept smaller than
+a conviction bet would be", at the same 5% as its peers), NLR ("conviction is
+high enough to accept concentration") and LB ("the hinge of the whole book",
+at 5%). Left as written; they are the author's voice.
+
+## 2026-10-14 — P0-1 Benchmarks and risk-adjusted metrics; volatility annualisation fix
+
+**What changed**
+
+- `lib/holdings.js` — `BENCHMARKS` (VGT; ACWI; 60/40 ACWI/AGG, rebalanced
+  daily), `MARKET = ACWI`, `RISK_FREE = SGOV`.
+- `lib/analytics.js` — `riskStats` (return, annualised return, vol, Sharpe and
+  Sortino in excess of the T-bill fund read on the series' own calendar, max
+  drawdown, weekly beta to the market), `relativeStats` (excess return,
+  weekly tracking error, information ratio, beta with t-stat), `windowed`
+  (shared window by calendar date, rebased to 100), `periodsPerYear`.
+- **Fix:** `annualisedVol` annualised every series with `sqrt(252)`. The book
+  curve has ~309 observations a year (union of seven venues' calendars), so
+  its volatility was understated. It now uses each series' own frequency.
+  Cross-check: the hedged book on a single New York calendar (250
+  observations) gives 24.6%; lag-1 autocorrelation of the union series is
+  −0.02, so the extra observations are real variance.
+- `lib/build-snapshot.js` — `buildBenchmarks` writes `snapshot.benchmarks`.
+- `page/template.html` — new section "Against the benchmarks": chart with a
+  dashed, end-labelled line per benchmark; absolute and relative tables; the
+  reading below them is computed (best Sharpe, which IRs clear 2, beta).
+- `app.py` — "Benchmarks" tab with the same two tables.
+- Tests: `tests/risk.test.mjs` (8 cases); `check-page.mjs` checks the section.
+
+**Numbers** — window 2025-10-14 → 2026-10-13, USD total return:
+
+| Series | Return | Vol | Sharpe | Sortino | β ACWI | Max DD |
+|---|---|---|---|---|---|---|
+| Book, FX-hedged | +34.9% | 24.6% | 1.19 | 1.79 | 1.26 | −14.3% |
+| Book, unhedged | +36.9% | 24.8% | 1.24 | 1.87 | 1.28 | −14.4% |
+| VGT | +36.3% | 24.5% | 1.24 | 1.84 | 1.47 | −16.4% |
+| ACWI | +18.5% | 13.9% | 1.03 | 1.53 | 1.00 | −9.7% |
+| 60/40 | +10.0% | 9.3% | 0.68 | 0.98 | 0.66 | −6.6% |
+
+Hedged book against each: VGT −1.4pp (TE 13.1%, IR 0.00); ACWI +16.4pp (TE
+13.5%, IR 1.02); 60/40 +24.9pp (TE 15.4%, IR 1.37). No IR clears 2.
+Risk-free (SGOV) earned 3.7% annualised.
+
+| Volatility | Before | After |
+|---|---|---|
+| Book, hedged (KPI) | 22.15% | 24.53% |
+| Book, unhedged | 22.39% | 24.81% |
+| Largest change on a single position | — | 2357.TW 42.3% → 41.4% |
+
+## 2026-10-14 — P0-6 Every line investable: EWY replaces ^KS11
+
+**What changed**
+
+- `data/positions.json` — `^KS11` is `status: "substituted"` (kept as history,
+  with `substituted_by`, `substituted_on`, `substitution_reason`); `EWY` (iShares
+  MSCI South Korea ETF, NYSE Arca, USD) is active in Compute at the same 4%, with
+  `^KS11` as its `reference` index.
+- `lib/build-snapshot.js` — `buildReferences` measures a held fund against its
+  reference index: the index is converted to USD date by date, tracking keeps
+  the one-session Seoul/New York lag, and the book is re-run holding the index
+  instead. The old index→proxy path is kept for any future index line.
+- `page/template.html` — the section now says the book **holds** EWY and reports
+  the **difference in exposure** (was "tracking difference"/"substitution
+  cost"); the method note reads "Korea is held through a fund, not the index".
+- `research/scenarios.py`, `research/feeds.py`, `scripts/make_pdf.py`,
+  `README.md` — EWY in place of ^KS11. The scenario shocks were set for the
+  index and carried over unchanged; the module docstring says so.
+
+**Numbers** — same market data, P0-3 code vs P0-6 code:
+
+| | Before (^KS11 held) | After (EWY held) |
+|---|---|---|
+| Unhedged YTD / 1y | +43.85% / +36.09% | +44.33% / +36.62% |
+| Hedged YTD / 1y | +41.70% / +34.08% | +42.53% / +34.91% |
+| Hedged vol / max DD | 21.21% / −14.46% | 22.15% / −14.33% |
+| Unhedged index level | 136.09 | 136.62 (log shows "rebased") |
+| Currencies in the book | 6 | 5 (KRW leaves) |
+| Book β to tech (VGT) / R² | 0.82 / 0.65 | 0.85 / 0.67 |
+| Compute β to tech / R² | 1.21 / 0.78 | 1.28 / 0.81 |
+| EWY vs ^KS11, USD: TE / ρ / β | 30.1% / 0.81 / 0.93 | unchanged |
+| EWY − ^KS11, YTD / 1y | +13.0pp / +26.3pp | unchanged |
+| Book-level difference, YTD / 1y | +0.48pp / +0.53pp | unchanged (sign now "held minus index") |
+
+Volatility and tech beta rise because EWY trades in New York hours alongside
+the rest of the book; the Seoul close was partly out of sync with it, which
+damped measured co-movement.
+
+## 2026-10-14 — P0-3 Bucket classification: RARA11.SA moves to a Materials bucket
+
+**Decision (author):** keep Energy at 38% and Compute at 32%; move RARA11.SA out
+of Ballast into a new **Materials** bucket (5%); Ballast becomes 25%. NBIS and
+CRWV stay in Energy with their existing caveat. No position weight changes, so
+the index, returns, volatility and drawdown are unchanged.
+
+**What changed**
+
+- `data/positions.json` — `bucket_targets` now Energy 38 / Compute 32 /
+  Materials 5 / Ballast 25; RARA11.SA `bucket: "materials"`; its falsification
+  note and PDF rationale no longer say "this is not ballast".
+- `lib/holdings.js`, `research/ontology.py`, `lib/holdings.d.ts`, `lib/quotes.ts`
+  — fourth sleeve, numeral III; Ballast becomes IV. Python and the PDF read the
+  bucket order from `ontology.BUCKET_ORDER` instead of hand-kept lists.
+- Colour: Materials `#65389F` (light) / `#8156C0` (dark), chosen with the
+  dataviz palette validator against the three existing hues (all pairs; every
+  check passes, worst CVD ΔE 10.0 light / 9.2 dark).
+- `page/template.html` — prose no longer assumes three buckets; the factor
+  table's thesis column reads "ρ to I–III" from the sleeve list; a bucket block
+  too narrow for its heading shows the numeral only (the 5% heading collided
+  with Ballast's).
+- `research/scenarios.py` — the capex note's "ballast is only 30%" is filled
+  from live weights.
+- `research/discipline.py` — **draft** Materials entry rule, for the author to
+  edit.
+- `scripts/make_pdf.py`, `app.py`, `README.md` — four buckets everywhere.
+
+**Numbers** — both snapshots built from the same market data minutes apart:
+
+| | Before | After |
+|---|---|---|
+| Bucket weights | Energy 38 / Compute 32 / Ballast 30 | Energy 38 / Compute 32 / Materials 5 / Ballast 25 |
+| Hedged YTD / 1y / vol | +41.70% / +34.08% / 21.21% | unchanged |
+| Ballast β tech (t) | 0.17 (2.1) | 0.14 (1.9) |
+| Ballast β energy (t) | 0.00 (0.0) | 0.00 (0.1) |
+| Ballast R² | 0.10 | 0.09 |
+| Ballast ρ to rest of book | 0.29 (to Energy + Compute) | 0.28 (to Energy + Compute + Materials) |
+| Materials regression | — | 11 weeks of history, too short to regress |
+
 ## 2026-10-14 — D-1 Data integrity: stale final bars, intraday prints, date and log labels
 
 Covers review items P2 "Date/number mismatches" and P2 "Suspicious data point",

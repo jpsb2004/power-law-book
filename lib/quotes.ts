@@ -1,10 +1,10 @@
 import { cacheLife } from "next/cache";
-import { HOLDINGS, FX_PAIRS, SLEEVES, type Holding, type SleeveId } from "./holdings";
+import { HOLDINGS, FX_PAIRS, SLEEVES, BASE_REBALANCE, type Holding, type SleeveId } from "./holdings";
 import {
   fetchSeries,
   describe,
   toUsdSeries,
-  portfolioIndex,
+  rebalancedIndex,
   type Point,
   type Stats,
 } from "./analytics";
@@ -143,7 +143,11 @@ export async function getBook(): Promise<Book> {
   // Positions without a series are dropped from the curve rather than held
   // flat -- a constant would damp measured volatility and flatter the book.
   const priced = positions.filter((p) => p.usdPoints.length > 1);
-  const curve = portfolioIndex(priced.map((p) => ({ weight: p.weight, points: p.usdPoints })));
+  // Same rule as the published headline (see build-snapshot bookIndex).
+  const curve = rebalancedIndex(
+    priced.map((p) => ({ weight: p.weight, points: p.usdPoints })),
+    { rebalance: BASE_REBALANCE }
+  ).points;
 
   return {
     asOf: Date.now(),
@@ -158,7 +162,7 @@ export async function getBook(): Promise<Book> {
   };
 }
 
-export const sleeveOrder: SleeveId[] = ["energy", "compute", "ballast"];
+export const sleeveOrder: SleeveId[] = ["energy", "compute", "materials", "ballast"];
 
 export const sleeveWeightOf = (id: SleeveId) =>
   HOLDINGS.filter((h) => h.sleeve === id).reduce((a, h) => a + h.weight, 0);

@@ -123,6 +123,64 @@ if (goodProxy) {
   fail.push("proxy section is visible without proxy data");
 }
 
+// Benchmarks: one table row per series (both book views plus each benchmark),
+// one relative row per benchmark for the view on screen, and a chart line each.
+const benchRows = (snap.benchmarks?.rows ?? []).filter((r) => r.stats);
+const benchSection = document.getElementById("bench-section");
+if (benchRows.length) {
+  if (benchSection.hidden) fail.push("snapshot carries benchmarks but the benchmark section is hidden");
+  const got = document.querySelectorAll("#bench-tbl tbody tr").length;
+  if (got !== benchRows.length) fail.push(`benchmark table rendered ${got} rows for ${benchRows.length} series`);
+  const benches = benchRows.filter((r) => r.kind === "benchmark").length;
+  const rel = document.querySelectorAll("#bench-rel-tbl tbody tr").length;
+  if (rel !== benches) fail.push(`relative table rendered ${rel} rows for ${benches} benchmarks`);
+  const paths = document.querySelectorAll("#bench-chart svg path").length;
+  if (paths !== benches + 1) fail.push(`benchmark chart drew ${paths} lines, expected ${benches + 1}`);
+} else if (!benchSection.hidden) {
+  fail.push("benchmark section is visible without benchmark data");
+}
+
+// Backtest vs record: the flag sits on the KPI row, the live tile closes it.
+if (!document.querySelector("#stats .flag")?.textContent.includes("not a track record")) {
+  fail.push("KPI row is missing the hindsight-backtest flag");
+}
+if (!document.querySelector("#stats .stat.live")) fail.push("KPI row is missing the live-record tile");
+
+// Change log: one row per entry in positions.json.
+const changes = (await import("../lib/holdings.js")).BOOK_CHANGES.length;
+const changesSection = document.getElementById("changes-section");
+if (changes) {
+  if (changesSection.hidden) fail.push("positions.json carries book changes but the change log is hidden");
+  const got = document.querySelectorAll("#changes-tbl tbody tr").length;
+  if (got !== changes) fail.push(`change log rendered ${got} rows for ${changes} entries`);
+}
+
+// Rebalancing variants and the reconciliation that ties them together.
+const rebalRows = snap.rebalancing?.usd?.rows?.length ?? 0;
+const rebalBlock = document.getElementById("rebal-block");
+if (rebalRows) {
+  if (rebalBlock.hidden) fail.push("snapshot carries rebalancing variants but the block is hidden");
+  const got = document.querySelectorAll("#rebal-tbl tbody tr").length;
+  if (got !== rebalRows) fail.push(`rebalancing table rendered ${got} rows for ${rebalRows} variants`);
+  if (document.querySelectorAll("#recon-tbl tbody tr").length !== 4) fail.push("reconciliation did not render 4 steps");
+} else if (!rebalBlock.hidden) {
+  fail.push("rebalancing block is visible without data");
+}
+
+// Risk contribution: one row per line with enough history, one per bucket.
+const riskRows = (snap.risk?.usd?.rows ?? []).filter((r) => !r.insufficient).length;
+const riskBlock = document.getElementById("risk-block");
+if (riskRows) {
+  if (riskBlock.hidden) fail.push("snapshot carries risk contributions but the risk block is hidden");
+  const got = document.querySelectorAll("#risk-tbl tbody tr").length;
+  if (got !== riskRows) fail.push(`risk table rendered ${got} rows for ${riskRows} lines`);
+  const buckets = snap.risk.usd.buckets.length;
+  const gotB = document.querySelectorAll("#risk-bucket-tbl tbody tr").length;
+  if (gotB !== buckets) fail.push(`risk bucket table rendered ${gotB} rows for ${buckets} buckets`);
+} else if (!riskBlock.hidden) {
+  fail.push("risk block is visible without risk data");
+}
+
 const factorRows = snap.factors?.rows?.length ?? 0;
 const factorSection = document.getElementById("factor-section");
 if (factorRows) {

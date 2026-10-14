@@ -1,4 +1,4 @@
-export type SleeveId = "energy" | "compute" | "ballast";
+export type SleeveId = "energy" | "compute" | "materials" | "ballast";
 
 export interface Sleeve {
   id: SleeveId;
@@ -62,6 +62,7 @@ export declare const FX_PAIRS: Record<string, string | null>;
 export declare const BASE_CURRENCY: string;
 export declare const HEDGE: { asOf: string | null; ratesPct: Record<string, number>; sources: Record<string, string> };
 export declare const FACTORS: Factor[];
+export declare const BASE_REBALANCE: string;
 export declare function totalWeight(): number;
 export declare function bySleeve(id: SleeveId): Holding[];
 export declare function sleeveWeight(id: SleeveId): number;

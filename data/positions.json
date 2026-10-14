@@ -4,7 +4,58 @@
   "bucket_targets": {
     "energy": 38,
     "compute": 32,
-    "ballast": 30
+    "materials": 5,
+    "ballast": 25
+  },
+  "book_changes_note": "Every change to what the book holds, its weights or the method that turns them into an index. Entries before 2026-10-14 are reconstructed from the repository history. Add a line here with every future change; the published page and the PDF render this list.",
+  "book_changes": [
+    {
+      "date": "2026-08-12",
+      "kind": "composition",
+      "change": "Book rebuilt as 18 positions in three buckets (Energy 38 / Compute 32 / Ballast 30), equal weight within each bucket. Added NBIS, CRWV, AMD, TSM, VGT, RARA11.SA, GLD and JPM; dropped a privately marked holding; replaced a dated gold future with GLD.",
+      "why": "Every line publicly priced; spot-backed gold shares remove the roll and expiry."
+    },
+    {
+      "date": "2026-10-08",
+      "kind": "method",
+      "change": "Index switched from weight × price to compounded weight-averaged daily returns; series switched to dividend-adjusted (total-return) closes.",
+      "why": "The price-weighted version let a $400 GLD share outvote a $5 KOSPI point regardless of weight; price-only closes read a T-bill fund as flat."
+    },
+    {
+      "date": "2026-10-08",
+      "kind": "composition",
+      "change": "SGOV and XLP added to Ballast at 5% each; GLD, AVDV, JPM and RARA11.SA cut to 5% so Ballast stayed at 30% (18 → 20 positions).",
+      "why": "The factor test showed Ballast still moving with the thesis. XLP rose 7.5% in the book's worst stretch (2 Jun – 29 Jul 2026); SGOV has had no meaningful drawdown."
+    },
+    {
+      "date": "2026-10-14",
+      "kind": "composition",
+      "change": "RARA11.SA moved from Ballast to a new Materials bucket (5%); Ballast now 25%.",
+      "why": "A rare-earth basket falls with the book rather than against it, so it was never ballast."
+    },
+    {
+      "date": "2026-10-14",
+      "kind": "composition",
+      "change": "EWY replaced ^KS11 at 4% in Compute.",
+      "why": "Every line must be investable. The KOSPI is kept as EWY's reference index."
+    },
+    {
+      "date": "2026-10-14",
+      "kind": "method",
+      "change": "Headline rebalanced monthly instead of daily; volatility annualised at each series' own observation frequency.",
+      "why": "Daily rebalancing harvests a premium no real book collects at zero cost; the union-calendar curve has ~309 observations a year, not 252."
+    }
+  ],
+  "rebalance": {
+    "base_case": "monthly",
+    "note": "The headline curve rebalances to target weight on the first session of each month. Daily rebalancing and buy-and-hold are shown beside it for comparison."
+  },
+  "cost_assumptions": {
+    "as_of": "2026-10-14",
+    "note": "Stated assumptions for the net-of-cost series, not quotes. trade_bps is commission plus half the bid-ask spread per dollar traded, by listing currency. fx_spread_bps is charged on every dollar traded in a non-USD line. withholding_pct is charged on each distribution as if held by a non-US individual investor without treaty relief; interest-related dividends from US T-bill funds can be exempt in practice, so SGOV's drag is overstated, and Brazilian JCP (15%) is ignored. Fund expense ratios are already inside fund prices and are not charged again.",
+    "trade_bps": { "USD": 5, "default": 15 },
+    "fx_spread_bps": 10,
+    "withholding_pct": { "USD": 30, "BRL": 0, "SAR": 5, "TWD": 21, "GBP": 0 }
   },
   "fx_hedge": {
     "note": "Policy rates used to model a rolled FX hedge back to USD. Held flat across the window; they stand in for forward points, so cross-currency basis and onshore/offshore gaps are ignored. Update with the as_of date when a central bank moves.",
@@ -315,11 +366,44 @@
           "clock_lag_sessions": 1
         }
       },
-      "status": "active",
+      "status": "substituted",
+      "substituted_by": "EWY",
+      "substituted_on": "2026-10-14",
+      "substitution_reason": "Every line in the book must be investable. The index stays as the reference EWY is measured against.",
       "tradability": "index",
       "memo": {
         "name": "KOSPI Composite Index",
         "rationale": "An index proxy for Korea's memory manufacturing exposure to the buildout, avoiding having to pick between the two dominant memory makers."
+      }
+    },
+    {
+      "ticker": "EWY",
+      "name": "iShares MSCI South Korea ETF",
+      "bucket": "compute",
+      "exchange": "NYSE Arca",
+      "currency": "USD",
+      "weight": 4,
+      "instrument_type": "ETF",
+      "factor_role": "Country-level exposure to memory, held through the MSCI Korea fund. HBM pricing runs through Korean national accounts, and the market carries a persistent governance discount that is finally being addressed.",
+      "falsification_metric": "It is not the KOSPI: MSCI's 25/50 caps hold Samsung and SK Hynix below their index weight, and the fund trades in New York hours against a Seoul close, so a year can open a double-digit gap to the Korean market in either direction.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": "^KS11",
+        "tracking_notes": "MSCI Korea 25/50 caps single names, so Samsung and SK Hynix are held below their KOSPI weight; EWY also trades in New York hours against a Seoul close, and carries a 0.59% expense ratio.",
+        "expense_ratio_pct": 0.59,
+        "reference": {
+          "ticker": "^KS11",
+          "name": "KOSPI Composite",
+          "venue": "KRX",
+          "currency": "KRW",
+          "clock_lag_sessions": 1
+        }
+      },
+      "status": "active",
+      "memo": {
+        "name": "iShares MSCI South Korea ETF",
+        "rationale": "Korea's memory manufacturing exposure to the buildout, held through the country fund rather than by picking between the two dominant memory makers. It replaced the KOSPI index itself on 14 October 2026 so that every line in the book can actually be bought."
       }
     },
     {
@@ -413,13 +497,13 @@
     {
       "ticker": "RARA11.SA",
       "name": "Investo MVIS Global Rare Earth & Strategic Metals",
-      "bucket": "ballast",
+      "bucket": "materials",
       "exchange": "B3 São Paulo",
       "currency": "BRL",
       "weight": 5,
       "instrument_type": "ETF",
       "factor_role": "The materials upstream of everything else here: magnets, motors, turbines. Exposure to export controls on rare earths, which is the supply chokepoint the compute bucket cannot design around.",
-      "falsification_metric": "This is not ballast. It is a concentrated, policy-driven, high-beta commodity-equity basket that will likely fall with the rest of the book rather than against it — and it is a thin BRL listing carrying currency risk on top.",
+      "falsification_metric": "A concentrated, policy-driven, high-beta commodity-equity basket that will likely fall with the rest of the book rather than against it — and it is a thin BRL listing carrying currency risk on top.",
       "investable": {
         "br_retail": null,
         "blocker": null,
@@ -429,7 +513,7 @@
       "status": "active",
       "memo": {
         "name": "Rare Earths / Critical Minerals ETF",
-        "rationale": "The other classification stretch I flag openly: a concentrated, policy-driven basket that tracks the same technology-materials cycle as the rest of the book, so in most states it does less true ballasting than its bucket label implies. The exception is an export-control shock, where it is the one line in the book that re-rates upward. It also traded in only about {coverage} of the measured window, which limits how much its long-horizon return figures should be trusted."
+        "rationale": "Held in its own Materials bucket rather than in Ballast: a concentrated, policy-driven basket that tracks the same technology-materials cycle as the rest of the book, so in most states it falls with the book rather than against it. The exception is an export-control shock, where it is the one line in the book that re-rates upward. It also traded in only about {coverage} of the measured window, which limits how much its long-horizon return figures should be trusted."
       }
     },
     {

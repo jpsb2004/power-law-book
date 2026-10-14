@@ -40,6 +40,10 @@ export declare function correlation(
 ): { rho: number; n: number } | null;
 export declare function toUsdSeries(points: Point[], fxPoints: Point[], invert: boolean): Point[];
 export declare function portfolioIndex(legs: { weight: number; points: Point[] }[]): Point[];
+export declare function rebalancedIndex(
+  legs: { key?: string; weight: number; points: Point[] }[],
+  opts?: { rebalance?: string; costs?: boolean }
+): { points: Point[]; rebalances: number; turnoverPctPerYear: number; tradingCostPct: number; withholdingPct: number };
 export declare function describe(points: Point[]): Stats;
 export declare function hedgedSeries(
   points: Point[],

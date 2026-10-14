@@ -24,7 +24,7 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { buildSnapshot, validateSnapshot } from "../lib/build-snapshot.js";
-import { INDEX_METHOD } from "../lib/analytics.js";
+import { INDEX_METHOD, extendTrack } from "../lib/analytics.js";
 
 const run = promisify(execFile);
 const root = new URL("../", import.meta.url);
@@ -112,6 +112,29 @@ async function main() {
   await writeFile(
     path("data/history.json"),
     JSON.stringify(history.slice(-HISTORY_LIMIT), null, 2)
+  );
+
+  // The live track record: chain-linked forward from its inception, never
+  // revised, and never truncated -- unlike the backtest curve, which is the
+  // current book replayed over the past year. Created by the first run that
+  // finds no file; that run's last completed date is the inception.
+  const trackBefore = await readJson(path("data/track.json"));
+  // The last date every venue has closed: the earliest last close among the
+  // lines, ignoring any more than five days stale (the validator flags those).
+  const bars = next.positions.map((p) => p.lastBar).filter(Boolean).sort();
+  const newest = bars.at(-1);
+  const upTo = bars.find((d) => (Date.parse(newest) - Date.parse(d)) / 864e5 <= 5) ?? null;
+  const track = extendTrack(
+    trackBefore,
+    { usd: next.curve, hedged: next.curveHedged },
+    bookFingerprint(next.positions),
+    { upTo }
+  );
+  await writeFile(path("data/track.json"), JSON.stringify(track, null, 2));
+  log(
+    trackBefore
+      ? `track +${track.points.length - trackBefore.points.length} day(s) since inception ${track.inception}`
+      : `track started — inception ${track.inception}`
   );
 
   const step = async (label, script) => {

@@ -3,8 +3,8 @@ Stress scenarios.
 
 These are **assumptions, not measurements.** Each scenario is a hand-specified
 shock in percent applied to individual positions, aggregated by weight. No
-covariance matrix is estimated, because a year of daily data across six
-currencies and a fund with three weeks of history cannot support one — a
+covariance matrix is estimated, because a year of daily data across several
+currencies and a fund with a few months of history cannot support one — a
 correlation matrix built on that would look rigorous and be noise.
 
 Sensitivities are attached at position level rather than bucket level, because
@@ -13,13 +13,17 @@ miner and bad for a neocloud, and both sit in Energy.
 
 Every number below is a judgement. They are stated in one table so they can be
 argued with, which is the point.
+
+The Korea line's shocks were set for ^KS11 and carried over unchanged when the
+book swapped it for EWY (14 Oct 2026). EWY is in dollars, so a won move now
+lands inside the shock; revisit them rather than reading them as re-estimated.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .ontology import Book, Entity
+from .ontology import BUCKET_LABELS, BUCKET_ORDER, Book, Entity
 
 
 @dataclass(frozen=True)
@@ -57,7 +61,7 @@ GRID_BOTTLENECK = Scenario(
         "TSM": -8.0,
         "AMD": -10.0,
         "2357.TW": -12.0,
-        "^KS11": -7.0,
+        "EWY": -7.0,
         "VGT": -6.0,
         "AINF.L": -9.0,
         "PLTR": -5.0,
@@ -86,7 +90,7 @@ CAPEX_RETRENCHMENT = Scenario(
         "AMD": -30.0,
         "TSM": -25.0,
         "2357.TW": -28.0,
-        "^KS11": -22.0,
+        "EWY": -22.0,
         "AINF.L": -30.0,
         "VGT": -20.0,
         "PLTR": -32.0,
@@ -107,7 +111,9 @@ CAPEX_RETRENCHMENT = Scenario(
         "SGOV": 0.0,
         "XLP": 6.0,
     },
-    note="The book's central risk. Note ballast is only 30% — it cushions, it does not rescue.",
+    # {ballast} is filled from the live weights: this note said "30%" by hand
+    # and would have gone stale the day Ballast was resized.
+    note="The book's central risk. Note ballast is only {ballast:.0f}% — it cushions, it does not rescue.",
 )
 
 GEOPOLITICAL_SHOCK = Scenario(
@@ -121,7 +127,7 @@ GEOPOLITICAL_SHOCK = Scenario(
         # Not a drawdown — an impairment. Three positions share one failure.
         "TSM": -45.0,
         "2357.TW": -50.0,
-        "^KS11": -35.0,
+        "EWY": -35.0,
         "AMD": -30.0,
         "VGT": -22.0,
         "AINF.L": -28.0,
@@ -144,7 +150,7 @@ GEOPOLITICAL_SHOCK = Scenario(
         "SGOV": 0.0,
         "XLP": -8.0,
     },
-    note="Concentrated single-point risk: TSM, 2357.TW and ^KS11 are one bet, not three.",
+    note="Concentrated single-point risk: TSM, 2357.TW and EWY are one bet, not three.",
 )
 
 SCENARIOS = {s.key: s for s in (GRID_BOTTLENECK, CAPEX_RETRENCHMENT, GEOPOLITICAL_SHOCK)}
@@ -175,13 +181,18 @@ def apply_scenario(book: Book, scenario: Scenario) -> dict:
         )
 
     rows.sort(key=lambda r: r["contribution_pct"])
-    by_bucket = {}
+    # Seeded in display order, so every renderer lists buckets the same way
+    # regardless of the order positions appear in the roster.
+    by_bucket = {BUCKET_LABELS[k]: 0.0 for k in BUCKET_ORDER if book.by_bucket(k)}
     for entity in book.entities:
         by_bucket.setdefault(entity.bucket_label, 0.0)
         by_bucket[entity.bucket_label] += scenario.shock_for(entity) * entity.weight / 100.0
 
     return {
         "scenario": scenario,
+        # The note with any live figures filled in; renderers show this, not
+        # `scenario.note`, which may carry placeholders.
+        "note": scenario.note.format(ballast=book.bucket_weight("ballast")),
         "portfolio_pct": total,
         "by_bucket": by_bucket,
         "rows": rows,

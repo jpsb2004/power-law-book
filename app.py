@@ -14,6 +14,7 @@ sitting next to them.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -22,7 +23,7 @@ import pandas as pd
 import streamlit as st
 
 from research.discipline import CATALYSTS, VALUATION_RULES
-from research.ontology import BUCKET_ORDER, SchemaError, load_book
+from research.ontology import BUCKET_LABELS, BUCKET_ORDER, SchemaError, load_book
 from research.scenarios import SCENARIOS, combined
 
 ROOT = Path(__file__).resolve().parent
@@ -30,7 +31,9 @@ BRIEFING = ROOT / "latest_briefing.md"
 
 # Same hues as the published page, validated for colourblind separation and
 # contrast across all pairs rather than picked by eye.
-BUCKET_COLOUR = {"Energy": "#AE6A12", "Compute": "#0F7BC0", "Ballast": "#B02D6E"}
+BUCKET_COLOUR = {"Energy": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65389F", "Ballast": "#B02D6E"}
+# Display order, from the ontology rather than restated here.
+BUCKET_RANK = {BUCKET_LABELS[k]: i for i, k in enumerate(BUCKET_ORDER)}
 GAIN, LOSS, MUTED = "#2E7D5B", "#B4382F", "#6E7A7F"
 
 st.set_page_config(
@@ -95,12 +98,34 @@ if _age > timedelta(hours=80):
     )
 
 stats = book.curve_stats
+st.caption(
+    "**Hindsight backtest — not a track record.** The figures below replay today's weights over the past "
+    f"twelve months (rebalanced {book.rebalancing.get('base', 'daily')}, gross of costs), with positions "
+    "chosen knowing how that year went."
+)
 cols = st.columns(5)
 cols[0].metric("Index", f"{book.index_level:.2f}", f"{(book.index_level or 100) - 100:+.1f} vs base")
 cols[1].metric("YTD (USD)", f"{stats.get('ytd', 0):+.1f}%")
 cols[2].metric("1-year (USD)", f"{stats.get('ret1y', 0):+.1f}%")
 cols[3].metric("Volatility", f"{stats.get('vol', 0):.1f}%")
 cols[4].metric("Max drawdown", f"{stats.get('maxDrawdown', 0):+.1f}%")
+
+# The live record: chain-linked forward from its inception, written by the
+# pipeline (data/track.json) and never revised. Kept apart from the replay.
+_track_path = ROOT / "data" / "track.json"
+if _track_path.exists():
+    _track = json.loads(_track_path.read_text(encoding="utf-8"))
+    _pts = _track.get("points", [])
+    if len(_pts) > 1 and _pts[0].get("usd") and _pts[-1].get("usd"):
+        _live = (_pts[-1]["usd"] / _pts[0]["usd"] - 1) * 100
+        st.info(
+            f"**Live record since {_track['inception']}:** {_live:+.1f}% (unhedged USD, {len(_pts) - 1} trading "
+            "days, chain-linked, never revised)."
+        )
+    else:
+        st.info(f"**Live record** started {_track['inception']}; no return yet.")
+else:
+    st.info("**Live record** starts with the next scheduled refresh.")
 
 partial = [e for e in book.entities if e.partial]
 if partial:
@@ -115,8 +140,8 @@ if partial:
         f"{len(book.entities)}."
     )
 
-tab_alloc, tab_note, tab_dev, tab_stress = st.tabs(
-    ["Allocation", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
+tab_alloc, tab_bench, tab_note, tab_dev, tab_stress = st.tabs(
+    ["Allocation", "Benchmarks", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
 )
 
 # --------------------------------------------------------------- allocation
@@ -126,7 +151,7 @@ with tab_alloc:
     bucket_df = (
         df.groupby("Bucket", as_index=False)["Weight"]
         .sum()
-        .assign(Order=lambda d: d["Bucket"].map({"Energy": 0, "Compute": 1, "Ballast": 2}))
+        .assign(Order=lambda d: d["Bucket"].map(BUCKET_RANK))
         .sort_values("Order")
     )
 
@@ -156,7 +181,7 @@ with tab_alloc:
         # labelOverlap is off: at a fixed height Vega silently dropped tick
         # labels (JPM among them) once the book reached twenty lines.
         by_pos = df.assign(
-            Order=lambda d: d["Bucket"].map({"Energy": 0, "Compute": 1, "Ballast": 2})
+            Order=lambda d: d["Bucket"].map(BUCKET_RANK)
         ).sort_values(["Order", "Weight", "Ticker"], ascending=[True, False, True])
         y_enc = alt.Y(
             "Ticker:N",
@@ -190,16 +215,52 @@ with tab_alloc:
             width="stretch",
         )
 
+    targets = " / ".join(f"{BUCKET_LABELS[k]} {book.bucket_weight(k):.0f}" for k in BUCKET_ORDER)
     st.info(
-        "Bucket targets are Energy 38 / Compute 32 / Ballast 30, split equally within each "
-        "bucket. Two classification notes worth arguing with: **NBIS and CRWV sit in Energy** "
-        "but are compute landlords that consume power rather than supply it, and "
-        "**RARA11.SA sits in Ballast** but is a concentrated, policy-driven rare-earth basket "
-        "that tracks the same technology-materials cycle as the rest of the book, so in most "
-        "states it falls with the book rather than against it. The exception is an "
-        "export-control shock — toggle Geopolitical Shock under Stress Tests and it is the "
-        "largest positive contributor in the book."
+        f"Sizing is near equal-weight by design: bucket targets are {targets}, split equally within "
+        "each bucket, so no single stock call carries the thesis. One classification "
+        "note worth arguing with: **NBIS and CRWV sit in Energy** but are compute landlords that "
+        "consume power rather than supply it. **RARA11.SA has its own Materials bucket** rather "
+        "than sitting in Ballast: a concentrated, policy-driven rare-earth basket tracks the same "
+        "technology-materials cycle as the rest of the book, so in most states it falls with the "
+        "book rather than against it. The exception is an export-control shock — toggle "
+        "Geopolitical Shock under Stress Tests and it is the largest positive contributor in the book."
     )
+
+    # Same decomposition the published page shows (snapshot["risk"]), not a
+    # second implementation: the Node pipeline owns the maths.
+    risk = book.risk.get("usd") or {}
+    if risk.get("rows"):
+        st.subheader("Equal capital is not equal risk")
+        st.caption(
+            "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
+            f"book ÷ the book's variance), on weekly USD returns over {risk['weeks']} weeks. The column sums "
+            f"to {risk['sumPct']:.0f}%; lines marked short have under 26 weeks of history and are indicative."
+        )
+        rdf = pd.DataFrame(
+            [
+                {
+                    "Ticker": r["key"] + (" (short)" if r.get("short") else ""),
+                    "Bucket": next((e.bucket_label for e in book.entities if e.ticker == r["key"]), ""),
+                    "Weight %": r["weightPct"],
+                    "Share of risk %": r.get("riskSharePct"),
+                    "Risk ÷ weight": r.get("riskPerWeight"),
+                    "Vol, weekly %": r.get("volPct"),
+                    "ρ to book": r.get("corrToBook"),
+                }
+                for r in risk["rows"]
+                if not r.get("insufficient")
+            ]
+        ).sort_values("Share of risk %", ascending=False)
+        st.dataframe(
+            rdf.style.format(
+                {"Weight %": "{:.0f}", "Share of risk %": "{:+.1f}", "Risk ÷ weight": "{:.2f}",
+                 "Vol, weekly %": "{:.0f}", "ρ to book": "{:.2f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
 
     # Both blocks below share their text with the thesis PDF via
     # research/discipline.py -- edit there, not here, or the two drift apart.
@@ -292,14 +353,119 @@ with tab_dev:
         hide_index=True,
     )
 
+# --------------------------------------------------------------- benchmarks
+with tab_bench:
+    bench = book.benchmarks
+    rows = [r for r in bench.get("rows", []) if r.get("stats")]
+    if not rows:
+        st.info("This snapshot carries no benchmark comparison. Run `npm run refresh` to build one.")
+    else:
+        win = bench["window"]
+        rf = bench.get("riskFree", {})
+        st.caption(
+            f"One shared window, {win['start']} to {win['end']}, USD total return. Sharpe and Sortino are in "
+            f"excess of {rf.get('ticker')}'s total return ({(rf.get('annRetPct') or 0):.1f}% annualised); beta, "
+            "tracking error and information ratio use weekly returns because Asian venues close before New York "
+            f"opens. The book and the 60/40 are rebalanced {book.rebalancing.get('base', 'daily')}. Same figures "
+            "as the published page."
+        )
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Series": r["label"],
+                        "Return %": r["stats"]["retPct"],
+                        "Volatility %": r["stats"]["volPct"],
+                        "Sharpe": r["stats"]["sharpe"],
+                        "Sortino": r["stats"]["sortino"],
+                        f"Beta to {bench['market']}": r["stats"]["betaMkt"],
+                        "Max DD %": r["stats"]["maxDrawdownPct"],
+                    }
+                    for r in rows
+                ]
+            ).style.format(
+                {"Return %": "{:+.1f}", "Volatility %": "{:.1f}", "Sharpe": "{:.2f}", "Sortino": "{:.2f}",
+                 f"Beta to {bench['market']}": "{:.2f}", "Max DD %": "{:.1f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+        st.subheader("Book against each benchmark")
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Book view": "FX-hedged USD" if x["book"] == "book-hedged" else "Unhedged USD",
+                        "Benchmark": x["label"],
+                        "Excess return pp": x["excessRetPct"],
+                        "Tracking error %": x["tePct"],
+                        "Information ratio": x["ir"],
+                        "Beta": x["beta"],
+                        "Beta t-stat": x["betaT"],
+                    }
+                    for x in bench.get("relative", [])
+                ]
+            ).style.format(
+                {"Excess return pp": "{:+.1f}", "Tracking error %": "{:.1f}", "Information ratio": "{:.2f}",
+                 "Beta": "{:.2f}", "Beta t-stat": "{:.1f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+        st.caption(
+            "An information ratio's t-statistic is roughly IR × √years, so over one year it needs to clear "
+            "about 2 to be told apart from luck."
+        )
+
+    rb = book.rebalancing.get("usd") or {}
+    if rb.get("rows"):
+        st.subheader("Rebalancing rule and costs")
+        rc = rb["reconciliation"]
+        st.caption(
+            f"The headline rebalances {book.rebalancing.get('base')} and is gross of costs. Same lines and "
+            f"dates in every row (unhedged USD). Reconciliation: each line's own return, weighted, "
+            f"{rc['weightedSumPct']:+.1f}%; buy and hold {rc['holdPct']:+.1f}%; base case {rc['basePct']:+.1f}%; "
+            f"daily {rc['dailyPct']:+.1f}%. Cost assumptions are stated in data/positions.json."
+        )
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Series": r["label"],
+                        "Return %": r["windowRetPct"],
+                        "Volatility %": r["stats"]["vol"],
+                        "Max DD %": r["stats"]["maxDrawdown"],
+                        "Rebalances": r["rebalances"],
+                        "Turnover %/yr": r["turnoverPctPerYear"],
+                        "Trading cost pp": r["tradingCostPct"] if r["costs"] else None,
+                        "Withholding pp": r["withholdingPct"] if r["costs"] else None,
+                    }
+                    for r in rb["rows"]
+                ]
+            ).style.format(
+                {"Return %": "{:+.1f}", "Volatility %": "{:.1f}", "Max DD %": "{:.1f}", "Turnover %/yr": "{:.0f}",
+                 "Trading cost pp": "{:.2f}", "Withholding pp": "{:.2f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+
 # ------------------------------------------------------------------- stress
 with tab_stress:
     st.subheader("Scenario shocks")
+    _ccys = len({e.currency for e in book.entities})
+    _young = [e for e in book.entities if e.partial]
+    _young_txt = (
+        " — including " + ", ".join(f"{e.ticker} with {round(52 * (e.coverage or 0))} weeks of history" for e in _young) + " —"
+        if _young else ""
+    )
     st.caption(
         "These are **stated assumptions, not estimates from a covariance matrix.** A year of "
-        "daily data across six currencies — including one fund with three weeks of history — "
-        "cannot support an estimated correlation structure, and one built on it would look "
-        "rigorous while being noise."
+        f"daily data across {_ccys} currencies{_young_txt} cannot support an estimated correlation "
+        "structure, and one built on it would look rigorous while being noise."
     )
 
     chosen = []
@@ -331,7 +497,7 @@ with tab_stress:
             alt.Chart(bucket_impact)
             .mark_bar(cornerRadiusEnd=3)
             .encode(
-                x=alt.X("Bucket:N", title=None, sort=["Energy", "Compute", "Ballast"]),
+                x=alt.X("Bucket:N", title=None, sort=list(BUCKET_RANK)),
                 y=alt.Y("Impact:Q", title="Contribution to portfolio (%)"),
                 color=alt.Color(
                     "Bucket:N",
@@ -366,7 +532,7 @@ with tab_stress:
             .properties(height=460),
             width="stretch",
         )
-        st.caption(result["scenario"].note)
+        st.caption(result["note"])
 
 st.divider()
 st.caption(

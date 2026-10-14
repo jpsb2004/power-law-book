@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { getBook, sleeveOrder, sleeveWeightOf, SLEEVES } from "@/lib/quotes";
-import { HOLDINGS, type SleeveId } from "@/lib/holdings";
+import { HOLDINGS, BASE_REBALANCE, type SleeveId } from "@/lib/holdings";
 import { Sparkline } from "@/components/Sparkline";
 
 const SLEEVE_VAR: Record<SleeveId, string> = {
   energy: "var(--s1)",
   compute: "var(--s2)",
+  materials: "var(--s4)",
   ballast: "var(--s3)",
 };
 
@@ -84,7 +85,8 @@ async function BookView() {
         <Sparkline points={book.curve} height={190} />
         <p style={{ color: "var(--ink-3)", fontSize: "0.82rem" }}>
           Excludes {book.excludedFromCurve.join(", ") || "nothing"} — no public price series.
-          Rebalanced daily to target weight; gross of all costs.
+          Hindsight backtest, not a track record: today&apos;s weights replayed, rebalanced{" "}
+          {BASE_REBALANCE}; gross of all costs.
         </p>
       </section>
 

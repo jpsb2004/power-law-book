@@ -26,27 +26,30 @@ built.
 
 Chips are fungible on a two-year horizon. **Interconnection queues are not.** The
 book is positioned long the constraint and long the ground it stands on, with a
-third of the notional held against the possibility that the whole thesis is one
-trade wearing three hats.
+quarter of the notional held against the possibility that the whole thesis is
+one trade wearing three hats.
 
 | Bucket | Target | Claim | Positions |
 |---|---|---|---|
 | **I · Energy** | 38% | The buildout is constrained by fuel, molecules and the ground it stands on | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV |
-| **II · Compute** | 32% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, ^KS11, AINF.L |
-| **III · Ballast** | 30% | What survives if the first two are the same bet | GLD, AVDV, JPM, RARA11.SA, SGOV, XLP |
+| **II · Compute** | 32% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L |
+| **III · Materials** | 5% | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
+| **IV · Ballast** | 25% | What survives if the rest of the book is the same bet | GLD, AVDV, JPM, SGOV, XLP |
 
 Equal weight within each bucket, integer remainder to the most liquid names.
 Bucket weights are fixed; there is no "provisional" allocation.
 Every position carries a thesis **and its falsification condition** in
-[`lib/holdings.js`](lib/holdings.js). Three the author disagrees with, stated in
-the repo rather than buried:
+[`data/positions.json`](data/positions.json). Classification calls worth
+arguing with, stated in the repo rather than buried:
 
 - **NBIS and CRWV are classified in Energy but consume power rather than supply
   it.** They are compute landlords. They are also the same trade twice.
 - **VGT overlaps half its own bucket** — it already holds AMD's peers and the
   megacaps, diluting single-name risk without adding a new bet.
-- **RARA11.SA is not ballast.** It is a concentrated, policy-driven rare-earth
-  basket that will likely fall *with* the book, not against it.
+- **RARA11.SA is not ballast, so it has its own Materials bucket.** It is a
+  concentrated, policy-driven rare-earth basket that will likely fall *with* the
+  book, not against it. It was in Ballast until 2026-10-14 (see
+  [`CHANGELOG.md`](CHANGELOG.md)).
 
 ---
 
@@ -135,9 +138,17 @@ adjust and use the plain close.
 
 ### Index construction
 
-The curve is the weight-averaged **daily return** of the legs, compounded:
-rebalanced to target weight every session, renormalised over whatever is
-trading. An earlier version averaged weighted *prices* instead. That is a
+The headline curve holds each line in value and **rebalances to target weight
+on the first session of each month** (`rebalance.base_case` in
+`data/positions.json`). Until 14 Oct 2026 it rebalanced every session, which
+harvests a rebalancing premium no real book collects at zero cost; the page
+now shows daily, monthly and buy-and-hold side by side, each gross and net of
+stated costs (trading bps, FX spread, dividend withholding — `cost_assumptions`),
+with a reconciliation from the weighted sum of line returns to the headline.
+A line that lists mid-window joins at the next rebalance (buy and hold: at its
+first close, by trimming the others).
+
+Before the daily-rebalanced version, the curve averaged weighted *prices*. That is a
 price-weighted index, where a $400 GLD share outvoted a $5 KOSPI point (in USD)
 eighty to one and a fund listing mid-window moved the level by its price alone.
 It understated the 1-year return by ~8pp. The method is folded into the refresh
@@ -166,23 +177,58 @@ most of the FX gain on Petrobras. Rates are a dated table in
 fails if a book currency has no rate. Not modelled: cross-currency basis, the
 onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
 
-### ^KS11 → EWY
+### EWY, measured against ^KS11
 
-The book holds the KOSPI because the index is the cleanest statement of the
-view. You cannot buy it. `EWY` is measured as the tradable stand-in: weekly
-tracking error, correlation, beta, tracking difference, average traded value,
-and the whole book re-run with EWY in place of the index.
+Every line in the book is investable. Until 14 Oct 2026 the Korea line was the
+KOSPI index itself (`^KS11`), which cannot be bought; the book now holds `EWY`
+and keeps the index as its reference. The page reports the **difference in
+exposure** rather than a "substitution cost", since MSCI's 25/50 caps and New
+York trading hours make EWY a different exposure that can run ahead of the index
+as easily as behind it: weekly tracking error, correlation, beta, the return gap,
+average traded value, and the whole book re-run with the index in place of EWY.
 
 Seoul closes ~10 hours after one New York close and ~14 before the next, so each
 Seoul close is paired with the **previous** NY close (`clock_lag_sessions: 1`).
 Same-date pairing measures the time zone, not the fund. SOXX was considered and
 rejected: a US semiconductor basket is a different bet, not a Korea proxy.
 
+### Backtest vs track record
+
+Every return, volatility and drawdown on the page, the dashboard and the PDF is
+a **hindsight backtest**: today's weights replayed over the past twelve months,
+with positions chosen knowing how that year went. Each is labelled so on the
+KPI row itself.
+
+The **live record** is separate (`data/track.json`, written by `extendTrack`):
+chain-linked forward from its inception, one entry per trading day every venue
+has closed, and never revised — a later change to the book changes only what
+comes after it. The first scheduled refresh that finds no file starts it, so
+its inception is the first run after the P0 changes were merged. Every change
+to the book or its method is dated in `book_changes` (`data/positions.json`)
+and rendered as a change log on the page and in the PDF.
+
+### Benchmarks and risk-adjusted returns
+
+The book is shown beside VGT (US tech, also a holding), ACWI (global equity)
+and a 60/40 blend of ACWI and AGG, over one shared window cut by calendar date
+and rebased to 100. For each: return, volatility, Sharpe and Sortino (in excess
+of SGOV's total return, i.e. the T-bill rate actually earned), beta to ACWI and
+max drawdown; and for the book against each benchmark, excess return, tracking
+error, information ratio and beta. Beta, tracking error and IR use weekly
+returns for the same time-zone reason as the factor regressions. An IR needs to
+clear about 2 over one year before it says anything; the page states which do.
+
+Volatility is annualised at each series' **own** observation frequency. The
+book curve runs on the union of seven venues' calendars (~309 observations a
+year, Riyadh trades Sundays), so the old `sqrt(252)` understated it by about a
+tenth; measured on a single New York calendar it agrees with the corrected
+figure.
+
 ### Factor exposure
 
 Weekly USD returns of the book, each bucket and each Ballast line, regressed on
 a tech factor (VGT) and an energy factor (XLE), with t-stats, R² and correlation
-to Energy + Compute combined. It answers whether Ballast behaves differently
+to the rest of the book (Energy, Compute and Materials) combined. It answers whether Ballast behaves differently
 from the thesis. It is **not** an alpha test: ~50 weekly observations cannot
 distinguish an annualised intercept from zero, and the page says so. VGT is also
 a Compute holding, so that bucket's tech beta is partly mechanical.
@@ -234,7 +280,7 @@ Three scenarios — Grid Bottleneck, CapEx Retrenchment, Geopolitical Shock —
 toggleable and combinable in the dashboard.
 
 The shocks are **stated assumptions, not estimates from a covariance matrix.** A
-year of daily data across six currencies, including a fund with three weeks of
+year of daily data across five currencies, including a fund with a few months of
 history, cannot support an estimated correlation structure; one built on it
 would look rigorous and be noise. Sensitivities are set per position rather than
 per bucket, because the buckets are not internally uniform — a grid bottleneck
@@ -296,7 +342,7 @@ positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
 
 ## CV summary
 
-> **The Power Law Book** — a 20-position, 3-bucket thesis portfolio on the
+> **The Power Law Book** — a 20-position, 4-bucket thesis portfolio on the
 > physical bottlenecks of AI infrastructure, across 7 exchanges and 6
 > currencies, refreshed and published automatically every weekday. I designed
 > the thesis, the positions, the risk framework and the falsification

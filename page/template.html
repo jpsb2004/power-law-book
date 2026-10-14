@@ -21,7 +21,10 @@
   --s1: #AE6A12;
   --s2: #0F7BC0;
   --s3: #B02D6E;
-
+  /* Materials. Picked by running the dataviz palette validator against the
+     three hues above (all pairs, light #EAEEEA / dark #171C1F surfaces):
+     every check passes, worst CVD ΔE 10.0 light / 9.2 dark. */
+  --s4: #65389F;
 
   --font-display: Bahnschrift, "DIN Condensed", "Franklin Gothic Medium", "Arial Narrow", "Helvetica Neue", sans-serif;
   --font-body: Charter, "Bitstream Charter", "Iowan Old Style", "Source Serif 4", Georgia, serif;
@@ -46,7 +49,7 @@
     --s1: #BE8829;
     --s2: #3D93D4;
     --s3: #D45E9C;
-
+    --s4: #8156C0;
   }
 }
 :root[data-theme="dark"] {
@@ -64,7 +67,7 @@
   --s1: #BE8829;
   --s2: #3D93D4;
   --s3: #D45E9C;
-
+  --s4: #8156C0;
 }
 
 /* ----------------------------------------------------------------- base */
@@ -128,6 +131,13 @@ a { color: var(--accent); }
 .stat .k { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .stat .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.75rem; line-height: 1.15; margin-top: 0.4rem; }
 .stat .n { font-size: 0.82rem; color: var(--ink-3); font-family: var(--font-body); }
+/* The flag spans the row: every figure under it is a replay, not a result. */
+.stats .flag {
+  grid-column: 1 / -1; background: var(--surface-2); padding: 0.55rem 1.2rem;
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2);
+}
+.stats .flag b { color: var(--ink); font-weight: 600; }
+.stat.live { box-shadow: inset 3px 0 0 var(--accent); }
 
 /* --------------------------------------------------------------- section */
 section { padding: clamp(3rem, 7vw, 5rem) 0; border-bottom: 1px solid var(--rule); }
@@ -240,6 +250,7 @@ td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .kv .k { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .kv .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.25rem; margin-top: 0.3rem; }
 .kv .n { font-size: 0.8rem; color: var(--ink-3); }
+.subhead { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 1.75rem 0 0.6rem; }
 
 .cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .note-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.1rem; }
@@ -278,8 +289,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>The argument</h2></div>
     <p class="lede prose">
       The buckets are ordered because they depend on each other. Fuel, molecules and
-      land are upstream of compute; and the third bucket exists because the first two
-      could turn out to be one trade wearing two hats.
+      land are upstream of compute, and the minerals in its hardware sit beside them;
+      the last bucket exists because the first three could turn out to be one trade
+      wearing three hats.
     </p>
     <div class="chain" id="chain"></div>
   </section>
@@ -287,7 +299,8 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Performance</h2></div>
     <p class="lede prose">
-      The book indexed to 100 twelve months ago, in USD, rebalanced daily to target weight.
+      The book indexed to 100 twelve months ago, in USD, rebalanced to target weight on the
+      first session of each <span id="rebal-word">month</span>.
       This is a backward-looking simulation of the current weights, not a track record —
       the positions were chosen with the benefit of knowing this window.
     </p>
@@ -297,19 +310,48 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
       <div class="chart-box rel"><div id="curve"></div><div class="tip" id="curve-tip"></div></div>
       <figcaption id="curve-cap"></figcaption>
     </figure>
+    <div id="rebal-block" hidden>
+      <h3 class="subhead">How the headline is built, and what costs take off it</h3>
+      <div class="tbl-scroll"><table class="mini" id="rebal-tbl"></table></div>
+      <h3 class="subhead">Reconciliation</h3>
+      <div class="tbl-scroll"><table class="mini" id="recon-tbl"></table></div>
+      <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="rebal-note"></p>
+    </div>
+  </section>
+
+  <section id="bench-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>Against the benchmarks</h2></div>
+    <p class="lede prose" id="bench-lede"></p>
+    <figure>
+      <div class="chart-box rel"><div id="bench-chart"></div><div class="tip" id="bench-tip"></div></div>
+      <figcaption id="bench-cap"></figcaption>
+    </figure>
+    <div class="tbl-scroll"><table class="mini" id="bench-tbl"></table></div>
+    <h3 class="subhead" id="bench-rel-head"></h3>
+    <div class="tbl-scroll"><table class="mini" id="bench-rel-tbl"></table></div>
+    <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="bench-note"></p>
   </section>
 
   <section>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Allocation</h2></div>
     <p class="lede prose">
-      Weight is the only real expression of conviction. <span id="alloc-ballast">Ballast carries
-      a large share of the book</span>, which is a deliberate statement that the book's own thesis might be wrong.
+      Sizing is near equal-weight by design: bucket targets carry the argument, and every
+      line inside a bucket gets the same slice, so no single stock call is asked to carry the thesis.
+      <span id="alloc-ballast">Ballast carries a large share of the book</span>, which is a deliberate
+      statement that the book's own thesis might be wrong.
     </p>
     <figure>
       <div class="chart-box rel"><div id="alloc"></div><div class="tip" id="alloc-tip"></div></div>
       <ul class="legend" id="alloc-legend"></ul>
       <figcaption>Weights as a share of notional. Bucket totals shown above each block.</figcaption>
     </figure>
+    <div id="risk-block" hidden>
+      <h3 class="subhead">Equal capital is not equal risk</h3>
+      <p class="prose" id="risk-lede" style="color:var(--ink-2);margin:0 0 1rem"></p>
+      <div class="tbl-scroll"><table class="mini" id="risk-bucket-tbl"></table></div>
+      <div class="tbl-scroll" style="margin-top:1rem"><table class="mini" id="risk-tbl"></table></div>
+      <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="risk-note"></p>
+    </div>
   </section>
 
   <section>
@@ -360,7 +402,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section id="factor-section" hidden>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Does the ballast ballast?</h2></div>
     <p class="lede prose">
-      Bucket III exists in case the first two are one trade. If it does its job, it should
+      Ballast exists in case the rest of the book is one trade. If it does its job, it should
       load lightly on the factors the thesis is long and explain little of its own movement
       through them. Weekly USD returns, regressed on a tech factor and an energy factor.
     </p>
@@ -373,6 +415,12 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <p class="lede prose">Every line, with the case for it and the condition that kills it.</p>
     <div class="tbl-scroll"><table id="tbl"></table></div>
     <div id="dossier"></div>
+  </section>
+
+  <section id="changes-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>Change log</h2></div>
+    <p class="lede prose" id="changes-lede"></p>
+    <div class="tbl-scroll"><table class="mini" id="changes-tbl"></table></div>
   </section>
 
   <section id="refresh-section" hidden>
@@ -394,13 +442,13 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     </p>
     <div class="cols">
       <ul class="note-list">
-        <li><h3>One line is not directly buyable</h3><p id="kospi-note">
+        <li><h3 id="kospi-head">One line is not directly buyable</h3><p id="kospi-note">
           The KOSPI is an index, so a real book expresses it through a tracking fund or futures and
           eats the tracking error and FX. Gold is held as spot-backed shares rather than a dated
           future, so there is no roll and no expiry to manage.</p></li>
         <li><h3>The hedged view is a model, not a quote</h3><p>
           It accrues the policy-rate differential day by day on the full marked value. Real forward
-          points also carry cross-currency basis, and KRW, TWD and BRL hedge offshore through
+          points also carry cross-currency basis, and TWD and BRL hedge offshore through
           non-deliverable forwards whose implied rates can sit well away from the onshore policy rate.</p></li>
         <li><h3>Not every position covers the full window</h3><p id="coverage-note">
           A fund that listed part-way through the year has no history before it existed. The curve
@@ -412,13 +460,13 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
           than the true economic relationship; weekly sampling would reduce it.</p></li>
       </ul>
       <ul class="note-list">
-        <li><h3>Daily rebalancing is a modelling choice</h3><p>
-          The curve rebalances to target weight every session. A held book would drift with its
+        <li><h3>Rebalancing is a modelling choice</h3><p id="rebal-limit">
+          The curve rebalances to target weight on a fixed schedule. A held book would drift with its
           winners, so this understates the concentration that would actually have built up.</p></li>
-        <li><h3>Total return, before your costs</h3><p>
+        <li><h3>Headline returns are gross</h3><p id="cost-limit">
           Returns include reinvested dividends and are net of each fund's own fee, which is already in
-          its price. They are gross of commission, spread, withholding on Brazilian and Saudi dividends,
-          and the FX spread on five currencies. The lived return would be lower.</p></li>
+          its price. The headline is gross of commission, spread, withholding and the FX spread; the
+          net-of-cost series in the performance section charges stated assumptions for each.</p></li>
         <li><h3>One window, chosen after the fact</h3><p>
           Twelve months, ending on the day the note was written, for positions selected today.
           That is the most flattering possible framing, and the reason the drawdown column matters
@@ -458,7 +506,7 @@ const DATA = __SNAPSHOT__;
 
 /* ------------------------------------------------------------- utilities */
 const $ = (id) => document.getElementById(id);
-const SLEEVE_VAR = { energy: "--s1", compute: "--s2", ballast: "--s3" };
+const SLEEVE_VAR = { energy: "--s1", compute: "--s2", materials: "--s4", ballast: "--s3" };
 /**
  * Colours go into the SVG as `var(--token)`, not as resolved hex.
  *
@@ -529,19 +577,35 @@ function renderStamp() {
 function renderStats() {
   const s = V().stats();
   const cards = [
-    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: (VIEW === "hedged" ? "FX-hedged USD" : "USD") + ", rebalanced daily" },
+    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: (VIEW === "hedged" ? "FX-hedged USD" : "USD") + ", rebalanced " + (DATA.rebalancing?.base ?? "daily") + ", gross" },
     { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
     { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
     { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
     { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "what is left if the thesis is wrong" },
   ];
-  $("stats").innerHTML = cards
-    .map(
-      (c) =>
-        '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
-        c.v + '</div><div class="n">' + c.n + "</div></div>"
-    )
-    .join("");
+  // The forward-tracked series, kept apart from the replay above it.
+  const tr = DATA.track;
+  const key = VIEW === "hedged" ? "hedged" : "usd";
+  const tp = tr?.points ?? [];
+  const liveRet = tp.length > 1 && tp[0][key] && tp.at(-1)[key] ? (tp.at(-1)[key] / tp[0][key] - 1) * 100 : null;
+  const live = !tr
+    ? { k: "Live record", v: "—", c: "", n: "starts with the next scheduled refresh" }
+    : liveRet == null
+      ? { k: "Live since " + fmtDate(Date.parse(tr.inception)), v: "—", c: "", n: "inception day; no return yet" }
+      : { k: "Live since " + fmtDate(Date.parse(tr.inception)), v: pct(liveRet), c: signClass(liveRet),
+          n: (tp.length - 1) + " trading day" + (tp.length === 2 ? "" : "s") + ", chain-linked, never revised" };
+  $("stats").innerHTML =
+    '<div class="flag"><b>Hindsight backtest — not a track record.</b> Return, volatility and drawdown replay today\'s ' +
+    "weights over the past twelve months, with positions chosen knowing how that year went. The live record is the last tile.</div>" +
+    cards
+      .map(
+        (c) =>
+          '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
+          c.v + '</div><div class="n">' + c.n + "</div></div>"
+      )
+      .join("") +
+    '<div class="stat live"><div class="k">' + escape(live.k) + '</div><div class="v ' + live.c + '">' + live.v +
+    '</div><div class="n">' + escape(live.n) + "</div></div>";
 }
 
 /* ----------------------------------------------------------------- chain */
@@ -708,8 +772,11 @@ function renderAlloc() {
     const blockW = (sw / total) * iw;
     const colour = css(SLEEVE_VAR[id]);
 
+    // A 5% block is ~50 units wide: its full heading ran into the next one.
+    // Narrow blocks show the numeral alone; the legend below carries the name.
+    const heading = SLEEVES[id].numeral + "  " + SLEEVES[id].name.toUpperCase();
     svg.appendChild(el("text", { x: x, y: m.t - 18, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-display)", "letter-spacing": "0.08em" },
-      SLEEVES[id].numeral + "  " + SLEEVES[id].name.toUpperCase()));
+      heading.length * 8.5 > blockW - 6 ? SLEEVES[id].numeral : heading));
     svg.appendChild(el("text", { x: x, y: m.t - 4, fill: colour, "font-size": 13, "font-family": "var(--font-mono)" }, sw + "%"));
 
     let ix = x;
@@ -1040,14 +1107,24 @@ const money = (v) =>
 function renderProxy() {
   const px = (DATA.proxies ?? []).find((x) => !x.error);
   if (!px) return;
-  const target = POS.find((p) => p.ticker === px.for);
-  if (!target) return;
+  // Two shapes. `held`: the book holds the fund and measures it against the
+  // index (EWY vs ^KS11, since 14 Oct 2026). Otherwise the older one, where the
+  // book carried the index and the fund was only measured.
+  const held = Boolean(px.held);
+  const line = POS.find((p) => p.ticker === (held ? px.ticker : px.for));
+  if (!line) return;
+  const indexUsd = held ? px.indexUsd : line.usd;
+  const fundUsd = held ? line.usd : px.usd;
+  const altBook = held ? px.indexBookStats : px.investableStats;
   $("proxy-section").hidden = false;
 
-  $("proxy-lede").textContent =
-    "The book carries " + px.for + " because the index is the cleanest statement of the view, but nobody can buy an index. " +
-    "The tradable stand-in is " + px.ticker + " (" + px.name + "), held in dollars on " + px.venue + ". " +
-    "This measures what the substitution costs rather than asserting it.";
+  $("proxy-lede").textContent = held
+    ? "The book holds " + px.ticker + " (" + px.name + ") in dollars on " + px.venue + ". The cleaner statement of the " +
+      "view is the index itself, " + px.for + ", but nobody can buy an index. This measures the difference in exposure " +
+      "between the two rather than calling it a cost: the fund can run ahead of the index as easily as behind it."
+    : "The book carries " + px.for + " because the index is the cleanest statement of the view, but nobody can buy an index. " +
+      "The tradable stand-in is " + px.ticker + " (" + px.name + "), held in dollars on " + px.venue + ". " +
+      "This measures what the substitution costs rather than asserting it.";
 
   const t = px.tracking;
   const kv = [
@@ -1060,18 +1137,18 @@ function renderProxy() {
   $("proxy-kv").innerHTML = kv.map((c) =>
     '<div><div class="k">' + c.k + '</div><div class="v">' + c.v + '</div><div class="n">' + escape(c.n) + "</div></div>").join("");
 
-  const ib = px.investableStats ?? {};
+  const ib = altBook ?? {};
   const row = (label, a, b, cls = "") =>
     '<tr class="' + cls + '"><td class="lbl">' + label + '</td>' +
     '<td class="n ' + signClass(a) + '">' + pct(a) + '</td><td class="n ' + signClass(b) + '">' + pct(b) + "</td></tr>";
   $("proxy-tbl").innerHTML =
     "<thead><tr><th>USD</th><th>YTD</th><th>1 year</th></tr></thead><tbody>" +
-    row(escape(px.for) + " (index)", target.usd.ytd, target.usd.ret1y) +
-    row(escape(px.ticker) + " (tradable)", px.usd.ytd, px.usd.ret1y) +
-    '<tr class="em"><td class="lbl">Tracking difference</td><td class="n">' + pp(px.trackingDiff.ytd) +
-      '</td><td class="n">' + pp(px.trackingDiff.ret1y) + "</td></tr>" +
+    row(escape(px.for) + (held ? " (index, reference)" : " (index)"), indexUsd.ytd, indexUsd.ret1y) +
+    row(escape(px.ticker) + (held ? " (held)" : " (tradable)"), fundUsd.ytd, fundUsd.ret1y) +
+    '<tr class="em"><td class="lbl">' + (held ? "Difference in exposure" : "Tracking difference") +
+      '</td><td class="n">' + pp(px.trackingDiff.ytd) + '</td><td class="n">' + pp(px.trackingDiff.ret1y) + "</td></tr>" +
     row("Book, as published", DATA.curveStats.ytd, DATA.curveStats.ret1y, "sub") +
-    row("Book, holding " + escape(px.ticker), ib.ytd, ib.ret1y, "sub") +
+    row(held ? "Book, holding " + escape(px.for) + " instead" : "Book, holding " + escape(px.ticker), ib.ytd, ib.ret1y, "sub") +
     '<tr class="em"><td class="lbl">Book-level difference</td><td class="n">' + pp(px.bookImpact.ytd) +
       '</td><td class="n">' + pp(px.bookImpact.ret1y) + "</td></tr>" +
     "</tbody>";
@@ -1085,13 +1162,302 @@ function renderProxy() {
       ? "A " + t.trackingErrorPct.toFixed(0) + "% tracking error alongside a " + t.correlation.toFixed(2) +
         " correlation means the fund follows the index's direction but not its size from week to week. "
       : "") +
-    "The book-level cost scales with the line's weight, here " + target.weight + "%." + lag;
+    "The book-level difference scales with the line's weight, here " + line.weight + "%." + lag;
 
-  $("kospi-note").textContent =
-    "The KOSPI is an index. Section " + secNumberOf("proxy-section") + " prices the substitution through " + px.ticker +
-    ": " + (t ? t.trackingErrorPct.toFixed(0) + "% tracking error, " : "") + pp(px.trackingDiff.ret1y) +
-    " of tracking difference over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
-    "shares rather than a dated future, so there is no roll and no expiry to manage.";
+  $("kospi-note").textContent = held
+    ? "The book holds " + px.ticker + ", not the KOSPI, which cannot be bought; every line is now investable. Section " +
+      secNumberOf("proxy-section") + " measures the difference in exposure: " +
+      (t ? t.trackingErrorPct.toFixed(0) + "% tracking error, " : "") + pp(px.trackingDiff.ret1y) +
+      " against the index over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
+      "shares rather than a dated future, so there is no roll and no expiry to manage."
+    : "The KOSPI is an index. Section " + secNumberOf("proxy-section") + " prices the substitution through " + px.ticker +
+      ": " + (t ? t.trackingErrorPct.toFixed(0) + "% tracking error, " : "") + pp(px.trackingDiff.ret1y) +
+      " of tracking difference over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
+      "shares rather than a dated future, so there is no roll and no expiry to manage.";
+  $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
+}
+
+/* ------------------------------------------------------------ change log */
+function renderChanges() {
+  const ch = DATA.bookChanges ?? [];
+  if (!ch.length) return;
+  $("changes-section").hidden = false;
+  const tr = DATA.track;
+  $("changes-lede").textContent =
+    "Every change to what the book holds, its weights, or the method that turns them into an index, newest first. " +
+    "The backtest above is always today's book replayed, so a change rewrites it; the live record " +
+    (tr ? "(since " + fmtDate(Date.parse(tr.inception)) + ") " : "") +
+    "is chain-linked and only ever moves forward. Entries before 14 Oct 2026 are reconstructed from the repository history.";
+  $("changes-tbl").innerHTML =
+    "<thead><tr><th>Date</th><th>Kind</th><th>What changed</th><th>Why</th></tr></thead><tbody>" +
+    [...ch].sort((a, b) => (a.date < b.date ? 1 : -1)).map((c) =>
+      '<tr><td class="t" style="white-space:nowrap">' + escape(c.date) + "</td>" +
+      '<td><span class="tag">' + escape(c.kind) + "</span></td>" +
+      '<td style="font-size:.86rem">' + escape(c.change) + "</td>" +
+      '<td style="font-size:.86rem;color:var(--ink-2)">' + escape(c.why) + "</td></tr>"
+    ).join("") + "</tbody>";
+}
+
+/* ----------------------------------------------------- rebalancing & costs */
+function renderRebalancing() {
+  const RB = DATA.rebalancing;
+  const R = RB?.[VIEW === "hedged" ? "hedged" : "usd"];
+  if (!R?.rows?.length) return;
+  $("rebal-block").hidden = false;
+  const unit = { monthly: "month", quarterly: "quarter", daily: "session" }[RB.base] ?? RB.base;
+  $("rebal-word").textContent = unit;
+  const ppx = (v) => (v == null ? "—" : v.toFixed(2) + "pp");
+
+  $("rebal-tbl").innerHTML =
+    "<thead><tr><th>Series</th><th>Return</th><th>Volatility</th><th>Max DD</th><th>Rebalances</th>" +
+    "<th>Turnover / yr</th><th>Trading cost</th><th>Withholding</th></tr></thead><tbody>" +
+    R.rows.map((r) =>
+      '<tr class="' + (r.key === "base" ? "em" : r.costs ? "sub" : "") + '"><td class="lbl">' + escape(r.label) + "</td>" +
+      '<td class="n ' + signClass(r.windowRetPct) + '">' + pct(r.windowRetPct) + "</td>" +
+      '<td class="n">' + (r.stats.vol ?? 0).toFixed(1) + "%</td>" +
+      '<td class="n neg">' + pct(r.stats.maxDrawdown) + "</td>" +
+      '<td class="n">' + r.rebalances + "</td>" +
+      '<td class="n">' + r.turnoverPctPerYear.toFixed(0) + "%</td>" +
+      '<td class="n">' + (r.costs ? ppx(r.tradingCostPct) : "—") + "</td>" +
+      '<td class="n">' + (r.costs ? ppx(r.withholdingPct) : "—") + "</td></tr>"
+    ).join("") + "</tbody>";
+
+  const rc = R.reconciliation;
+  const steps = [
+    { label: "Each line's own return, weighted", v: rc.weightedSumPct, why: "Σ weight × return over the window" },
+    { label: "Buy and hold", v: rc.holdPct, why: rc.lateListings.length
+        ? rc.lateListings.join(", ") + " listed part-way through and was bought by trimming the others"
+        : "identical when every line trades from day one" },
+    { label: "Rebalanced " + RB.base + " (base case)", v: rc.basePct, why: "selling winners and buying laggards each " + unit },
+    { label: "Rebalanced daily", v: rc.dailyPct, why: "the same, every session (the previous headline)" },
+  ];
+  $("recon-tbl").innerHTML =
+    "<thead><tr><th>Step</th><th>Return</th><th>Change</th><th>Why</th></tr></thead><tbody>" +
+    steps.map((s, i) =>
+      '<tr class="' + (s.label.includes("base case") ? "em" : "") + '"><td class="lbl">' + escape(s.label) + "</td>" +
+      '<td class="n">' + pct(s.v) + "</td>" +
+      '<td class="n">' + (i && s.v != null && steps[i - 1].v != null ? pp(s.v - steps[i - 1].v) : "") + "</td>" +
+      '<td style="color:var(--ink-2);font-size:.82rem">' + escape(s.why) + "</td></tr>"
+    ).join("") + "</tbody>";
+
+  const c = RB.costs;
+  const wh = Object.entries(c.withholdingPct ?? {}).map(([k, v]) => k + " " + v + "%").join(", ");
+  const net = R.rows.find((r) => r.key === "base-net");
+  $("rebal-note").textContent =
+    "All rows use the same lines, dates and " + V().label + " view; only the rule and the costs differ. " +
+    "Net of costs, the base case returned " + pct(net?.windowRetPct) + " against " + pct(rc.basePct) + " gross. " +
+    "Cost assumptions (" + (c.asOf ?? "undated") + "): trading " + (c.tradeBps?.USD ?? 0) + " bps per dollar traded in US " +
+    "listings and " + (c.tradeBps?.default ?? 0) + " bps elsewhere, including the initial purchase; FX spread " + c.fxSpreadBps +
+    " bps on every non-USD trade; withholding on distributions at " + wh + ", as for a non-US investor without treaty relief. " +
+    "These are stated assumptions, not quotes; tax on gains is not modelled.";
+
+  $("rebal-limit").textContent =
+    "The headline rebalances to target weight on the first session of each " + unit + ". Over the window, buy and hold " +
+    "returned " + pct(rc.holdPct) + " against " + pct(rc.basePct) + " for the base case and " + pct(rc.dailyPct) +
+    " rebalanced daily. A held book drifts with its winners, so the base case understates the concentration that " +
+    "would actually have built up.";
+}
+
+/* ------------------------------------------------------------------ risk */
+function renderRisk() {
+  const R = DATA.risk?.[VIEW === "hedged" ? "hedged" : "usd"];
+  if (!R?.rows?.length) return;
+  $("risk-block").hidden = false;
+  const order = Object.keys(SLEEVES);
+  const sleeveOf = (t) => POS.find((p) => p.ticker === t)?.sleeve;
+  const num = (v, d = 2) => (v == null ? "—" : (Math.abs(v) < 0.5 * 10 ** -d ? 0 : v).toFixed(d));
+  const share = (v) => (v == null ? "—" : (Math.abs(v) < 0.05 ? 0 : v).toFixed(1) + "%");
+  const rows = R.rows.filter((r) => !r.insufficient).sort((a, b) => (b.riskSharePct ?? 0) - (a.riskSharePct ?? 0));
+  const short = rows.filter((r) => r.short);
+
+  const top2 = rows.slice(0, 2);
+  const topShare = top2.reduce((a, r) => a + r.riskSharePct, 0);
+  const topW = top2.reduce((a, r) => a + r.weightPct, 0);
+  const bal = R.buckets.find((b) => b.sleeve === "ballast");
+  $("risk-lede").textContent =
+    top2.map((r) => r.key).join(" and ") + " hold " + topW.toFixed(0) + "% of the capital and " + topShare.toFixed(0) +
+    "% of the risk" + (bal ? "; Ballast holds " + bal.weightPct.toFixed(0) + "% of the capital and " + bal.riskSharePct.toFixed(0) + "% of the risk" : "") +
+    ". Share of risk is each line's contribution to the book's variance, so the column sums to the whole book " +
+    "and a negative entry is a line that lowered it.";
+
+  $("risk-bucket-tbl").innerHTML =
+    "<thead><tr><th>Bucket</th><th>Weight</th><th>Share of risk</th><th>Risk ÷ weight</th></tr></thead><tbody>" +
+    order.map((id) => R.buckets.find((b) => b.sleeve === id)).filter(Boolean).map((b) =>
+      '<tr style="--sleeve: var(' + SLEEVE_VAR[b.sleeve] + ')"><td class="lbl">' + SLEEVES[b.sleeve].numeral + " · " + escape(SLEEVES[b.sleeve].name) + "</td>" +
+      '<td class="n">' + b.weightPct.toFixed(0) + "%</td>" +
+      '<td class="n">' + share(b.riskSharePct) + "</td>" +
+      '<td class="n">' + num(b.riskSharePct / b.weightPct) + "</td></tr>"
+    ).join("") + "</tbody>";
+
+  $("risk-tbl").innerHTML =
+    "<thead><tr><th>Position</th><th>Bucket</th><th>Weight</th><th>Share of risk</th><th>Risk ÷ weight</th><th>Vol, weekly</th><th>ρ to book</th></tr></thead><tbody>" +
+    rows.map((r) =>
+      "<tr><td class=\"lbl\">" + escape(r.key) + (r.short ? " *" : "") + "</td>" +
+      "<td>" + escape(SLEEVES[sleeveOf(r.key)]?.name ?? "") + "</td>" +
+      '<td class="n">' + r.weightPct.toFixed(0) + "%</td>" +
+      '<td class="n ' + ((r.riskSharePct ?? 0) < 0 ? "pos" : "") + '">' + share(r.riskSharePct) + "</td>" +
+      '<td class="n">' + num(r.riskPerWeight) + "</td>" +
+      '<td class="n">' + num(r.volPct, 0) + "%</td>" +
+      '<td class="n">' + num(r.corrToBook) + "</td></tr>"
+    ).join("") + "</tbody>";
+
+  $("risk-note").textContent =
+    "Euler decomposition on weekly log returns over " + R.weeks + " weeks: weight × covariance with the book ÷ the book's " +
+    "variance, in the " + V().label + " view. Weekly sampling avoids the time-zone bias in daily cross-market " +
+    "covariances; on this basis the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure " +
+    "in the headline. " +
+    (short.length
+      ? "* " + short.map((r) => r.key + " (" + r.weeks + " weeks)").join(", ") + " has too short a history for a stable " +
+        "covariance; its share is indicative, and is why the column sums to " + R.sumPct.toFixed(0) + "% rather than 100%."
+      : "The column sums to " + R.sumPct.toFixed(0) + "%; the gap from 100% is the curve renormalising over lines that " +
+        "were not trading on some dates.");
+}
+
+/* ------------------------------------------------------------- benchmarks */
+// Benchmarks are neutral ink with distinct dashes and a direct end label, so
+// identity never rests on colour and the categorical hues stay with buckets.
+const BENCH_STYLE = {
+  vgt: { stroke: "--ink-2", dash: "7 4", width: 1.6 },
+  acwi: { stroke: "--ink-3", dash: "2 3", width: 1.6 },
+  "6040": { stroke: "--ink-3", dash: "9 3 2 3", width: 1.3 },
+};
+
+function renderBenchmarks() {
+  const B = DATA.benchmarks;
+  if (!B?.rows?.length) return;
+  $("bench-section").hidden = false;
+  const bookKey = VIEW === "hedged" ? "book-hedged" : "book-usd";
+  const book = B.rows.find((r) => r.key === bookKey) ?? B.rows.find((r) => r.kind === "book");
+  const otherBook = B.rows.find((r) => r.kind === "book" && r !== book);
+  const benches = B.rows.filter((r) => r.kind === "benchmark" && r.stats);
+  // No "-0.00": a value that rounds to zero prints as zero.
+  const num = (v, d = 2) => (v == null ? "—" : (Math.abs(v) < 0.5 * 10 ** -d ? 0 : v).toFixed(d));
+  const from = fmtDate(Date.parse(B.window.start)), to = fmtDate(Date.parse(B.window.end));
+  const rfTxt = B.riskFree?.annRetPct == null ? "" : " (" + B.riskFree.annRetPct.toFixed(1) + "% annualised over the window)";
+
+  $("bench-lede").textContent =
+    "A return means nothing on its own. This is the book beside what a reader could have held instead, over one " +
+    "shared window (" + from + " to " + to + "), in USD total return, rebased to 100 at its start. Sharpe and Sortino " +
+    "are in excess of " + B.riskFree.ticker + "'s total return" + rfTxt + ". Beta, tracking error and information ratio " +
+    "use weekly returns, because Seoul, Taipei and Riyadh close before New York opens.";
+
+  // ---- chart
+  const host = $("bench-chart");
+  host.innerHTML = "";
+  const lines = [book, ...benches].filter((r) => r.points?.length > 1);
+  const W = 1000, H = 300, m = { t: 14, r: 150, b: 28, l: 8 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xs = lines.flatMap((r) => r.points.map((p) => p.t)), ys = lines.flatMap((r) => r.points.map((p) => p.c));
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+  const X = (t) => m.l + ((t - x0) / (x1 - x0)) * iw;
+  const Y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Book and benchmarks, rebased to 100, " + from + " to " + to });
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + ((hi - lo) * i) / 4;
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: css("--rule"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: m.l + 4, y: Y(v) - 4, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, v.toFixed(0)));
+  }
+  if (lo < 100 && hi > 100) {
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(100), y2: Y(100), stroke: css("--rule-strong"), "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  }
+  const path = (pts) => pts.map((p, i) => (i ? "L" : "M") + X(p.t).toFixed(2) + " " + Y(p.c).toFixed(2)).join(" ");
+  // Benchmarks first, so the book's line sits on top.
+  for (const r of benches) {
+    const s = BENCH_STYLE[r.key] ?? { stroke: "--ink-3", dash: "3 3", width: 1.3 };
+    svg.appendChild(el("path", { d: path(r.points), fill: "none", stroke: css(s.stroke), "stroke-width": s.width, "stroke-dasharray": s.dash }));
+  }
+  svg.appendChild(el("path", { d: path(book.points), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round" }));
+
+  // Direct end labels, nudged apart so none overlap (min 15 units).
+  const ends = lines.map((r) => ({ r, y: Y(r.points.at(-1).c) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
+  for (const e of ends) {
+    const isBook = e.r === book;
+    const short = isBook ? "Book" : e.r.label.split(" (")[0];
+    svg.appendChild(el("text", {
+      x: m.l + iw + 8, y: e.y + 4, fill: isBook ? css("--ink") : css("--ink-2"), "font-size": 12,
+      "font-family": "var(--font-mono)", "font-weight": isBook ? 600 : 400,
+    }, short + " " + (e.r.points.at(-1).c - 100 >= 0 ? "+" : "") + (e.r.points.at(-1).c - 100).toFixed(1) + "%"));
+  }
+  svg.appendChild(el("text", { x: m.l, y: H - 8, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, from));
+  svg.appendChild(el("text", { x: m.l + iw, y: H - 8, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "end" }, to));
+
+  const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(hit);
+  host.appendChild(svg);
+
+  const tip = $("bench-tip");
+  const byDay = lines.map((r) => ({ r, map: new Map(r.points.map((p) => [new Date(p.t).toISOString().slice(0, 10), p.c])) }));
+  hit.addEventListener("mousemove", (ev) => {
+    const box = svg.getBoundingClientRect();
+    const t = x0 + ((((ev.clientX - box.left) / box.width) * W - m.l) / iw) * (x1 - x0);
+    let best = book.points[0];
+    for (const p of book.points) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    const key = new Date(best.t).toISOString().slice(0, 10);
+    cross.setAttribute("x1", X(best.t)); cross.setAttribute("x2", X(best.t)); cross.setAttribute("opacity", 0.4);
+    tip.classList.add("on");
+    tip.innerHTML = fmtDate(best.t) + byDay.map(({ r, map }) => {
+      const v = map.get(key);
+      return v == null ? "" : "<br>" + escape(r === book ? book.label : r.label) + " " + v.toFixed(1);
+    }).join("");
+    const hb = host.getBoundingClientRect();
+    tip.style.left = Math.min(Math.max(ev.clientX - hb.left + 12, 0), hb.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = ev.clientY - hb.top - 10 + "px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.classList.remove("on"); cross.setAttribute("opacity", 0); });
+
+  $("bench-cap").textContent =
+    "Index = 100 at " + from + ". Solid: " + book.label + ". Dashed, labelled at the end: " +
+    benches.map((r) => r.label).join(", ") + ". The 60/40 and the book are rebalanced " +
+    (DATA.rebalancing?.base ?? "daily") + ". Gross of all costs.";
+
+  // ---- table: absolute
+  const s = (r) => r.stats ?? {};
+  const absRow = (r, cls) =>
+    '<tr class="' + cls + '"><td class="lbl">' + escape(r.label) + "</td>" +
+    '<td class="n ' + signClass(s(r).retPct) + '">' + pct(s(r).retPct) + "</td>" +
+    '<td class="n">' + num(s(r).volPct, 1) + "%</td>" +
+    '<td class="n">' + num(s(r).sharpe) + "</td>" +
+    '<td class="n">' + num(s(r).sortino) + "</td>" +
+    '<td class="n">' + num(s(r).betaMkt) + "</td>" +
+    '<td class="n neg">' + pct(s(r).maxDrawdownPct) + "</td></tr>";
+  $("bench-tbl").innerHTML =
+    "<thead><tr><th>Series</th><th>Return</th><th>Volatility</th><th>Sharpe</th><th>Sortino</th><th>β to " +
+    escape(B.market) + "</th><th>Max DD</th></tr></thead><tbody>" +
+    absRow(book, "em") + (otherBook ? absRow(otherBook, "sub") : "") + benches.map((r) => absRow(r, "")).join("") +
+    "</tbody>";
+
+  // ---- table: relative to each benchmark
+  const rel = B.relative.filter((x) => x.book === book.key);
+  $("bench-rel-head").textContent = book.label + " against each benchmark";
+  $("bench-rel-tbl").innerHTML =
+    "<thead><tr><th>Benchmark</th><th>Excess return</th><th>Tracking error</th><th>Information ratio</th><th>β (t)</th></tr></thead><tbody>" +
+    rel.map((x) =>
+      '<tr><td class="lbl">' + escape(x.label) + "</td>" +
+      '<td class="n ' + signClass(x.excessRetPct) + '">' + pp(x.excessRetPct) + "</td>" +
+      '<td class="n">' + num(x.tePct, 1) + "%</td>" +
+      '<td class="n">' + num(x.ir) + "</td>" +
+      '<td class="n">' + num(x.beta) + ' <span style="color:var(--ink-3);font-size:.75rem">(' + num(x.betaT, 1) + ")</span></td></tr>"
+    ).join("") + "</tbody>";
+
+  // ---- the reading, from the numbers
+  const top = benches.reduce((a, b) => ((s(b).sharpe ?? -Infinity) > (s(a).sharpe ?? -Infinity) ? b : a));
+  const sharpeRead = (s(book).sharpe ?? -Infinity) >= (s(top).sharpe ?? -Infinity)
+    ? "Per unit of risk the book did at least as well as every benchmark here: a Sharpe of " + num(s(book).sharpe) +
+      " against " + num(s(top).sharpe) + " for " + top.label + ". "
+    : "Per unit of risk the book did not beat " + top.label + ": a Sharpe of " + num(s(book).sharpe) + " against " +
+      num(s(top).sharpe) + ", so holding it alone would have done as well for the volatility taken. ";
+  const sig = rel.filter((x) => Math.abs(x.ir ?? 0) >= 2);
+  const irRead = sig.length
+    ? "Only the gap to " + sig.map((x) => x.label).join(" and ") + " has an information ratio above 2, the rough bar for one year of data. "
+    : "No information ratio here clears 2, the rough bar for telling one year of outperformance from luck. ";
+  const betaRead = s(book).betaMkt == null ? "" :
+    "A beta of " + num(s(book).betaMkt) + " to " + B.market + " means much of the excess over global equity is leverage to the same market, not a separate source of return.";
+  $("bench-note").textContent = sharpeRead + irRead + betaRead;
 }
 
 /* ------------------------------------------------------- factor exposure */
@@ -1104,10 +1470,15 @@ function renderFactors() {
   const num = (v, d = 2) => (v == null ? "—" : v.toFixed(d));
   const tstat = (t) => (t == null ? "" : ' <span style="color:var(--ink-3);font-size:.75rem">(' + t.toFixed(1) + ")</span>");
   const tcell = (text, t) => '<td class="n">' + text + tstat(t) + "</td>";
+  // "The thesis" is every bucket except Ballast, as build-snapshot defines it.
+  const thesis = Object.keys(SLEEVES).filter((id) => id !== "ballast");
+  const thesisNumerals = SLEEVES[thesis[0]].numeral + "–" + SLEEVES[thesis.at(-1)].numeral;
+  const thesisNames = thesis.map((id) => SLEEVES[id].name);
+  const thesisList = thesisNames.slice(0, -1).join(", ") + " and " + thesisNames.at(-1);
 
   $("factor-tbl").innerHTML =
     "<thead><tr><th>Series</th>" + ids.map((id) => "<th>β " + escape(name(id)) + "</th>").join("") +
-    "<th>R²</th><th>α / yr</th><th>ρ to I + II</th><th>Weeks</th></tr></thead><tbody>" +
+    "<th>R²</th><th>α / yr</th><th>ρ to " + thesisNumerals + "</th><th>Weeks</th></tr></thead><tbody>" +
     f.rows.map((r) => {
       const cls = r.kind === "position" ? "sub" : r.key === "ballast" ? "em" : "";
       const label = r.kind === "bucket" ? SLEEVES[r.key].numeral + " · " + escape(r.label) : escape(r.label);
@@ -1127,7 +1498,7 @@ function renderFactors() {
   const b = f.rows.find((r) => r.key === "ballast" && !r.insufficient);
   const read = b
     ? "Ballast loads " + b.betas.tech.toFixed(2) + " on tech and " + b.betas.energy.toFixed(2) + " on energy, and the two together explain " +
-      (b.r2 * 100).toFixed(0) + "% of its weekly variance; its correlation with Energy and Compute combined is " +
+      (b.r2 * 100).toFixed(0) + "% of its weekly variance; its correlation with " + thesisList + " combined is " +
       num(b.rhoThesis) + ". " +
       (b.betas.tech > 0 && (b.rhoThesis ?? 0) > 0
         ? "That is diversification, not a hedge: it still rises and falls with the thesis, only less. A hedge would show a negative beta. "
@@ -1155,7 +1526,7 @@ document.addEventListener("click", (ev) => {
   const btn = ev.target.closest?.(".fxview button");
   if (!btn || btn.dataset.view === VIEW) return;
   VIEW = btn.dataset.view;
-  renderToggles(); renderStats(); renderCurve(); renderYtd(); renderTable(); renderRefreshLog();
+  renderToggles(); renderStats(); renderCurve(); renderRebalancing(); renderBenchmarks(); renderRisk(); renderYtd(); renderTable(); renderRefreshLog();
 });
 
 /* --------------------------------------------------------- section numbers */
@@ -1178,7 +1549,7 @@ function secNumberOf(id) {
 function renderAll() {
   renderStamp(); renderToggles(); renderStats(); renderChain();
   renderCurve(); renderAlloc(); renderYtd(); renderFx();
-  renderFactors(); renderTable(); renderDossier(); renderRefreshLog();
+  renderRebalancing(); renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderChanges(); renderRefreshLog();
   renderProxy(); numberSections();
 }
 renderAll();

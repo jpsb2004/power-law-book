@@ -43,7 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from research.discipline import CATALYSTS, VALUATION_RULES  # noqa: E402
-from research.ontology import load_book  # noqa: E402
+from research.ontology import BUCKET_LABELS, BUCKET_ORDER, load_book  # noqa: E402
 from research.scenarios import GRID_BOTTLENECK, apply_scenario  # noqa: E402
 
 OUTPUT = ROOT / "The_Power_Law_Book_Thesis.pdf"
@@ -58,10 +58,16 @@ RULE = colors.HexColor("#C8CDD4")
 
 BUCKET_INK = {"Energy": colors.HexColor("#B5790A"),
               "Compute": colors.HexColor("#1F6FB2"),
+              "Materials": colors.HexColor("#65389F"),
               "Ballast": colors.HexColor("#A02060")}
 BUCKET_TINT = {"Energy": colors.HexColor("#FAF3E4"),
                "Compute": colors.HexColor("#EAF1F8"),
+               "Materials": colors.HexColor("#F0EBF7"),
                "Ballast": colors.HexColor("#F9EAF1")}
+# Display order and labels come from the ontology, so a bucket added there
+# reaches every table and chart below without another hand-kept list.
+ORDER = [BUCKET_LABELS[k] for k in BUCKET_ORDER]
+NUMBER_WORDS = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
 CREAM = colors.HexColor("#F7F1E3")
 
 # --------------------------------------------------------------- geometry
@@ -178,11 +184,11 @@ class Chart(Drawing):
     """Base: no axes furniture beyond what the original showed."""
 
 
-def allocation_chart(width=136, height=74):
+def allocation_chart(width=136, height=88):
     """Horizontal target-weight bars for the cover sidebar."""
     d = Drawing(width, height)
-    order = ["Energy", "Compute", "Ballast"]
-    x0, top, row_h, bar_h = 34.0, height - 10.0, 18.0, 9.0
+    order = ORDER
+    x0, top, row_h, bar_h = 34.0, height - 10.0, 14.0, 8.0
     span = width - x0 - 22.0
     scale = span / 40.0                      # axis runs 0..40%
     d.add(Rect(0, 0, width, height, fillColor=CREAM, strokeColor=None))
@@ -194,7 +200,7 @@ def allocation_chart(width=136, height=74):
         d.add(Rect(x0, y, w, bar_h, fillColor=BUCKET_INK[label], strokeColor=None))
         d.add(String(x0 + w + 3, y + 2, f"{BUCKET_W.get(label, 0):.0f}%",
                      fontName="Helvetica-Bold", fontSize=5.5, fillColor=INK))
-    axis_y = top - 3 * row_h + 1
+    axis_y = top - len(order) * row_h + 1
     d.add(Line(x0, axis_y, x0 + span, axis_y, strokeColor=RULE, strokeWidth=0.5))
     for tick in (0, 10, 20, 30, 40):
         tx = x0 + tick * scale
@@ -209,7 +215,7 @@ def allocation_chart(width=136, height=74):
 def scenario_chart(width=133, height=74):
     """Per-bucket contribution for the grid scenario, straight from the model."""
     d = Drawing(width, height)
-    order = ["Energy", "Compute", "Ballast"]
+    order = ORDER
     vals = [grid_buckets.get(k, 0.0) for k in order]
     d.add(Rect(0, 0, width, height, fillColor=CREAM, strokeColor=None))
     left, base_pad, plot_h = 26.0, 16.0, height - 26.0
@@ -311,7 +317,7 @@ def boxed_header(text, width):
     return t
 
 
-BUCKET_LABEL = {"energy": "Energy", "compute": "Compute", "ballast": "Ballast"}
+BUCKET_LABEL = BUCKET_LABELS
 
 
 def positions_in(bucket):
@@ -360,16 +366,16 @@ for lead, rest in [
      " Grid interconnect queues and transformer lead times, not chip supply, increasingly "
      "gate how fast new capacity can actually come online."),
     ("Construction is top-down, not stock-by-stock.",
-     f" Target weights are set at the bucket level (Energy {BUCKET_W['Energy']:.0f}% / "
-     f"Compute {BUCKET_W['Compute']:.0f}% / Ballast {BUCKET_W['Ballast']:.0f}%); positions "
+     " Target weights are set at the bucket level ("
+     + " / ".join(f"{b} {BUCKET_W.get(b, 0):.0f}%" for b in ORDER) + "); positions "
      "inside each bucket are held close to equal-weight so no single stock call carries the thesis."),
     ("Compute is retained on purpose, not shrunk to a token hedge.",
      " A portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
      "construction than one that wins on the rotation but does not collapse if the rotation stalls."),
     ("Every position carries a standing falsification note:",
-     " the specific condition under which its inclusion in the thesis is wrong. Two "
-     "classification calls (the neocloud names, the critical-minerals ETF) are flagged as "
-     "stretches rather than smoothed over. See Section 4."),
+     " the specific condition under which its inclusion in the thesis is wrong. The neocloud "
+     "classification is flagged as a stretch rather than smoothed over, and the critical-minerals "
+     "ETF sits in its own Materials bucket rather than being counted as ballast. See Section 4."),
 ]:
     story.append(Paragraph(f"•&nbsp;<b>{lead}</b>{rest}", cover_body))
 
@@ -377,7 +383,8 @@ story.append(FrameBreak())
 
 # ---- sidebar
 SIDE_W = SIDE_R - SIDE_L
-story.append(boxed_header("KEY METRICS", SIDE_W))
+story.append(boxed_header("BACKTEST METRICS", SIDE_W))
+_bk = next((r for r in (book.benchmarks or {}).get("rows", []) if r.get("key") == "book-usd"), None)
 metrics = [
     ("Index level", f"{book.index_level:.2f}"),
     ("YTD (USD)", pct(stats.get("ytd", 0.0))),
@@ -385,6 +392,8 @@ metrics = [
     ("Volatility (ann.)", f"{stats.get('vol', 0.0):.1f}%"),
     ("Max drawdown", pct(stats.get("maxDrawdown", 0.0))),
 ]
+if _bk and _bk.get("stats", {}).get("sharpe") is not None:
+    metrics.append(("Sharpe (vs T-bills)", f"{_bk['stats']['sharpe']:.2f}"))
 mt = Table([[Paragraph(k, side_label), Paragraph(v, side_value)] for k, v in metrics],
            colWidths=[SIDE_W * 0.58, SIDE_W * 0.42], rowHeights=[21] * len(metrics))
 mt.setStyle(TableStyle([
@@ -394,8 +403,11 @@ mt.setStyle(TableStyle([
     ("LEFTPADDING", (0, 0), (0, -1), 8),
     ("RIGHTPADDING", (-1, 0), (-1, -1), 8),
 ]))
-story += [mt, Spacer(1, 10), boxed_header("BUCKET ALLOCATION", SIDE_W), Spacer(1, 6),
-          allocation_chart(SIDE_W, 74), Spacer(1, 12),
+story += [mt, Spacer(1, 4), Paragraph(
+              "Hindsight backtest, not a track record: today's weights replayed over twelve months, "
+              f"rebalanced {(book.rebalancing or {}).get('base', 'daily')}, gross of costs.", side_body_i),
+          Spacer(1, 8), boxed_header("BUCKET ALLOCATION", SIDE_W), Spacer(1, 6),
+          allocation_chart(SIDE_W, 88), Spacer(1, 12),
           boxed_header("AUTHOR", SIDE_W), Spacer(1, 7),
           Paragraph("<b>João</b>", side_body),
           Paragraph("Business Administration student, ESPM São Paulo", side_body),
@@ -409,7 +421,7 @@ story += [
     Paragraph("2. PORTFOLIO CONSTRUCTION", eyebrow),
     Paragraph("Bucket Weights and Factor Logic", headline),
     Paragraph(
-        "The book is organized into three thematic buckets rather than picked stock-by-stock. "
+        f"The book is organized into {NUMBER_WORDS[len(ORDER)]} thematic buckets rather than picked stock-by-stock. "
         "Target weights are set at the bucket level; positions within a bucket are then held "
         "close to equal-weight, so no single stock-picking call inside a bucket is doing "
         "outsized work. The bet is on the theme, not on any individual name being the best "
@@ -420,17 +432,16 @@ rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Weight", "N", "Structural e
 exposure = {
     "Energy": "Baseload generation, transmission, fuel supply, land and<br/>interconnect rights: the most direct expression of the thesis",
     "Compute": "The hardware layer itself: a macro counterweight against<br/>being wrong about the timing of the rotation",
+    "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
     "Ballast": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
 }
-for b in ("Energy", "Compute", "Ballast"):
+for b in ORDER:
     rows.append([Paragraph(b, tbl_cell), Paragraph(f"{BUCKET_W[b]:.1f}%", tbl_cell),
                  Paragraph(str(BUCKET_N[b]), tbl_cell), Paragraph(exposure[b], tbl_cell)])
 bt = Table(rows, colWidths=[78, 62, 36, 314])
 bt.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SPINE),
-    ("BACKGROUND", (0, 1), (-1, 1), BUCKET_TINT["Energy"]),
-    ("BACKGROUND", (0, 2), (-1, 2), BUCKET_TINT["Compute"]),
-    ("BACKGROUND", (0, 3), (-1, 3), BUCKET_TINT["Ballast"]),
+    *[("BACKGROUND", (0, i), (-1, i), BUCKET_TINT[b]) for i, b in enumerate(ORDER, start=1)],
     ("BOX", (0, 0), (-1, -1), 0.5, RULE),
     ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -443,8 +454,26 @@ story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
     "expression of the thesis. Compute is kept at close to a third of the book on purpose: a "
     "portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
     "construction than one that wins on the rotation but does not collapse if the rotation "
-    "stalls. Ballast is sized to absorb drawdown from the other two buckets rather than to add "
+    "stalls. Ballast is sized to absorb drawdown from the rest of the book rather than to add "
     "a competing return thesis.", body)]
+
+# Equal capital is not equal risk: the same Euler decomposition the page shows,
+# read from the snapshot rather than recomputed here.
+_risk = (book.risk or {}).get("usd") or {}
+_rrows = sorted((r for r in _risk.get("rows", []) if r.get("riskSharePct") is not None),
+                key=lambda r: -r["riskSharePct"])
+if _rrows:
+    _top = _rrows[:2]
+    _bk = {b["sleeve"]: b for b in _risk.get("buckets", [])}
+    _bal = _bk.get("ballast")
+    story.append(Paragraph(
+        "Near equal weight is not equal risk. Measured as each line's share of the book's variance "
+        f"(weekly USD returns, {_risk['weeks']} weeks), {_top[0]['key']} and {_top[1]['key']} hold "
+        f"{sum(r['weightPct'] for r in _top):.0f}% of the capital and "
+        f"{sum(r['riskSharePct'] for r in _top):.0f}% of the risk"
+        + (f"; Ballast holds {_bal['weightPct']:.0f}% of the capital and {_bal['riskSharePct']:.0f}% of the risk"
+           if _bal else "")
+        + ". The full table is on the published page.", body))
 
 # ---- NEW: valuation discipline
 val_rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Initiation threshold and trim discipline")]]
@@ -454,9 +483,8 @@ for label, rule in VALUATION_RULES:
 vt = Table(val_rows, colWidths=[78, 412])
 vt.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SPINE),
-    ("BACKGROUND", (0, 1), (-1, 1), BUCKET_TINT["Energy"]),
-    ("BACKGROUND", (0, 2), (-1, 2), BUCKET_TINT["Compute"]),
-    ("BACKGROUND", (0, 3), (-1, 3), BUCKET_TINT["Ballast"]),
+    *[("BACKGROUND", (0, i), (-1, i), BUCKET_TINT[label])
+      for i, (label, _) in enumerate(VALUATION_RULES, start=1)],
     ("BOX", (0, 0), (-1, -1), 0.5, RULE),
     ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -487,6 +515,12 @@ story.append(Paragraph(f"Compute &amp; Hardware ({BUCKET_W['Compute']:.1f}%, {BU
 for _p in positions_in("compute"):
     story.append(KeepTogether(position(_p)))
 
+_n_mat = BUCKET_N.get("Materials", 0)
+story.append(Paragraph(f"Critical Materials ({BUCKET_W.get('Materials', 0):.1f}%, {_n_mat} "
+                       f"position{'' if _n_mat == 1 else 's'})", sub_head))
+for _p in positions_in("materials"):
+    story.append(KeepTogether(position(_p)))
+
 story.append(Paragraph(f"Macro Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
 for _p in positions_in("ballast"):
     story.append(KeepTogether(position(_p)))
@@ -505,10 +539,10 @@ story += [
         "compute-infrastructure lessors, not power generators, and their high operational "
         f"correlation compresses the {N_POSITIONS}-position book closer to {N_POSITIONS - 1} independent bets.", weakness),
     Paragraph(
-        "<b>Ballast misclassification and liquidity drag.</b> RARA11.SA is assigned to Ballast "
-        "but is correlated with the same technology-materials cycle the rest of the book is "
-        f"long, and its thin trading history (~{RARA_COVER} active coverage in the measured "
-        "window) adds noise to any long-horizon variance figure.", weakness),
+        "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
+        "bucket rather than in Ballast, because it is correlated with the same technology-materials "
+        f"cycle the rest of the book is long. Its thin trading history (~{RARA_COVER} active "
+        "coverage in the measured window) adds noise to any long-horizon variance figure.", weakness),
     Paragraph(
         "<b>Temporal horizon mismatch.</b> Daily deviation tracking compares short-term market "
         "noise against a multi-year infrastructure lead-time thesis (permitting and transformer "
@@ -529,21 +563,48 @@ for heading, text in CATALYSTS:
         f"<b>{heading.replace('&', '&amp;')}.</b> {text.replace('**', '')}",
         catalyst_style, bulletText="•"))
 
+# ---- change log: every change to the book or its method, from positions.json
+_changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)
+if _changes:
+    _cl = [[Paragraph(h, tbl_head) for h in ("Date", "What changed", "Why")]]
+    for c in _changes:
+        _cl.append([Paragraph(c["date"], tbl_cell),
+                    Paragraph(c["change"].replace("&", "&amp;"), tbl_cell),
+                    Paragraph(c["why"].replace("&", "&amp;"), tbl_cell)])
+    clt = Table(_cl, colWidths=[62, 250, 178], repeatRows=1)
+    clt.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE),
+        ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story += [
+        Paragraph("Change Log", sub_head),
+        Paragraph(
+            "The figures in this note replay today's book, so every change below rewrites them; the live "
+            "record on the published page is chain-linked from its inception and is not rewritten. Entries "
+            "before 14 October 2026 are reconstructed from the repository history.", body),
+        clt,
+    ]
+
 # ============================================================== 5. RISK
 story += [
     Paragraph("5. RISK FRAMEWORK", eyebrow),
     Paragraph("Scenario Stress-Testing", headline),
     Paragraph(
-        "An empirical covariance matrix, estimated over a year of daily data across six "
-        f"currencies (one with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
+        f"An empirical covariance matrix, estimated over a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} "
+        f"currencies (one line with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
         "while being almost entirely noise. The portfolio uses stated-assumption scenario shocks "
         "instead.", body),
 ]
 grid_text = Paragraph(
     "Interconnection queues and transformer lead times, not chip supply, become the binding "
     "constraint; announced data-centre builds slip. Modelled portfolio impact "
-    f"<b>{pct(grid['portfolio_pct'])}</b> (Energy {pct(grid_buckets.get('Energy', 0))}, "
-    f"Compute {pct(grid_buckets.get('Compute', 0))}, Ballast {pct(grid_buckets.get('Ballast', 0))}). "
+    f"<b>{pct(grid['portfolio_pct'])}</b> ("
+    + ", ".join(f"{b} {pct(grid_buckets.get(b, 0))}" for b in ORDER) + "). "
     "This is the scenario the book is built to profit from being right about: the one where a "
     "negative headline number still confirms the thesis is working as designed.", inset)
 gt = Table([[grid_text, scenario_chart(133, 74)]], colWidths=[340, 150])
@@ -561,7 +622,7 @@ story += [gt, Spacer(1, 8), Paragraph(
     "number, is the hedge.", body), Paragraph(
     "<b>Geopolitical Shock</b> (Taiwan Strait escalation): advanced foundry output is "
     "interrupted and export controls tighten on strategic materials. The tail scenario the "
-    "portfolio is least hedged against: TSM, 2357.TW and ^KS11 all sit in the impact zone and "
+    "portfolio is least hedged against: TSM, 2357.TW and EWY all sit in the impact zone and "
     "are closer to one bet than three. RARA11.SA is the one line that works here, since the same "
     f"export controls that interrupt foundry output bid rare earths up, but at {RARA_W:.0f}% it cannot "
     f"offset a Compute bucket {BUCKET_W['Compute'] / (RARA_W or 1):.0f} times its size. Also left unmodelled rather than assigned a "
@@ -569,7 +630,7 @@ story += [gt, Spacer(1, 8), Paragraph(
 
 callout = Table([[Paragraph(
     "<b>Why stated assumptions instead of a fitted model.</b> A covariance matrix estimated "
-    "from a year of daily data across six currencies would look statistically rigorous and "
+    f"from a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} currencies would look statistically rigorous and "
     "would be almost entirely noise, given how little history several positions have. Stating "
     "one assumption directly and leaving the other two scenarios qualitative is less "
     "impressive-looking than assigning every scenario a precise number, and it is more honest "
