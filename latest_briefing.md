@@ -2,7 +2,7 @@
 ## The Power Law Book: Quantifying Physical Bottlenecks of the Global AI CapEx Supercycle
 
 **Daily note — 14 October 2026**  
-*Data as of 2026-10-14 19:14 UTC · 20 positions · base USD · index 135.35*
+*Data as of 2026-10-14 19:21 UTC · 20 positions · base USD · index 135.35*
 
 ---
 
@@ -13,7 +13,7 @@ No position moved beyond the 2σ alert threshold. The book sits at index 135.35,
 
 **Energy (38%)**
 
-**2222.SR** -1.6% (-1.7σ). Volume ran 0.93x its 50-day average. Most recent headline: "Aramco HQ Hit as Houthis Widen Attacks on Saudi Arabia - Bloomberg.com" (Bloomberg.com). Falsification on watch: Free float is thin and the payout leans on the state budget. A sustained sub-$60 Brent forces a choice between the dividend and Vision 2030.
+**2222.SR** -1.6% (-1.7σ). Volume ran 0.93x its 50-day average. Most recent headline: "Houthis attack Saudi Aramco headquarters - Financial Times" (Financial Times). Falsification on watch: Free float is thin and the payout leans on the state budget. A sustained sub-$60 Brent forces a choice between the dividend and Vision 2030.
 
 **PETR4.SA** +1.5% (+0.8σ). Volume ran 0.80x its 50-day average. Most recent headline: "Petrobras bate quarto recorde seguido e alcança marca histórica de R$ 800 bilhões na Bolsa - Estadão" (Estadão). Falsification on watch: Dividend policy is set by the controlling shareholder, and the controlling shareholder is the state. Fuel-price intervention ahead of an election ends the thesis without warning.
 
@@ -32,6 +32,6 @@ Energy carried -0.88% on the day against Compute at +0.03%, a spread of -0.92pp.
 
 ---
 
-*Generated 2026-10-14 19:14 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
+*Generated 2026-10-14 19:21 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
 
 *Not investment advice. A personal research exercise. Prices are delayed and sourced from a free public endpoint. Performance figures are a backward-looking simulation of current weights, not a track record.*
