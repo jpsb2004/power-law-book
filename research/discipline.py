@@ -26,7 +26,7 @@ VALUATION_RULES: tuple[tuple[str, str], ...] = (
     (
         "Compute",
         "Cap total exposure if Basket Forward P/E > 32x or NTM PEG > 1.8. Serves as "
-        "pure valuation-disciplined macro insurance.",
+        "valuation-disciplined insurance against mistiming the rotation.",
     ),
     (
         # DRAFT for the author: written when RARA11.SA moved out of Ballast.

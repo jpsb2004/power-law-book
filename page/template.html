@@ -1,5 +1,8 @@
+<!doctype html>
+<html lang="en">
 <meta charset="utf-8">
-<title>The Power Law Book — a macro portfolio on compute and the energy it eats</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Power Law Book — a thematic equity portfolio on compute and the energy it eats</title>
 <style>
 /* ---------------------------------------------------------------- tokens */
 :root {
@@ -124,7 +127,7 @@ a { color: var(--accent); }
 /* ----------------------------------------------------------------- stats */
 .stats {
   display: grid; gap: 1px; background: var(--rule);
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   border: 1px solid var(--rule); margin: 2.5rem 0;
 }
 .stat { background: var(--surface); padding: 1.1rem 1.2rem; }
@@ -245,17 +248,17 @@ td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .mini td.lbl { font-family: var(--font-mono); font-size: 0.82rem; }
 .mini tr.sub td.lbl { padding-left: 1.6rem; color: var(--ink-2); }
 .mini tr.em td { background: var(--surface-2); }
-.kv { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 0 0 1.5rem; }
+.kv { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); margin: 0 0 1.5rem; }
 .kv div { background: var(--surface); padding: 0.9rem 1rem; }
 .kv .k { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .kv .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.25rem; margin-top: 0.3rem; }
 .kv .n { font-size: 0.8rem; color: var(--ink-3); }
 .subhead { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 1.75rem 0 0.6rem; }
 
-.cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
 .note-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.1rem; }
 .note-list h3 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); }
-.note-list p { margin: 0.35rem 0 0; font-size: 0.92rem; color: var(--ink-2); }
+.note-list p { margin: 0.35rem 0 0; font-size: 0.92rem; color: var(--ink-2); overflow-wrap: anywhere; }
 
 footer { padding: 3rem 0 4rem; color: var(--ink-3); font-size: 0.85rem; }
 footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-height: 1.7; letter-spacing: 0.02em; margin-top: 1rem; }
@@ -271,7 +274,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
 <div class="wrap">
 
   <header class="masthead">
-    <p class="eyebrow">Global macro · single-book research note</p>
+    <p class="eyebrow">Thematic equity portfolio · long-only research note</p>
     <h1>The Power<br>Law Book<span class="thin">compute, and the energy it eats</span></h1>
     <p class="standfirst">
       <span id="npos-word">Twenty</span> positions built on one claim: that the demand curve for computation is
@@ -330,6 +333,14 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <h3 class="subhead" id="bench-rel-head"></h3>
     <div class="tbl-scroll"><table class="mini" id="bench-rel-tbl"></table></div>
     <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="bench-note"></p>
+  </section>
+
+  <section id="stress-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>When it goes wrong</h2></div>
+    <p class="lede prose" id="stress-lede"></p>
+    <div class="kv" id="tail-kv"></div>
+    <div class="tbl-scroll"><table class="mini" id="stress-tbl"></table></div>
+    <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="stress-note"></p>
   </section>
 
   <section>
@@ -399,14 +410,48 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="proxy-note"></p>
   </section>
 
+  <section id="bets-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>How many bets twenty lines are</h2></div>
+    <p class="lede prose" id="bets-lede"></p>
+    <div class="kv" id="bets-kv"></div>
+    <figure>
+      <div class="chart-box rel"><div id="heatmap"></div><div class="tip" id="heatmap-tip"></div></div>
+      <figcaption id="heatmap-cap"></figcaption>
+    </figure>
+    <h3 class="subhead">Single points of failure</h3>
+    <div class="tbl-scroll"><table class="mini" id="pof-tbl"></table></div>
+    <h3 class="subhead">Look-through: largest underlying exposures</h3>
+    <div class="tbl-scroll"><table class="mini" id="lt-tbl"></table></div>
+    <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="bets-note"></p>
+  </section>
+
+  <section id="value-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>What is priced in, and what would prove it wrong</h2></div>
+    <p class="lede prose" id="variant-view"></p>
+    <div class="cols">
+      <p class="prose" style="color:var(--ink-2)"><b>Horizon.</b> <span id="horizon"></span></p>
+      <p class="prose" style="color:var(--ink-2)"><b>Review and exit.</b> <span id="review-rules"></span></p>
+    </div>
+    <h3 class="subhead">Portfolio-level falsifiers, read today</h3>
+    <div class="tbl-scroll"><table class="mini" id="falsifier-tbl"></table></div>
+    <h3 class="subhead">Valuation by line</h3>
+    <div class="tbl-scroll"><table class="mini" id="val-tbl"></table></div>
+    <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="val-note"></p>
+  </section>
+
   <section id="factor-section" hidden>
-    <div class="sec-head"><span class="eyebrow secnum"></span><h2>Does the ballast ballast?</h2></div>
-    <p class="lede prose">
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>What the returns are made of</h2></div>
+    <p class="lede prose" id="factor-lede">
       Ballast exists in case the rest of the book is one trade. If it does its job, it should
       load lightly on the factors the thesis is long and explain little of its own movement
-      through them. Weekly USD returns, regressed on a tech factor and an energy factor.
+      through them.
     </p>
     <div class="tbl-scroll"><table class="mini" id="factor-tbl"></table></div>
+    <p style="color:var(--ink-2);margin-top:1rem;max-width:var(--measure)" id="factor-conclusion"></p>
+    <figure id="rolling-fig" hidden>
+      <div class="chart-box rel"><div id="rolling"></div><div class="tip" id="rolling-tip"></div></div>
+      <figcaption id="rolling-cap"></figcaption>
+    </figure>
     <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="factor-note"></p>
   </section>
 
@@ -447,9 +492,10 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
           eats the tracking error and FX. Gold is held as spot-backed shares rather than a dated
           future, so there is no roll and no expiry to manage.</p></li>
         <li><h3>The hedged view is a model, not a quote</h3><p>
-          It accrues the policy-rate differential day by day on the full marked value. Real forward
+          It accrues the short-rate differential day by day on the full marked value, from dated daily
+          series for USD (T-bills) and BRL (CDI) and a dated policy-rate table elsewhere. Real forward
           points also carry cross-currency basis, and TWD and BRL hedge offshore through
-          non-deliverable forwards whose implied rates can sit well away from the onshore policy rate.</p></li>
+          non-deliverable forwards; the hedge note shows what one point a year of basis would cost.</p></li>
         <li><h3>Not every position covers the full window</h3><p id="coverage-note">
           A fund that listed part-way through the year has no history before it existed. The curve
           renormalises across whatever is trading on each date, so the headline return describes the
@@ -463,6 +509,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
         <li><h3>Rebalancing is a modelling choice</h3><p id="rebal-limit">
           The curve rebalances to target weight on a fixed schedule. A held book would drift with its
           winners, so this understates the concentration that would actually have built up.</p></li>
+        <li><h3>Prices are checked against a second source</h3><p id="xcheck-note">
+          Each refresh compares Yahoo's closes for five US-listed lines against Nasdaq's published
+          closes, session by session.</p></li>
         <li><h3>Headline returns are gross</h3><p id="cost-limit">
           Returns include reinvested dividends and are net of each fund's own fee, which is already in
           its price. The headline is gross of commission, spread, withholding and the FX spread; the
@@ -570,8 +619,27 @@ function renderStamp() {
   $("disclaimer").textContent =
     "Not investment advice, not a recommendation, and not an offer to buy or sell anything. " +
     "A personal research exercise built to practise market analysis. Prices are delayed and " +
-    "sourced from a free public endpoint; they have not been reconciled against a paid vendor " +
-    "and may contain errors. Past performance says nothing about future returns.";
+    "sourced from a free public endpoint and cross-checked against a second free source, not a paid " +
+    "vendor; they may contain errors. Past performance says nothing about future returns. " +
+    "An educational exercise, not a securities analysis report: the author is not a CVM-registered securities analyst (Resolução CVM 20) or investment adviser, and nothing here is a recommendation.";
+
+  const xc = DATA.sourceCheck;
+  const ok = (xc?.rows ?? []).filter((r) => !r.error);
+  if (ok.length) {
+    const sessions = ok.reduce((a, r) => a + r.sessions, 0);
+    const worst = ok.reduce((a, r) => (r.maxAbsDiffPct > a.maxAbsDiffPct ? r : a));
+    $("xcheck-note").textContent =
+      "Each refresh compares Yahoo's unadjusted closes for " + ok.map((r) => r.ticker).join(", ") + " against " +
+      xc.source + ": " + sessions + " sessions on this run, largest gap " + worst.maxAbsDiffPct.toFixed(3) + "% (" +
+      worst.ticker + "). A gap above 0.5% is flagged by the validator. Dividend adjustment is Yahoo's ratio method; " +
+      "splits are applied to the whole history by the provider, and the validator flags a clean 2x/3x/4x jump.";
+  }
+  const vf = DATA.verification;
+  if (vf?.rows?.length) {
+    $("xcheck-note").textContent += " " + vf.rows.map((r) => r.ticker).join(", ") + " are also recomputed independently " +
+      "(standard-library Python and Excel formulas, research/verification.xlsx): largest difference from the pipeline " +
+      vf.maxAbsDiffPp.toFixed(4) + "pp, checked " + vf.asOf + ".";
+  }
 }
 
 function renderStats() {
@@ -609,6 +677,17 @@ function renderStats() {
 }
 
 /* ----------------------------------------------------------------- chain */
+// What the bucket actually trades like, beside what it is called (review P0-3):
+// its three-year weekly loadings from the factor section.
+function measured(id) {
+  const f = DATA.factors;
+  const r = f?.rows?.find((x) => x.key === id && x.kind === "bucket" && !x.insufficient);
+  if (!r) return "";
+  const parts = f.factors.map((x) => "β " + x.ticker + " " + r.betas[x.id].toFixed(2));
+  return '<p class="meta" style="color:var(--ink-3)">Trades like: ' + escape(parts.join("  ·  ")) +
+    "  (R² " + r.r2.toFixed(2) + ", weekly" + (f.window ? ", since " + escape(f.window.start.slice(0, 4)) : "") + ")</p>";
+}
+
 function renderChain() {
   const order = Object.keys(SLEEVES);
   $("chain").innerHTML = order
@@ -627,6 +706,7 @@ function renderChain() {
         "<h3>" + escape(s.name) + "</h3>" +
         '<p class="claim">' + escape(s.claim) + "</p>" +
         '<p class="meta">' + DATA.sleeveWeights[id] + "% of book  ·  " + escape(names) + "</p>" +
+        measured(id) +
         "</div></article>"
       );
     })
@@ -869,6 +949,8 @@ function renderYtd() {
 }
 
 /* ------------------------------------------------- chart: FX slope chart */
+const ccyMove = (r) => ((1 + r.usd.ytd / 100) / (1 + r.local.ytd / 100) - 1) * 100;
+
 function renderFx() {
   const host = $("fx");
   host.innerHTML = "";
@@ -914,7 +996,10 @@ function renderFx() {
 
     const g = el("text", { x: m.l + iw + 12, y: y2 + 4, "font-size": 11.5, "font-family": "var(--font-mono)", fill: css("--ink-2") });
     g.appendChild(el("tspan", {}, pct(r.usd.ytd) + "  "));
-    g.appendChild(el("tspan", { fill: colour }, "(" + pct(r.usd.ytd - r.local.ytd) + " FX)"));
+    // Two different numbers, labelled as such: the gap between the columns in
+    // percentage points, and the currency's own move against the dollar,
+    // (1 + USD) / (1 + local) - 1. They differ by the cross term.
+    g.appendChild(el("tspan", { fill: colour }, "(" + pp(r.usd.ytd - r.local.ytd) + "; ccy " + pct(ccyMove(r)) + ")"));
     svg.appendChild(g);
 
     const hit = el("rect", { x: m.l, y: Math.min(y1, y2) - 7, width: iw, height: Math.abs(y2 - y1) + 14, fill: "transparent", style: "cursor:pointer" });
@@ -922,7 +1007,8 @@ function renderFx() {
       const hb = host.getBoundingClientRect();
       tip.classList.add("on");
       tip.innerHTML = r.ticker + " · " + r.currency + "<br>Local " + pct(r.local.ytd) + " → USD " + pct(r.usd.ytd) +
-        "<br>FX contributed " + pp(r.usd.ytd - r.local.ytd) +
+        "<br>FX added " + pp(r.usd.ytd - r.local.ytd) + " to the USD return" +
+        "<br>The currency itself moved " + pct(ccyMove(r)) + " against the dollar" +
         (r.hedged?.ytd != null ? "<br>Hedged instead " + pct(r.hedged.ytd) : "");
       tip.style.left = Math.min(ev.clientX - hb.left + 12, hb.width - tip.offsetWidth - 4) + "px";
       tip.style.top = ev.clientY - hb.top - 10 + "px";
@@ -938,7 +1024,14 @@ function renderFx() {
 
   const rates = Object.entries(DATA.fx).filter(([c]) => c !== "USD")
     .map(([c, f]) => c + " " + (f.quoted ?? 0).toFixed(c === "GBP" ? 4 : 2)).join("  ·  ");
-  $("fx-cap").textContent = "Converted at each day's rate, not today's. Closing rates: " + rates + ".";
+  const brl = DATA.baseViews?.BRL;
+  $("fx-cap").textContent = "Converted at each day's rate, not today's. Closing rates: " + rates + ". " +
+    "Labels show the percentage-point gap and, after “ccy”, the currency's own move against the dollar." +
+    (brl
+      ? " USD is the base because most lines and every benchmark are dollar assets. Measured in reais, the unhedged book returned " +
+        pct(brl.stats.ytd) + " year to date and " + pct(brl.stats.ret1y) + " over twelve months, against " +
+        pct(brl.usdStats.ytd) + " and " + pct(brl.usdStats.ret1y) + " in dollars."
+      : "");
 
   renderHedge(rows);
 }
@@ -952,7 +1045,7 @@ function renderHedge(rows) {
   for (const r of rows) (byCcy[r.currency] ??= []).push(r);
 
   $("hedge-tbl").innerHTML =
-    "<thead><tr><th>Currency</th><th>Policy rate</th><th>Hedge carry / yr</th>" +
+    "<thead><tr><th>Currency</th><th>Rate today</th><th>Hedge carry / yr</th>" +
     "<th>Position</th><th>YTD local</th><th>YTD unhedged</th><th>YTD hedged</th></tr></thead><tbody>" +
     Object.keys(h.carryPct).flatMap((ccy) =>
       (byCcy[ccy] ?? []).map((r, i) =>
@@ -968,10 +1061,19 @@ function renderHedge(rows) {
       )
     ).join("") + "</tbody>";
 
+  const dated = h.dated ?? [];
+  const bs = h.basisSensitivity;
   $("hedge-note").textContent =
-    "Carry is the USD rate (" + usdRate.toFixed(2) + "%) minus the local policy rate, as of " + h.asOf +
-    ", held flat across the window. Positive means the hedge earns. Sources: " +
-    Object.entries(h.sources).map(([c, s]) => c + " " + s).join("; ") + ".";
+    "Carry is the USD rate (" + usdRate.toFixed(2) + "% today) minus the local rate, accrued day by day. " +
+    (dated.length
+      ? dated.join(" and ") + " use dated daily series, so the carry moves with the rate path; the others hold the " +
+        "policy rate as of " + h.asOf + " flat. "
+      : "Rates are held flat as of " + h.asOf + ". ") +
+    "Positive means the hedge earns. Sources: " + Object.entries(h.sources).map(([c, s]) => c + " " + s).join("; ") + "." +
+    (bs?.delta1y != null
+      ? " Sensitivity: if offshore NDF basis made every non-dollar hedge 1 point a year dearer, the hedged book would " +
+        "return " + pct(bs.ret1y) + " over twelve months (" + pp(bs.delta1y, 2) + ")."
+      : "");
 }
 
 /* ---------------------------------------------------------------- tables */
@@ -1022,6 +1124,7 @@ function renderDossier() {
       if (p.proxy) tags.push("tradable via " + p.proxy.ticker);
       if (p.tradability === "future") tags.push("expires " + p.expiry);
       if (p.tradability === "private") tags.push("illiquid · stale mark");
+      for (const f of p.flags ?? []) tags.push(f);
       const tagHtml = tags.map((t, i) =>
         '<span class="tag' + (i > 0 ? " warn" : "") + '">' + escape(t) + "</span>").join(" ");
       return (
@@ -1175,6 +1278,164 @@ function renderProxy() {
       " of tracking difference over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
       "shares rather than a dated future, so there is no roll and no expiry to manage.";
   $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
+}
+
+/* ---------------------------------------------------------- tail & stress */
+function renderStress() {
+  const T = DATA.tail, S = DATA.stress;
+  if (!T || !S) return;
+  $("stress-section").hidden = false;
+  const loss = (v) => (v == null ? "—" : "−" + Math.abs(v).toFixed(1) + "%");
+  const dd = T.daily ?? [], wk = T.weekly ?? [];
+  $("stress-lede").textContent =
+    "The drawdown in the headline comes from one strong year. These are the losses the book would have taken in " +
+    "the bad stretches of the last five years, today's weights held through each, and the tail of its own " +
+    "distribution. Historical figures are what happened to these lines, or to a stated stand-in where a line did " +
+    "not exist yet; they are not forecasts.";
+  const tiles = [
+    dd[0] && { k: "1-day VaR 95%", v: loss(dd[0].varPct), n: "CVaR " + loss(dd[0].cvarPct) + " · " + dd[0].n + " days" },
+    dd[1] && { k: "1-day VaR 99%", v: loss(dd[1].varPct), n: "CVaR " + loss(dd[1].cvarPct) },
+    wk[0] && { k: "1-week VaR 95%", v: loss(wk[0].varPct), n: "CVaR " + loss(wk[0].cvarPct) + " · " + wk[0].n + " weeks" },
+    wk[1] && { k: "1-week VaR 99%", v: loss(wk[1].varPct), n: "CVaR " + loss(wk[1].cvarPct) },
+  ].filter(Boolean);
+  $("tail-kv").innerHTML = tiles.map((c) =>
+    '<div><div class="k">' + c.k + '</div><div class="v neg">' + c.v + '</div><div class="n">' + escape(c.n) + "</div></div>").join("");
+
+  const cell = (v) => '<td class="n ' + signClass(v) + '">' + pct(v) + "</td>";
+  const row = (name, kind, when, book, b = {}) =>
+    '<tr><td class="lbl">' + escape(name) + '</td><td><span class="tag">' + kind + "</span></td>" +
+    '<td style="font-size:.8rem;color:var(--ink-3);white-space:nowrap">' + escape(when) + "</td>" +
+    '<td class="n ' + signClass(book) + '" style="font-weight:600">' + pct(book) + "</td>" +
+    cell(b.VGT) + cell(b.ACWI) + cell(b["60/40"]) + "</tr>";
+  $("stress-tbl").innerHTML =
+    "<thead><tr><th>Scenario</th><th>Kind</th><th>Window</th><th>Book</th><th>VGT</th><th>ACWI</th><th>60/40</th></tr></thead><tbody>" +
+    S.historical.map((h) => row(h.name, "historical", h.start + " → " + h.end, h.bookPct, h.benchmarks)).join("") +
+    S.hypothetical.map((h) => row(h.name, "factor", "β " + (h.beta ?? 0).toFixed(2) + " to " + h.factor, h.bookPct,
+      { [h.factor]: h.shockPct })).join("") +
+    S.stated.map((h) => row(h.name, "stated", "assumed shocks", h.bookPct)).join("") +
+    "</tbody>";
+
+  const proxies = Object.entries(S.proxies ?? {}).map(([k, v]) => k + " → " + v.ticker).join(", ");
+  const worst = S.historical.filter((h) => h.bookPct != null).sort((a, b) => a.bookPct - b.bookPct)[0];
+  $("stress-note").textContent =
+    (worst ? "The worst historical window is " + worst.name + ", " + pct(worst.bookPct) + " against " + pct(worst.benchmarks.ACWI) +
+      " for ACWI. " : "") +
+    "VaR is the loss exceeded on the worst 5% (or 1%) of days or weeks; CVaR is the average loss on those days. One-day " +
+    "figures use the headline year, one-week figures three years. " + (S.note ?? "") + " Stand-ins where a line did not exist: " +
+    proxies + ". Factor rows apply the book's measured beta to a hypothetical move. Stated rows are the judgement " +
+    "shocks in data/scenarios.json, the same ones the dashboard's Stress Tests tab uses.";
+}
+
+/* ------------------------------------------------------- bets & look-through */
+function renderBets() {
+  const S = DATA.structure;
+  if (!S) return;
+  $("bets-section").hidden = false;
+  $("bets-lede").textContent =
+    "Twenty lines are not twenty independent bets. Weekly USD returns over " + S.weeks + " weeks: the effective number of " +
+    "bets splits the book's variance across its principal components and asks how evenly it is spread: 1 if everything " +
+    "rides one factor, " + S.lines + " if every line were its own bet.";
+  const tiles = [
+    { k: "Effective bets", v: S.enb.toFixed(1), n: "of " + S.lines + " lines (Meucci entropy measure)" },
+    { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: "of the book's variance" },
+    { k: "Common factor", v: S.firstCorrPcPct.toFixed(0) + "%", n: "of total correlation, first eigenvalue" },
+  ];
+  $("bets-kv").innerHTML = tiles.map((c) =>
+    '<div><div class="k">' + c.k + '</div><div class="v">' + c.v + '</div><div class="n">' + escape(c.n) + "</div></div>").join("");
+
+  // Heatmap: diverging around zero with a neutral midpoint; the accent for
+  // positive correlation, amber for negative. Every cell also prints its value.
+  const host = $("heatmap");
+  host.innerHTML = "";
+  const n = S.tickers.length, cs = 34, lab = 74;
+  const W = lab + n * cs + 4, H = lab + n * cs + 4;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Correlation matrix of weekly returns" });
+  const fill = (r) => r >= 0
+    ? "color-mix(in oklab, var(--accent) " + Math.round(r * 85) + "%, var(--surface-2))"
+    : "color-mix(in oklab, var(--s1) " + Math.round(-r * 85) + "%, var(--surface-2))";
+  const tip = $("heatmap-tip");
+  S.tickers.forEach((t, i) => {
+    const short = t.replace(/\.(SA|SR|TW|L)$/, "");
+    svg.appendChild(el("text", { x: lab - 6, y: lab + i * cs + cs / 2 + 4, fill: css("--ink-2"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "end" }, short));
+    svg.appendChild(el("text", { x: 0, y: 0, fill: css("--ink-2"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "start",
+      transform: "translate(" + (lab + i * cs + cs / 2 + 4) + "," + (lab - 6) + ") rotate(-60)" }, short));
+    S.tickers.forEach((u, j) => {
+      const r = S.corr[i][j];
+      const rect = el("rect", { x: lab + j * cs + 1, y: lab + i * cs + 1, width: cs - 2, height: cs - 2, rx: 2, style: "fill:" + fill(r) });
+      rect.addEventListener("mousemove", (ev) => {
+        const hb = host.getBoundingClientRect();
+        tip.classList.add("on");
+        tip.innerHTML = escape(t) + " × " + escape(u) + "<br>ρ " + r.toFixed(2);
+        tip.style.left = Math.min(ev.clientX - hb.left + 12, hb.width - tip.offsetWidth - 4) + "px";
+        tip.style.top = ev.clientY - hb.top - 10 + "px";
+      });
+      rect.addEventListener("mouseleave", () => tip.classList.remove("on"));
+      svg.appendChild(rect);
+      if (i !== j) {
+        svg.appendChild(el("text", { x: lab + j * cs + cs / 2, y: lab + i * cs + cs / 2 + 4, fill: css(Math.abs(r) > 0.55 ? "--surface" : "--ink-2"),
+          "font-size": 9.5, "font-family": "var(--font-mono)", "text-anchor": "middle", style: "pointer-events:none" },
+          (Math.abs(r) < 0.05 ? 0 : r).toFixed(1).replace("0.", ".").replace(/^\.0$/, "0")));
+      }
+    });
+  });
+  host.appendChild(svg);
+  $("heatmap-cap").textContent = "Pairwise correlation of weekly USD returns; darker teal means the two lines move together, amber that they move apart. " +
+    (S.excluded.length ? S.excluded.join(", ") + " has under 40 weeks of history and is left out. " : "") + "Hover a cell for the exact value.";
+
+  const pof = S.pointsOfFailure ?? [];
+  $("pof-tbl").innerHTML = "<thead><tr><th>Shared failure</th><th>Lines</th><th>Capital</th><th>Share of risk</th><th>Why one failure</th></tr></thead><tbody>" +
+    pof.map((g) => '<tr><td class="lbl">' + escape(g.name) + "</td><td>" + escape(g.tickers.join(", ")) + "</td>" +
+      '<td class="n">' + g.capitalPct.toFixed(0) + '%</td><td class="n">' + g.riskSharePct.toFixed(0) + "%</td>" +
+      '<td style="font-size:.84rem;color:var(--ink-2)">' + escape(g.why) + "</td></tr>").join("") + "</tbody>";
+
+  const F = DATA.fundamentals;
+  if (F?.lookThrough?.length) {
+    $("lt-tbl").innerHTML = "<thead><tr><th>Underlying</th><th>Name</th><th>Exposure</th><th>Through</th></tr></thead><tbody>" +
+      F.lookThrough.slice(0, 10).map((e) => '<tr><td class="lbl">' + escape(e.key) + "</td><td>" + escape(e.name) + "</td>" +
+        '<td class="n">' + e.weightPct.toFixed(2) + "%</td><td>" + escape(e.via.join(", ")) + "</td></tr>").join("") + "</tbody>";
+  }
+  const cover = (F?.funds ?? []).map((f) => f.ticker + " " + f.coveredPct.toFixed(0) + "%").join(", ");
+  $("bets-note").textContent =
+    "Share of risk is the Euler decomposition from the allocation section, summed over each group. Look-through adds each " +
+    "fund's published top holdings, times the fund's weight, to the lines held directly; it is a floor, because only top " +
+    "holdings are published" + (cover ? " (coverage: " + cover + ")" : "") + ". Source: " + (F?.source ?? "unavailable") +
+    (F?.asOf ? ", " + F.asOf : "") + ".";
+}
+
+/* ------------------------------------------------------ valuation & thesis */
+function renderValue() {
+  const T = DATA.thesis, F = DATA.fundamentals;
+  if (!T && !F?.valuation) return;
+  $("value-section").hidden = false;
+  if (T) {
+    $("variant-view").textContent = T.variantView;
+    $("horizon").textContent = T.horizon;
+    $("review-rules").textContent = T.reviewRules;
+    const reading = (c) => c.reading == null ? "checked each earnings season"
+      : c.unit === "$" ? "$" + c.reading.toFixed(2) : c.unit === "pp" ? pp(c.reading) : pct(c.reading);
+    $("falsifier-tbl").innerHTML = "<thead><tr><th>Falsifier</th><th>Test</th><th>Reading</th><th>Status</th></tr></thead><tbody>" +
+      T.checks.map((c) => '<tr><td class="lbl">' + escape(c.name) + '</td><td style="font-size:.84rem;color:var(--ink-2)">' + escape(c.test) + "</td>" +
+        '<td class="n">' + escape(reading(c)) + (c.detail ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(c.detail) + "</div>" : "") + "</td>" +
+        "<td>" + (c.triggered == null ? '<span class="tag">watch</span>' : c.triggered ? '<span class="tag warn">triggered</span>' : '<span class="tag">holding</span>') +
+        "</td></tr>").join("") + "</tbody>";
+  }
+  if (F?.valuation?.length) {
+    const x = (v, d, suf) => (v == null ? "—" : v < 0 && suf === "x" ? "n.m." : v.toFixed(d) + suf);
+    const sleeveOf = (t) => POS.find((p) => p.ticker === t)?.sleeve;
+    $("val-tbl").innerHTML = "<thead><tr><th>Line</th><th>Bucket</th><th>Fwd P/E</th><th>Trailing P/E</th><th>EV/EBITDA</th><th>FCF yield</th><th>Dividend yield</th></tr></thead><tbody>" +
+      F.valuation.map((v) => '<tr><td class="lbl">' + escape(v.ticker) + (v.currencyNote ? " *" : "") + "</td><td>" + escape(SLEEVES[sleeveOf(v.ticker)]?.name ?? "") + "</td>" +
+        '<td class="n">' + x(v.forwardPE, 1, "x") + '</td><td class="n">' + x(v.trailingPE, 1, "x") + '</td><td class="n">' + x(v.evToEbitda, 1, "x") +
+        '</td><td class="n">' + x(v.fcfYieldPct, 1, "%") + '</td><td class="n">' + x(v.dividendYieldPct, 1, "%") + "</td></tr>").join("") + "</tbody>";
+    const notes = F.valuation.filter((v) => v.currencyNote).map((v) => "* " + v.ticker + ": " + v.currencyNote + ".");
+    // The Compute trim rule, checked against the data: harmonic mean of the
+    // bucket's positive forward P/Es (equal weights inside the bucket).
+    const cl = F.valuation.filter((v) => v.forwardPE > 0 && sleeveOf(v.ticker) === "compute");
+    const bpe = cl.length ? cl.length / cl.reduce((a, v) => a + 1 / v.forwardPE, 0) : null;
+    if (bpe) notes.unshift("Compute basket forward P/E (harmonic mean of " + cl.map((v) => v.ticker).join(", ") + "): " +
+      bpe.toFixed(1) + "x against the 32x cap in the Compute rule" + (bpe > 32 ? ", so the cap binds." : ", inside the cap."));
+    $("val-note").textContent = "Source: " + F.source + ", retrieved " + F.asOf + ". Funds show the fund-level P/E and distribution yield the " +
+      "provider reports; n.m. marks a negative multiple (loss-making). The bucket trim rules in the allocation section apply to these figures. " + notes.join(" ");
+  }
 }
 
 /* ------------------------------------------------------------ change log */
@@ -1495,20 +1756,97 @@ function renderFactors() {
         '<td class="n">' + r.n + "</td></tr>";
     }).join("") + "</tbody>";
 
+  const yrs = f.window ? ((Date.parse(f.window.end) - Date.parse(f.window.start)) / 3.15576e10).toFixed(0) : null;
+  const fnames = f.factors.map((x) => x.ticker + " (" + x.id + ")").join(", ");
+  $("factor-lede").textContent =
+    "Ballast exists in case the rest of the book is one trade. If it does its job, it should load lightly on the " +
+    "factors the thesis is long and explain little of its own movement through them. Weekly USD returns" +
+    (f.excessOf ? " in excess of " + f.excessOf + " (T-bills)" : "") +
+    (f.window ? ", " + fmtDate(Date.parse(f.window.start)) + " to " + fmtDate(Date.parse(f.window.end)) + " (" + yrs + " years)" : "") +
+    ", regressed on " + fnames + ". None of the factors is a holding, so no bucket is regressed on itself.";
+
   const b = f.rows.find((r) => r.key === "ballast" && !r.insufficient);
+  const lead = (r) => {
+    const top = ids.reduce((a, id) => (Math.abs(r.betas[id]) > Math.abs(r.betas[a]) ? id : a));
+    return name(top) + " (" + r.betas[top].toFixed(2) + ")";
+  };
   const read = b
-    ? "Ballast loads " + b.betas.tech.toFixed(2) + " on tech and " + b.betas.energy.toFixed(2) + " on energy, and the two together explain " +
-      (b.r2 * 100).toFixed(0) + "% of its weekly variance; its correlation with " + thesisList + " combined is " +
-      num(b.rhoThesis) + ". " +
-      (b.betas.tech > 0 && (b.rhoThesis ?? 0) > 0
-        ? "That is diversification, not a hedge: it still rises and falls with the thesis, only less. A hedge would show a negative beta. "
-        : "A negative loading is what a hedge looks like; with ~50 observations, check the t-stat before believing it. ")
+    ? "Ballast's largest loading is on " + lead(b) + "; the factors together explain " + (b.r2 * 100).toFixed(0) +
+      "% of its weekly variance, and its correlation with " + thesisList + " combined is " + num(b.rhoThesis) + ". " +
+      (ids.some((id) => b.betas[id] > 0.3 && (b.tStats[id] ?? 0) > 2)
+        ? "That is not a hedge: it rises and falls with the market, only by different amounts. A hedge would show negative loadings. "
+        : "Its loadings are small; a hedge would show them negative. ")
     : "";
+  const sig = f.rows.filter((r) => !r.insufficient && r.kind !== "position" && Math.abs(r.alphaT ?? 0) >= 2);
+  $("factor-conclusion").textContent =
+    "Returns are explained by factor exposure; there is no evidence of skill. " +
+    (sig.length
+      ? sig.map((r) => r.label).join(", ") + " show" + (sig.length === 1 ? "s" : "") + " an intercept with a t-statistic near or " +
+        "above 2, but this is a backtest of positions chosen knowing how these years went: an intercept there measures " +
+        "the selection, not an edge that would have been available in advance."
+      : "No intercept clears a t-statistic of 2.");
   $("factor-note").textContent =
     read +
-    "t-statistics in brackets. An annualised intercept from ~50 weekly observations is noise unless its t-stat clears about 2, " +
-    "so this table cannot show alpha — it shows exposure. " + name("tech") + " is also a Compute holding, so part of that bucket's tech beta is mechanical. " +
-    "Weekly sampling is used because Seoul and Taipei close before New York opens, which biases daily cross-market betas toward zero.";
+    "t-statistics in brackets; alpha is the annualised intercept. Weekly sampling is used because Seoul, Taipei and " +
+    "Riyadh close before New York opens, which biases daily cross-market betas toward zero. The long-run curve " +
+    "replays today's weights; lines that listed later join when they list.";
+
+  renderRolling();
+}
+
+function renderRolling() {
+  const pts = (DATA.factors?.rolling ?? []).filter((p) => p.market != null);
+  if (pts.length < 10) return;
+  $("rolling-fig").hidden = false;
+  const host = $("rolling");
+  host.innerHTML = "";
+  const W = 1000, H = 240, m = { t: 14, r: 120, b: 26, l: 8 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xs = pts.map((p) => p.t), ys = pts.flatMap((p) => [p.market, p.semis]).filter((v) => v != null);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let lo = Math.min(0, ...ys), hi = Math.max(...ys);
+  const pad = (hi - lo) * 0.1 || 0.1; lo -= pad; hi += pad;
+  const X = (t) => m.l + ((t - x0) / (x1 - x0)) * iw;
+  const Y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Rolling 52-week beta of the book to global equity and semiconductors" });
+  for (const v of [0, 0.5, 1, 1.5, 2].filter((v) => v >= lo && v <= hi)) {
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: css(v === 0 ? "--rule-strong" : "--rule"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: m.l + 4, y: Y(v) - 4, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, v.toFixed(1)));
+  }
+  const series = [
+    { key: "market", label: "β to ACWI", stroke: "--accent", dash: null, width: 2 },
+    { key: "semis", label: "β to SMH", stroke: "--ink-2", dash: "6 4", width: 1.6 },
+  ];
+  for (const s of series) {
+    const d = pts.filter((p) => p[s.key] != null).map((p, i) => (i ? "L" : "M") + X(p.t).toFixed(2) + " " + Y(p[s.key]).toFixed(2)).join(" ");
+    svg.appendChild(el("path", { d, fill: "none", stroke: css(s.stroke), "stroke-width": s.width, ...(s.dash ? { "stroke-dasharray": s.dash } : {}) }));
+    const last = pts.at(-1)[s.key];
+    svg.appendChild(el("text", { x: m.l + iw + 8, y: Y(last) + 4, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-mono)" }, s.label + " " + last.toFixed(2)));
+  }
+  svg.appendChild(el("text", { x: m.l, y: H - 6, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, fmtDate(x0)));
+  svg.appendChild(el("text", { x: m.l + iw, y: H - 6, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "end" }, fmtDate(x1)));
+  const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(hit);
+  host.appendChild(svg);
+  const tip = $("rolling-tip");
+  hit.addEventListener("mousemove", (ev) => {
+    const box = svg.getBoundingClientRect();
+    const t = x0 + ((((ev.clientX - box.left) / box.width) * W - m.l) / iw) * (x1 - x0);
+    let best = pts[0];
+    for (const p of pts) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    cross.setAttribute("x1", X(best.t)); cross.setAttribute("x2", X(best.t)); cross.setAttribute("opacity", 0.4);
+    tip.classList.add("on");
+    tip.innerHTML = "52 weeks to " + fmtDate(best.t) + "<br>β to ACWI " + best.market.toFixed(2) + "<br>β to SMH " + (best.semis ?? 0).toFixed(2);
+    const hb = host.getBoundingClientRect();
+    tip.style.left = Math.min(Math.max(ev.clientX - hb.left + 12, 0), hb.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = ev.clientY - hb.top - 10 + "px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.classList.remove("on"); cross.setAttribute("opacity", 0); });
+  $("rolling-cap").textContent =
+    "Rolling 52-week beta of the book's weekly excess return to ACWI (solid) and, separately, to SMH (dashed). " +
+    "A rising line means the book has become more of a leveraged bet on that factor.";
 }
 
 /* ------------------------------------------------------------- view toggle */
@@ -1549,7 +1887,7 @@ function secNumberOf(id) {
 function renderAll() {
   renderStamp(); renderToggles(); renderStats(); renderChain();
   renderCurve(); renderAlloc(); renderYtd(); renderFx();
-  renderRebalancing(); renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderChanges(); renderRefreshLog();
+  renderRebalancing(); renderBenchmarks(); renderStress(); renderRisk(); renderBets(); renderValue(); renderFactors(); renderTable(); renderDossier(); renderChanges(); renderRefreshLog();
   renderProxy(); numberSections();
 }
 renderAll();

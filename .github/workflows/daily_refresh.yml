@@ -49,7 +49,7 @@ jobs:
 
       - run: npm ci
 
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements-dev.txt
 
       # Guards the roster before anything fetches or publishes: counts must
       # agree across positions.json, holdings.js and the last snapshot, and
@@ -60,7 +60,9 @@ jobs:
       # The maths the page publishes. A failing test stops the run before it
       # can replace a correct snapshot with one built on broken code.
       - name: Unit tests
-        run: npm test
+        run: |
+          npm test
+          python -m pytest tests -q
 
       - name: Fetch and validate daily closes
         id: refresh
@@ -122,6 +124,21 @@ jobs:
           # note is commentary on top of them.
           if [ $code -ne 0 ]; then echo "::warning::briefing generation failed (exit $code); keeping previous note"; fi
 
+      # Three lines recomputed by independent code (and as Excel formulas)
+      # against the snapshot just written. Before the page is uploaded, so
+      # the page reports today's check; a failure never blocks publishing.
+      - name: Independent verification
+        if: steps.refresh.outputs.status == 'published'
+        run: |
+          python scripts/verify_independent.py && node scripts/build-page.mjs || echo "::warning::verification failed"
+
+      # The PDF is rebuilt from the same snapshot, so the note sent with an
+      # application never disagrees with the page. A failure keeps the last PDF.
+      - name: Build thesis PDF
+        if: steps.refresh.outputs.status == 'published'
+        run: |
+          python scripts/make_pdf.py || echo "::warning::PDF build failed; keeping the previous PDF"
+
       - name: Commit daily closes
         if: steps.refresh.outputs.status == 'published'
         uses: stefanzweifel/git-auto-commit-action@v7
@@ -129,7 +146,7 @@ jobs:
           commit_message: "refresh: daily closes ${{ github.run_id }} [skip ci]"
           # Only the data the next run needs as its validation baseline, plus
           # the note. out/ is gitignored and ships as a Pages artifact instead.
-          file_pattern: data/snapshot.json data/history.json data/track.json latest_briefing.md
+          file_pattern: data/snapshot.json data/history.json data/track.json data/prices.csv data/verification.json research/verification.xlsx latest_briefing.md The_Power_Law_Book_Thesis.pdf
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
 

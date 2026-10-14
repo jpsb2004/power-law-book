@@ -45,12 +45,21 @@ try {
   track = null;
 }
 
+// The independent recomputation of three lines, if it has been run.
+let verification = null;
+try {
+  verification = JSON.parse(await readFile(new URL("data/verification.json", root), "utf8"));
+} catch {
+  verification = null;
+}
+
 const payload = {
   ...snapshot,
   sleeves: SLEEVES,
   sleeveWeights,
   history: history.slice(-12),
   track,
+  verification,
   bookChanges: BOOK_CHANGES,
 };
 

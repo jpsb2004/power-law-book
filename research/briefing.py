@@ -175,7 +175,7 @@ def run_worker(client, entity: Entity) -> str:
 
     prompt = (
         f"{HOUSE_STYLE}\n\n"
-        "Below is one position from a global macro book on AI infrastructure "
+        "Below is one position from a long-only thematic equity book on AI infrastructure "
         "bottlenecks. Write 2-3 sentences on what happened and whether it speaks "
         "to the standing thesis or the stated falsification. If the headlines do "
         "not explain the move, say the move is unexplained by available sources "
@@ -337,7 +337,7 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
         out.append("No position moved beyond the 2σ alert threshold. ")
     out.append(
         f"The book sits at index {book.index_level:.2f}, "
-        f"{stats.get('ytd', 0):+.1f}% year to date with "
+        f"{stats.get('ytd', 0):+.1f}% year to date in the hindsight backtest, with "
         f"{stats.get('vol', 0):.1f}% annualised volatility and a "
         f"{stats.get('maxDrawdown', 0):+.1f}% maximum drawdown over the window.\n"
     )

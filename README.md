@@ -93,7 +93,7 @@ blanks.
 
 ### Multi-exchange normalisation
 
-20 instruments, 7 venues, 6 currencies, no API key.
+20 instruments, 7 venues, 5 currencies, no API key.
 
 FX is applied **date by date, not at today's spot** — converting a year of
 Korean prices at the current KRW rate would book twelve months of currency moves
@@ -224,14 +224,28 @@ year, Riyadh trades Sundays), so the old `sqrt(252)` understated it by about a
 tenth; measured on a single New York calendar it agrees with the corrected
 figure.
 
-### Factor exposure
+### Factor exposure (three years, three factors)
 
-Weekly USD returns of the book, each bucket and each Ballast line, regressed on
-a tech factor (VGT) and an energy factor (XLE), with t-stats, R² and correlation
-to the rest of the book (Energy, Compute and Materials) combined. It answers whether Ballast behaves differently
-from the thesis. It is **not** an alpha test: ~50 weekly observations cannot
-distinguish an annualised intercept from zero, and the page says so. VGT is also
-a Compute holding, so that bucket's tech beta is partly mechanical.
+Weekly USD returns in excess of T-bills (SGOV) for the book, each bucket and
+each Ballast line, over three years, regressed on global equity (ACWI),
+semiconductors (SMH) and energy (XLE) — none of them a holding, so no bucket is
+regressed on itself. Lines that listed later join the long-run curve when they
+list. The page adds a rolling 52-week beta to ACWI and SMH, shows each bucket's
+loadings beside its name, and states the conclusion the numbers support:
+returns are explained by exposure; an intercept in a hindsight backtest
+measures selection, not an edge. Over three years Ballast loads 0.74 on global
+equity — diversification by degree, not a hedge.
+
+### Tail risk and stress tests
+
+Historical one-day VaR/CVaR (95%, 99%) from the headline year and one-week
+VaR/CVaR from three years; today's weights held through 2022's bear market, the
+2023 rate spike, the DeepSeek day and the April 2025 tariff shock, beside VGT,
+ACWI and 60/40 over the same dates; a hypothetical 40% tech fall through the
+book's measured beta; and the three stated scenarios. Windows, stated shocks
+(with their rationale) and the stand-ins for lines that did not exist yet
+(NBIS/CRWV → SMH, LB → TPL, RARA11.SA → REMX, AINF.L → VGT) live in
+`data/scenarios.json`, which the page, the dashboard and the PDF all read.
 
 ---
 
@@ -294,9 +308,12 @@ have. The dashboard says so on screen.
 ## Running it
 
 ```bash
-npm ci && pip install -r requirements.txt
+npm ci && pip install -r requirements-dev.txt
 
+npm test && python -m pytest tests   # unit tests (no network)
 npm run refresh                      # fetch, validate, rebuild the static page
+python scripts/verify_independent.py # recompute three lines independently
+python scripts/make_pdf.py           # the thesis PDF, from the same snapshot
 python scripts/build_briefing.py     # RSS + synthesis -> latest_briefing.md
 streamlit run app.py                 # dashboard on :8501
 ```
@@ -307,9 +324,9 @@ beats a corrupted one, and CI treats a rejection as a successful defence rather
 than a failure.
 
 **CI/CD:** [`.github/workflows/daily_refresh.yml`](.github/workflows/daily_refresh.yml)
-runs weekdays at 22:00 UTC — fetch → validate → generate note → commit via
-`stefanzweifel/git-auto-commit-action@v5` → deploy Pages. See
-[DEPLOY.md](DEPLOY.md).
+runs weekdays at 22:17 UTC — unit tests → fetch → validate → generate note →
+independent verification → PDF → commit (snapshot, history, live record,
+prices CSV, verification, PDF) → deploy Pages. See [DEPLOY.md](DEPLOY.md).
 
 The Streamlit dashboard is deployed separately on Streamlit Community Cloud —
 GitHub Pages serves static files only and cannot run a Python process. The split
@@ -319,6 +336,35 @@ Streamlit carries the interactive dashboard (stress toggles, filtering).
 Because the dashboard reads artifacts committed by CI rather than fetching
 anything, Streamlit Cloud's redeploy-on-push means the daily job feeds both
 deployments from one commit.
+
+### Data handling and reproducibility
+
+- **Prices.** Daily closes from Yahoo's chart endpoint. Returns use the
+  dividend-adjusted close (Yahoo's ratio method), so every series is a total
+  return; splits are applied to the whole history by the provider, and the
+  validator flags a clean 2x/3x/4x jump between runs. Bars are keyed by the
+  exchange's own trading date (FX bars arrive stamped 23:00 UTC the day
+  before; keyed by UTC date they converted every non-USD close at the next
+  day's rate until 14 Oct 2026). A session still open at run time is never
+  published as a close.
+- **Second source.** Each refresh compares the unadjusted close of AMD, TSM,
+  JPM, GLD and VGT with Nasdaq's published closes, session by session; a gap
+  above 0.5% is flagged. On 14 Oct 2026: 125 sessions, largest gap 0.001%.
+- **Independent recomputation.** `scripts/verify_independent.py` refetches AMD,
+  PETR4.SA (with USDBRL) and GLD using only the Python standard library,
+  recomputes YTD, one-year return and volatility, and writes
+  `research/verification.xlsx` — the raw closes plus Excel formulas that redo
+  the calculation — and `data/verification.json`. On 14 Oct 2026 the largest
+  difference from the pipeline was 0.0004pp. It is what exposed the FX dating
+  error above.
+- **Saved data.** `data/prices.csv` holds every line's USD total-return closes
+  for the window; `data/snapshot.json` every derived figure; `data/track.json`
+  the live record. All are committed on each refresh.
+- **Pinned.** Node dependencies by `package-lock.json`, Python by
+  `requirements.txt` / `requirements-dev.txt`, Python 3.12 by `.python-version`.
+- **Tests.** `tests/*.test.mjs` (return, FX, hedge carry, regression,
+  rebalancing, risk, stress, live record, data fetching) and
+  `tests/test_research.py`; both run in CI before every refresh.
 
 ---
 
@@ -342,21 +388,21 @@ positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
 
 ## CV summary
 
-> **The Power Law Book** — a 20-position, 4-bucket thesis portfolio on the
-> physical bottlenecks of AI infrastructure, across 7 exchanges and 6
-> currencies, refreshed and published automatically every weekday. I designed
-> the thesis, the positions, the risk framework and the falsification
-> conditions, and used Claude Code to build the tooling that tests them: total
-> returns in USD with hedged and unhedged views, factor exposure, proxy tracking
-> error and scenario stress tests. Acting on those tests changed the book.
+> **The Power Law Book** — built a 20-position thematic equity portfolio on AI
+> compute and the energy it consumes, across 7 exchanges and 5 currencies;
+> developed an FX-hedged USD return model, benchmark and risk-adjusted
+> comparison, factor regressions, risk-contribution, effective-bets and
+> stress-test analytics, refreshed and published automatically every weekday
+> (Node, Python; AI-assisted coding with Claude Code).
 >
-> Skills: investment thesis construction · portfolio and risk design ·
-> AI-assisted research and tooling (Claude Code).
+> Documented the limitations (hindsight bias, costs, rebalancing), validated the
+> data against a second source and an independent recomputation, and changed
+> the book when the tests said so.
 
-Do **not** quote the performance figures as a track record. They are a
-backward-looking simulation of the current weights over a window ending today —
-the most flattering possible framing. The drawdown column matters more than the
-return column, and saying so first is worth more than the number.
+Do **not** put the return on a CV as a result. If a number is mentioned, label
+it **backtest**: it replays today's weights over a year chosen after the fact.
+The measured findings are the better line — e.g. the book behaves like about
+two independent bets, and per unit of risk it did not beat simply holding VGT.
 
 ---
 
@@ -369,12 +415,17 @@ exercise built to practise market analysis.
 
 Performance figures are a backward-looking simulation of the current weights,
 not a track record. Positions were selected with hindsight over a window ending
-on the day of writing. Figures are gross of commission, spread, ETF expense,
-withholding tax and FX costs; the lived return would be lower. Scenario impacts
+on the day of writing. Headline figures are gross of commission, spread,
+withholding tax and FX costs (fund fees are inside fund prices); the page shows
+a net-of-cost series under stated assumptions. Scenario impacts
 are hand-specified assumptions, not forecasts.
 
-Prices are delayed, sourced from a free public endpoint, and have not been
-reconciled against a paid vendor. They may be wrong. News items are retrieved
+Prices are delayed, sourced from a free public endpoint, and cross-checked
+against a second free source, not a paid vendor. They may be wrong. News items are retrieved
 from third-party feeds and are not verified. Past performance says nothing about
 future returns. Do your own research and speak to a licensed adviser before
 making any investment decision.
+
+It is an educational exercise, not a securities analysis report: the author is
+not a CVM-registered securities analyst (Resolução CVM 20) or investment
+adviser.

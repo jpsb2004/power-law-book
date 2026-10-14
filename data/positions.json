@@ -44,6 +44,46 @@
       "kind": "method",
       "change": "Headline rebalanced monthly instead of daily; volatility annualised at each series' own observation frequency.",
       "why": "Daily rebalancing harvests a premium no real book collects at zero cost; the union-calendar curve has ~309 observations a year, not 252."
+    },
+    {
+      "date": "2026-10-14",
+      "kind": "method",
+      "change": "Bars keyed by each exchange's own trading date; hedge carry from dated USD and BRL rates; three-factor, three-year regressions on excess returns.",
+      "why": "FX bars arrive stamped the day before, so every non-USD close had been converted at the next day's rate; an independent recomputation of PETR4.SA found it."
+    }
+  ],
+  "thesis": {
+    "variant_view": "The market prices the AI buildout as a semiconductor story and treats power as a utility input that will be supplied on demand. This book's view is that grid interconnection, fuel and sited land are the binding constraint for the next three to five years, so the scarce rent accrues to whoever owns power, fuel and land with grid access rather than to the designers of the chips; the consensus reprices that only once announced data-centre capacity visibly slips.",
+    "horizon": "Three to five years, matching transformer, switchgear and interconnection-queue lead times. Daily and monthly moves are monitored, not acted on.",
+    "review_rules": "Reviewed each quarter against the portfolio falsifiers below and every line's own 'what breaks it'. A line is cut when its falsification condition is met, not on price alone; a line whose valuation breaches its bucket's trim rule is cut back to target. If two portfolio falsifiers trigger in the same quarter, the thesis itself is reconsidered, not just the lines.",
+    "falsifiers": [
+      {"key": "capex", "name": "Hyperscaler capex cut", "test": "Two or more of Microsoft, Alphabet, Amazon and Meta cut next-year capital spending guidance in the same quarter.", "kind": "qualitative"},
+      {"key": "rotation", "name": "Compute keeps leading power", "test": "Compute out-returns Energy by more than 20 percentage points over twelve months.", "kind": "buckets", "threshold": 20},
+      {"key": "uranium", "name": "Uranium price breaks", "test": "Sprott Physical Uranium Trust (a holder of physical uranium) falls more than 25% over twelve months.", "kind": "drawdown12m", "ticker": "U-U.TO", "threshold": -25},
+      {"key": "memory", "name": "Memory pricing rolls over", "test": "Micron, the listed read on HBM pricing, trades more than 30% below its twelve-month high.", "kind": "fromHigh", "ticker": "MU", "threshold": -30},
+      {"key": "oil", "name": "Oil floor gives way", "test": "Brent trades below $60, the level at which Saudi Aramco and Petrobras payouts come under pressure.", "kind": "level", "ticker": "BZ=F", "threshold": 60}
+    ]
+  },
+  "concentration_groups": [
+    {
+      "name": "Taiwan",
+      "tickers": ["TSM", "2357.TW"],
+      "why": "A Taiwan Strait event is an impairment, not a drawdown; nearly every accelerator in the book is fabricated by TSM, so AMD and the tech funds depend on it too."
+    },
+    {
+      "name": "Korea memory",
+      "tickers": ["EWY"],
+      "why": "HBM supply runs through two Korean makers; the same strait scenario tightens export controls on them."
+    },
+    {
+      "name": "US AI capex",
+      "tickers": ["NBIS", "CRWV", "AMD", "PLTR", "VGT", "AINF.L"],
+      "why": "These lines are paid out of hyperscaler capital spending; one guidance cut moves all of them."
+    },
+    {
+      "name": "Nuclear fuel",
+      "tickers": ["URA", "NLR"],
+      "why": "Two funds on one fuel cycle; a reactor incident or a supply restart hits both."
     }
   ],
   "rebalance": {
@@ -53,9 +93,18 @@
   "cost_assumptions": {
     "as_of": "2026-10-14",
     "note": "Stated assumptions for the net-of-cost series, not quotes. trade_bps is commission plus half the bid-ask spread per dollar traded, by listing currency. fx_spread_bps is charged on every dollar traded in a non-USD line. withholding_pct is charged on each distribution as if held by a non-US individual investor without treaty relief; interest-related dividends from US T-bill funds can be exempt in practice, so SGOV's drag is overstated, and Brazilian JCP (15%) is ignored. Fund expense ratios are already inside fund prices and are not charged again.",
-    "trade_bps": { "USD": 5, "default": 15 },
+    "trade_bps": {
+      "USD": 5,
+      "default": 15
+    },
     "fx_spread_bps": 10,
-    "withholding_pct": { "USD": 30, "BRL": 0, "SAR": 5, "TWD": 21, "GBP": 0 }
+    "withholding_pct": {
+      "USD": 30,
+      "BRL": 0,
+      "SAR": 5,
+      "TWD": 21,
+      "GBP": 0
+    }
   },
   "fx_hedge": {
     "note": "Policy rates used to model a rolled FX hedge back to USD. Held flat across the window; they stand in for forward points, so cross-currency basis and onshore/offshore gaps are ignored. Update with the as_of date when a central bank moves.",
@@ -119,7 +168,7 @@
       "status": "active",
       "memo": {
         "name": "VanEck Uranium & Nuclear ETF",
-        "rationale": "Deliberate overlap with URA on the nuclear theme rather than diversifying away from it. Conviction is high enough to accept concentration in exchange for broader coverage across the fuel cycle and regulated utilities."
+        "rationale": "Deliberate overlap with URA on the nuclear theme rather than diversifying away from it: the book accepts that thematic concentration, at an ordinary 5% line, in exchange for broader coverage across the fuel cycle and regulated utilities."
       }
     },
     {
@@ -174,7 +223,7 @@
       "currency": "USD",
       "weight": 5,
       "instrument_type": "Equity",
-      "factor_role": "The hinge of the whole book. Owns Permian surface acreage and collects royalties on whatever sits on it — water handling, pipelines, and now data-centre leases. Sells energy and compute demand without drilling or buying a GPU.",
+      "factor_role": "The hinge of the thesis, held at an ordinary 5% line because a small float makes it one of the book's most fragile names. Owns Permian surface acreage and collects royalties on whatever sits on it — water handling, pipelines, and now data-centre leases. Sells energy and compute demand without drilling or buying a GPU.",
       "falsification_metric": "Small float, and the data-centre revenue is a handful of contracts. Concentration cuts both ways: it fell 9.5% in a single session on 12 Aug 2026.",
       "investable": {
         "br_retail": null,
@@ -208,7 +257,10 @@
       "memo": {
         "name": "Nebius Group",
         "rationale": "Classified here as a power consumer, which is a stretch I flag rather than hide: Nebius is a compute landlord: capex-funded, customer-concentrated, and competing with the hyperscalers it sells to. It sits in Energy because its unit economics are gated by power access, not because it generates power."
-      }
+      },
+      "classification_flags": [
+        "power consumer, not supplier"
+      ]
     },
     {
       "ticker": "CRWV",
@@ -230,7 +282,10 @@
       "memo": {
         "name": "CoreWeave",
         "rationale": "Same classification stretch as NBIS, and the two overlap enough operationally that this is closer to one position expressed twice than two independent bets (see Section 4)."
-      }
+      },
+      "classification_flags": [
+        "power consumer, not supplier"
+      ]
     },
     {
       "ticker": "TSM",
@@ -273,7 +328,7 @@
       "status": "active",
       "memo": {
         "name": "Advanced Micro Devices",
-        "rationale": "Second-source accelerator exposure, kept smaller than a conviction bet would be: this bucket is insurance against the thesis, not a parallel thesis of its own."
+        "rationale": "Second-source accelerator exposure, held at the same weight as its bucket peers rather than sized as a conviction bet: this bucket is insurance against the thesis, not a parallel thesis of its own."
       }
     },
     {
@@ -491,8 +546,11 @@
       "status": "active",
       "memo": {
         "name": "JPMorgan Chase & Co.",
-        "rationale": "A quality financial with real exposure to the debt financing the CapEx cycle runs on, but broad enough not to live or die on it."
-      }
+        "rationale": "A quality financial with real exposure to the debt financing the CapEx cycle runs on. Flagged as credit beta rather than ballast: it is levered to the same economy the rest of the book needs, and the risk table shows it diversifies through low correlation, not through a negative one."
+      },
+      "classification_flags": [
+        "credit beta, not ballast"
+      ]
     },
     {
       "ticker": "RARA11.SA",

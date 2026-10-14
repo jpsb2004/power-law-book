@@ -4,6 +4,103 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P2 Second source, independent recomputation, reproducibility, legal; FX dating fix
+
+- **Fix: FX dating.** Yahoo stamps FX daily bars at 23:00 UTC of the previous
+  day; keyed by UTC date, every non-USD close was converted at the next day's
+  rate. Bars are now keyed by the exchange's trading date. Found by the
+  independent recomputation: PETR4.SA one-year return 128.46% (pipeline) vs
+  127.73% (independent) before the fix, 127.734% vs 127.734% after; volatility
+  31.77% → 30.46%. Book unhedged one-year +35.5% → +35.3%; hedged +33.6%
+  unchanged at one decimal.
+- **Second source.** `lib/crosscheck.js` compares Yahoo's unadjusted closes for
+  AMD, TSM, JPM, GLD and VGT with Nasdaq's, session by session, every refresh
+  (125 sessions, largest gap 0.001%); a gap above 0.5% is a validator warning.
+- **Independent recomputation.** `scripts/verify_independent.py` (standard
+  library only) and `research/verification.xlsx` (Excel formulas) recompute
+  AMD, PETR4.SA and GLD; largest difference 0.0004pp. Runs in CI.
+- **Reproducibility.** Python dependencies pinned (`requirements.txt`, with
+  `reportlab`, which the PDF needed but was missing; `requirements-dev.txt`);
+  `data/prices.csv` saved on every refresh; the PDF is rebuilt and committed
+  by CI from the same snapshot; pytest runs in CI. README documents adjusted
+  closes, splits, dividends, the second source and how to rerun everything.
+- **Legal.** Page, dashboard, PDF and README state it is an educational
+  exercise and the author is not a CVM-registered securities analyst
+  (Resolução CVM 20) or adviser.
+- **CV summary** in the README rewritten to the review's wording, with the
+  instruction to label any return as a backtest.
+
+## 2026-10-14 — P1-3 Overlap and concentration; P1-4 valuation and testable thesis
+
+- **P1-3.** New section "How many bets twenty lines are": correlation heatmap
+  of weekly USD returns; effective number of bets (Meucci entropy over
+  principal components) **2.0** of 19 lines, the first component carrying
+  **83%** of the book's variance; single points of failure with their capital
+  and risk share — US AI capex 29% of capital / **57% of risk**, nuclear fuel
+  11% / 17%, Taiwan 9% / 9%, Korea memory 4% / 7%; top-10 look-through
+  exposures from each fund's published top holdings (a floor; coverage shown).
+  The PDF's "closer to 19 independent bets" now reads the measured figure.
+- **P1-4.** Valuation by line (forward and trailing P/E, EV/EBITDA, FCF and
+  dividend yield; Yahoo quoteSummary, dated). Statement ratios are dropped
+  when statements and quote are in different currencies (TSM ADR) and
+  holdings-level fund ratios are not used. The Compute trim rule is checked
+  against the data: basket forward P/E 24.1x vs the 32x cap. A variant view,
+  horizon, review/exit rules and five portfolio falsifiers with live readings
+  (`thesis` in positions.json — **drafted from the existing thesis text, for
+  the author to own**). Today one falsifier is triggered: Compute out-returned
+  Energy by 55.7pp over twelve months against a 20pp threshold.
+- Dashboard: "Thesis & Valuation" tab; PDF: valuation snapshot, variant view
+  and falsifier table, effective-bets paragraph.
+- Tests: `tests/structure.test.mjs` (3 cases).
+
+## 2026-10-14 — P1-1 Tail risk and stress tests; P1-2 three-factor, three-year exposure; P0-3 loadings
+
+- **P1-2.** Factor regression moved from one year on VGT + XLE to three years
+  (weekly, excess of SGOV) on ACWI + SMH + XLE. VGT dropped as a factor because
+  it is a holding. Rolling 52-week beta chart. The page states the conclusion:
+  returns are explained by exposure; intercepts near t = 2 in a hindsight
+  backtest measure selection. Also fixes a method error: raw returns had put
+  the risk-free rate into alpha (SGOV showed +4.4% "alpha" at t = 57; ~0 now).
+  Book (2023-10 → 2026-10): β ACWI 0.66, SMH 0.26, XLE 0.07, R² 0.69. Ballast:
+  β ACWI 0.74 (t 13), R² 0.66 — not a hedge over three years (one-year VGT/XLE
+  view had shown 0.14).
+- **P0-3.** Each bucket card shows its measured loadings ("trades like"):
+  Energy β ACWI 0.67 / SMH 0.27 / XLE 0.20 — it trades as AI and market risk
+  more than as energy, which the page now says beside the name.
+- **P1-1.** One-day VaR 95% 2.4% (CVaR 3.0%), 99% 3.5% (3.9%); one-week VaR
+  95% 4.1% (5.5%), 99% 8.8%. Today's weights held through: 2022 bear −17.1%
+  (ACWI −26.4%, VGT −34.5%), 2023 rate spike −2.4%, DeepSeek day −6.1%, April
+  2025 tariff shock −13.4%; tech −40% via β 0.73 → −29.1%. Stated scenarios
+  now carry numbers in the PDF too (CapEx −17.1%, Taiwan −8.6%), which the PDF
+  had described as "unmodelled".
+- Stated shocks moved from `research/scenarios.py` to `data/scenarios.json`
+  (with each scenario's rationale), so Python and Node read one table.
+- Tests: `tests/longrun.test.mjs` (3 cases).
+
+## 2026-10-14 — P1-5 FX labels, dated hedge rates, BRL view; P0-3/P0-4 remainders; P2 wording
+
+- **P1-5.** FX labels now give both numbers, named: the percentage-point gap
+  between USD and local returns, and the currency's own move,
+  (1 + USD) / (1 + local) − 1 (PETR4.SA: +21.0pp gap, real +10.7%). The hedge
+  carry uses dated daily rates for USD (13-week T-bills, ^IRX) and BRL (CDI,
+  Banco Central SGS 4389); SAR, TWD and GBP keep the dated policy-rate table. A
+  sensitivity shows the hedged book with every non-USD hedge 1pp a year
+  dearer (NDF basis). The FX caption justifies the USD base and shows the
+  unhedged book measured in reais.
+  Numbers (same data): hedged 1y +33.88% → +33.75%, YTD +42.23% → +42.13%;
+  PETR4.SA hedged YTD +81.6% → +80.3% (CDI was 14.90% a year ago, not the
+  13.75% table). Basis −1pp: hedged 1y −0.31pp. In BRL: 1y +24.6%, YTD +32.5%.
+- **P0-3.** JPM tagged "credit beta, not ballast"; NBIS and CRWV tagged "power
+  consumer, not supplier" (page, dashboard table, PDF headings).
+- **P0-4.** Memo text no longer argues from sizes the book does not hold: AMD
+  ("held at the same weight as its bucket peers"), NLR (thematic
+  concentration "at an ordinary 5% line"), LB ("the hinge of the thesis, held
+  at an ordinary 5% line").
+- **P2 wording.** "Global macro" replaced by "thematic equity portfolio" (page
+  title and eyebrow, Next.js app, dashboard docstring, briefing prompt).
+- Tests: `tests/fx.test.mjs` (7 cases: FX conversion, currency move, flat and
+  dated hedge carry, basis shift, OLS).
+
 ## 2026-10-14 — P0-2 Backtest vs track record: labels, live record, change log
 
 **Decision (author):** the live record's inception is the first scheduled

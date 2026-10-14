@@ -38,7 +38,7 @@ itself.
 
 ## What runs, and when
 
-`.github/workflows/daily_refresh.yml` fires **weekdays at 22:00 UTC**, about two
+`.github/workflows/daily_refresh.yml` fires **weekdays at 22:17 UTC**, about two
 hours after the US close, by which point every market in the book has settled.
 GitHub cron is UTC and has no DST, so this drifts by an hour relative to São
 Paulo across the year — harmless, since it snapshots a close rather than an
@@ -99,7 +99,7 @@ data** — it pulls what CI already committed, rebuilds the page from it, and
 republishes:
 
 ```
-22:00 UTC  GitHub Action   fetch → validate → commit data → deploy Pages
+22:17 UTC  GitHub Action   test → fetch → validate → verify → PDF → commit → deploy Pages
 22:22 UTC  Claude task     git pull → npm run page → republish artifact
 ```
 

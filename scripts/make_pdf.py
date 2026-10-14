@@ -44,7 +44,7 @@ sys.path.insert(0, str(ROOT))
 
 from research.discipline import CATALYSTS, VALUATION_RULES  # noqa: E402
 from research.ontology import BUCKET_LABELS, BUCKET_ORDER, load_book  # noqa: E402
-from research.scenarios import GRID_BOTTLENECK, apply_scenario  # noqa: E402
+from research.scenarios import CAPEX_RETRENCHMENT, GEOPOLITICAL_SHOCK, GRID_BOTTLENECK, apply_scenario  # noqa: E402
 
 OUTPUT = ROOT / "The_Power_Law_Book_Thesis.pdf"
 
@@ -82,6 +82,7 @@ SIDE_L, SIDE_R = 374.4, 518.4          # cover sidebar
 COVER_RULE_Y = PAGE_H - 57.0           # 735
 BODY_RULE_Y = PAGE_H - 63.0            # 729
 
+LEGAL = ("An educational exercise, not a securities analysis report: the author is not a CVM-registered securities analyst (Resolução CVM 20) or investment adviser, and nothing here is a recommendation.")
 DISCLAIMER = ("Independent personal research. Not investment advice. "
               "Not affiliated with any bank or financial institution.")
 
@@ -92,6 +93,8 @@ POSITIONS = json.loads((ROOT / "data" / "positions.json").read_text(encoding="ut
 book = load_book()
 stats = book.curve_stats
 grid = apply_scenario(book, GRID_BOTTLENECK)
+capex = apply_scenario(book, CAPEX_RETRENCHMENT)
+geo = apply_scenario(book, GEOPOLITICAL_SHOCK)
 grid_buckets = grid["by_bucket"]
 
 _thin = {e.ticker: e.coverage for e in book.entities
@@ -341,7 +344,8 @@ def position(p):
     esc = lambda s: s.replace("&", "&amp;")
     name = esc(p["memo"]["name"])
     text = esc(p["memo"]["rationale"]).replace("{coverage}", RARA_COVER)
-    return [Paragraph(f"<b>{esc(p['ticker'])}: {name}</b> · {p['weight']:.1f}%",
+    flags = "".join(f" · <i>{esc(f)}</i>" for f in p.get("classification_flags", []))
+    return [Paragraph(f"<b>{esc(p['ticker'])}: {name}</b> · {p['weight']:.1f}%{flags}",
                       POS_HEAD[label], bulletText="•"),
             Paragraph(text, pos_body)]
 
@@ -431,7 +435,7 @@ story += [
 rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Weight", "N", "Structural exposure")]]
 exposure = {
     "Energy": "Baseload generation, transmission, fuel supply, land and<br/>interconnect rights: the most direct expression of the thesis",
-    "Compute": "The hardware layer itself: a macro counterweight against<br/>being wrong about the timing of the rotation",
+    "Compute": "The hardware layer itself: a counterweight against<br/>being wrong about the timing of the rotation",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
     "Ballast": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
 }
@@ -502,6 +506,45 @@ story += [
     vt,
 ]
 
+# ---- valuation snapshot (P1-4): what each line is priced at, with source and date
+_fu = book.fundamentals or {}
+if _fu.get("valuation"):
+    def _m(v, suf):
+        if v is None:
+            return "—"
+        if v < 0 and suf == "x":
+            return "n.m."
+        return f"{v:.1f}{suf}"
+    _vr = [[Paragraph(h, tbl_head) for h in ("Line", "Fwd P/E", "Trail. P/E", "EV/EBITDA", "FCF yld", "Div yld")]]
+    for v in _fu["valuation"]:
+        _vr.append([Paragraph(v["ticker"] + (" *" if v.get("currencyNote") else ""), tbl_cell),
+                    Paragraph(_m(v.get("forwardPE"), "x"), tbl_cell), Paragraph(_m(v.get("trailingPE"), "x"), tbl_cell),
+                    Paragraph(_m(v.get("evToEbitda"), "x"), tbl_cell), Paragraph(_m(v.get("fcfYieldPct"), "%"), tbl_cell),
+                    Paragraph(_m(v.get("dividendYieldPct"), "%"), tbl_cell)])
+    _vt = Table(_vr, colWidths=[90, 70, 70, 70, 70, 70], repeatRows=1)
+    _vt.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE), ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    _cn = " ".join(f"* {v['ticker']}: {v['currencyNote']}." for v in _fu["valuation"] if v.get("currencyNote"))
+    # The Compute trim rule, checked: weight-averaged earnings yield of the
+    # bucket's lines with a positive forward P/E, inverted (harmonic mean).
+    _cl = [v for v in _fu["valuation"]
+           if v.get("forwardPE") and v["forwardPE"] > 0
+           and next((e.bucket for e in book.entities if e.ticker == v["ticker"]), "") == "compute"]
+    _bpe = (sum(1 for _ in _cl) / sum(1 / v["forwardPE"] for v in _cl)) if _cl else None
+    _rule = (f" Compute basket forward P/E (harmonic mean of {', '.join(v['ticker'] for v in _cl)}): "
+             f"<b>{_bpe:.1f}x</b> against the 32x cap in the Compute rule"
+             + (" — the cap binds." if _bpe > 32 else " — inside the cap.")) if _bpe else ""
+    story += [KeepTogether([
+        Paragraph("Valuation Snapshot", sub_head),
+        Paragraph(
+            f"What each line is priced at, from {_fu['source']} on {_fu['asOf']}. Funds show the fund-level P/E and "
+            "distribution yield; n.m. marks a negative multiple. " + _cn + _rule, body),
+        _vt,
+    ])]
+
 # ========================================================== 3. RATIONALE
 story += [
     Paragraph("3. MICROECONOMIC MAPPING", eyebrow),
@@ -521,7 +564,7 @@ story.append(Paragraph(f"Critical Materials ({BUCKET_W.get('Materials', 0):.1f}%
 for _p in positions_in("materials"):
     story.append(KeepTogether(position(_p)))
 
-story.append(Paragraph(f"Macro Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
+story.append(Paragraph(f"Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
 for _p in positions_in("ballast"):
     story.append(KeepTogether(position(_p)))
 
@@ -537,7 +580,11 @@ story += [
     Paragraph(
         "<b>Neocloud classification overlap.</b> NBIS and CRWV are functionally "
         "compute-infrastructure lessors, not power generators, and their high operational "
-        f"correlation compresses the {N_POSITIONS}-position book closer to {N_POSITIONS - 1} independent bets.", weakness),
+        "correlation is one example of a wider problem: measured on weekly returns, the "
+        f"{N_POSITIONS}-position book behaves like "
+        + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets, with "
+           f"{(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
+           if book.structure else "far fewer independent bets than it has lines."), weakness),
     Paragraph(
         "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
         "bucket rather than in Ballast, because it is correlated with the same technology-materials "
@@ -562,6 +609,40 @@ for heading, text in CATALYSTS:
     story.append(Paragraph(
         f"<b>{heading.replace('&', '&amp;')}.</b> {text.replace('**', '')}",
         catalyst_style, bulletText="•"))
+
+# ---- variant view, falsifiers, concentration (P1-4, P1-3)
+_th = book.thesis or {}
+_sx = book.structure or {}
+if _th:
+    def _rd(c):
+        if c.get("reading") is None:
+            return "checked each earnings season"
+        u = c.get("unit")
+        return f"${c['reading']:.2f}" if u == "$" else (f"{c['reading']:+.1f}pp" if u == "pp" else f"{c['reading']:+.1f}%")
+    _fr = [[Paragraph(h, tbl_head) for h in ("Falsifier", "Test", "Reading", "Status")]]
+    for c in _th.get("checks", []):
+        _st = "watch" if c.get("triggered") is None else ("<b>triggered</b>" if c["triggered"] else "holding")
+        _fr.append([Paragraph(c["name"], tbl_cell), Paragraph(c["test"], tbl_cell), Paragraph(_rd(c), tbl_cell),
+                    Paragraph(_st, tbl_cell)])
+    _ft = Table(_fr, colWidths=[95, 255, 80, 60], repeatRows=1)
+    _ft.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE), ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story += [
+        Paragraph("Variant View and Falsifiers", sub_head),
+        Paragraph(_th["variantView"], body),
+        Paragraph(f"<b>Horizon.</b> {_th['horizon']} <b>Review and exit.</b> {_th['reviewRules']}", body),
+        _ft,
+    ]
+if _sx:
+    _pf = "; ".join(f"{g['name']} {g['capitalPct']:.0f}% of capital, {g['riskSharePct']:.0f}% of risk"
+                    for g in _sx.get("pointsOfFailure", []))
+    story.append(Paragraph(
+        f"<b>Twenty lines, {_sx['enb']:.1f} effective bets.</b> Splitting the book's weekly variance across its "
+        f"principal components, the first carries {_sx['firstPcSharePct']:.0f}% of it; the entropy-based effective "
+        f"number of bets is {_sx['enb']:.1f} of {_sx['lines']} lines. Shared points of failure: {_pf}.", body))
 
 # ---- change log: every change to the book or its method, from positions.json
 _changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)
@@ -618,23 +699,82 @@ story += [gt, Spacer(1, 8), Paragraph(
     "<b>CapEx Retrenchment</b> (cyclical digestion): hyperscalers cut AI capital-spending "
     "guidance and the supercycle is re-rated as an ordinary cycle. This is the scenario the "
     "Compute bucket exists to cushion against, and the one most likely to hurt every bucket at "
-    "once. No point estimate is modelled for this scenario. The position sizing, not a forecast "
-    "number, is the hedge.", body), Paragraph(
+    f"once. Modelled impact <b>{pct(capex['portfolio_pct'])}</b> on the stated shocks; the position "
+    "sizing, not a forecast, is the hedge.", body), Paragraph(
     "<b>Geopolitical Shock</b> (Taiwan Strait escalation): advanced foundry output is "
     "interrupted and export controls tighten on strategic materials. The tail scenario the "
     "portfolio is least hedged against: TSM, 2357.TW and EWY all sit in the impact zone and "
     "are closer to one bet than three. RARA11.SA is the one line that works here, since the same "
     f"export controls that interrupt foundry output bid rare earths up, but at {RARA_W:.0f}% it cannot "
-    f"offset a Compute bucket {BUCKET_W['Compute'] / (RARA_W or 1):.0f} times its size. Also left unmodelled rather than assigned a "
-    "manufactured number.", body)]
+    f"offset a Compute bucket {BUCKET_W['Compute'] / (RARA_W or 1):.0f} times its size. Modelled impact "
+    f"<b>{pct(geo['portfolio_pct'])}</b> on the stated shocks, which treat the three Taiwan- and Korea-linked lines "
+    "as impaired rather than merely marked down.", body)]
+
+# ---- the historical record and the tail (P1-1), read from the snapshot
+_stress = book.stress or {}
+_tail = book.tail or {}
+if _stress.get("historical"):
+    _rows = [[Paragraph(h, tbl_head) for h in ("Scenario", "Window", "Book", "VGT", "ACWI", "60/40")]]
+    for h in _stress["historical"]:
+        b = h.get("benchmarks", {})
+        _rows.append([Paragraph(h["name"], tbl_cell), Paragraph(f"{h['start']} to {h['end']}", tbl_cell),
+                      Paragraph(f"<b>{pct(h['bookPct'])}</b>", tbl_cell), Paragraph(pct(b.get("VGT")), tbl_cell),
+                      Paragraph(pct(b.get("ACWI")), tbl_cell), Paragraph(pct(b.get("60/40")), tbl_cell)])
+    for h in _stress.get("hypothetical", []):
+        _rows.append([Paragraph(h["name"], tbl_cell), Paragraph(f"beta {h['beta']:.2f} to {h['factor']}", tbl_cell),
+                      Paragraph(f"<b>{pct(h['bookPct'])}</b>", tbl_cell), Paragraph(pct(h["shockPct"]), tbl_cell),
+                      Paragraph("—", tbl_cell), Paragraph("—", tbl_cell)])
+    st_t = Table(_rows, colWidths=[150, 120, 55, 55, 55, 55], repeatRows=1)
+    st_t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE), ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    _d = (_tail.get("daily") or [None, None])
+    _w = (_tail.get("weekly") or [None, None])
+    _var = (f" Historical one-day VaR at 95% is {_d[0]['varPct']:.1f}% (CVaR {_d[0]['cvarPct']:.1f}%), "
+            f"one-week VaR at 95% {_w[0]['varPct']:.1f}% (CVaR {_w[0]['cvarPct']:.1f}%)." if _d[0] and _w[0] else "")
+    story += [
+        Paragraph("The Historical Record", sub_head),
+        Paragraph(
+            "Today's weights held through the worst stretches of the last five years, using each line's own "
+            "history where it existed and a stated stand-in where it did not ("
+            + ", ".join(f"{k} as {v['ticker']}" for k, v in (_stress.get("proxies") or {}).items())
+            + ")." + _var, body),
+        st_t,
+    ]
+
+# ---- what the returns are made of, and what else could have been held (P1-2, P0-1)
+_f = book.factors or {}
+_brow = next((r for r in _f.get("rows", []) if r.get("key") == "book" and not r.get("insufficient")), None)
+_bm = book.benchmarks or {}
+_rows_bm = {r["key"]: r.get("stats") or {} for r in _bm.get("rows", [])}
+if _brow:
+    _fx = ", ".join(f"{x['ticker']} {_brow['betas'][x['id']]:.2f}" for x in _f["factors"])
+    _bk = _rows_bm.get("book-usd", {})
+    _vgt = _rows_bm.get("vgt", {})
+    _acwi = _rows_bm.get("acwi", {})
+    story += [
+        Paragraph("Exposure, Not Alpha", sub_head),
+        Paragraph(
+            f"Weekly excess returns over {_f['window']['start'][:4]}–{_f['window']['end'][:4]} load {_fx} on global equity, "
+            f"semiconductors and energy, with R² {_brow['r2']:.2f}. Returns are explained by factor exposure; an "
+            "intercept in a backtest of positions chosen with hindsight measures the selection, not an edge. "
+            + (f"Over the latest year the book's Sharpe ratio was {_bk['sharpe']:.2f}, against {_vgt['sharpe']:.2f} for VGT "
+               f"(US tech) and {_acwi['sharpe']:.2f} for ACWI (global equity): it did not beat simply holding tech "
+               "per unit of risk." if _bk.get('sharpe') is not None and _vgt.get('sharpe') is not None and _bk['sharpe'] < _vgt['sharpe']
+               else (f"Over the latest year the book's Sharpe ratio was {_bk['sharpe']:.2f}, against {_vgt.get('sharpe', 0):.2f} for VGT "
+                     f"and {_acwi.get('sharpe', 0):.2f} for ACWI." if _bk.get('sharpe') is not None else "")),
+            body),
+    ]
 
 callout = Table([[Paragraph(
     "<b>Why stated assumptions instead of a fitted model.</b> A covariance matrix estimated "
     f"from a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} currencies would look statistically rigorous and "
-    "would be almost entirely noise, given how little history several positions have. Stating "
-    "one assumption directly and leaving the other two scenarios qualitative is less "
-    "impressive-looking than assigning every scenario a precise number, and it is more honest "
-    "about what the data can actually support.", body)]], colWidths=[R - L - 72])
+    "would be almost entirely noise, given how little history several positions have. The three "
+    "scenarios are therefore stated shocks, written down per position in data/scenarios.json so "
+    "they can be argued with, and checked against what actually happened in the historical "
+    "windows above rather than presented as forecasts.", body)]], colWidths=[R - L - 72])
 callout.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, -1), CREAM),
     ("BOX", (0, 0), (-1, -1), 0.5, RULE),
@@ -682,7 +822,7 @@ disc = Table([[boxed_header("IMPORTANT DISCLOSURES", R - L)],
                   "track record. The thesis, positions and weights are the author's; all "
                   "software behind this report, the data pipeline and the published page was "
                   "written by Claude Code, Anthropic's AI coding agent, under the author's "
-                  "direction.", disc_body)]], colWidths=[R - L])
+                  "direction. " + LEGAL, disc_body)]], colWidths=[R - L])
 disc.setStyle(TableStyle([
     ("BOX", (0, 1), (-1, 1), 0.5, RULE),
     ("LEFTPADDING", (0, 0), (-1, 0), 0),

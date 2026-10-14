@@ -76,6 +76,7 @@ class Entity:
     kind: str = ""
     thesis: str = ""
     breaks: str = ""
+    flags: list[str] = field(default_factory=list)
 
     price: float | None = None
     price_usd: float | None = None
@@ -135,6 +136,12 @@ class Book:
     benchmarks: dict[str, Any] = field(default_factory=dict)
     risk: dict[str, Any] = field(default_factory=dict)
     rebalancing: dict[str, Any] = field(default_factory=dict)
+    tail: dict[str, Any] = field(default_factory=dict)
+    stress: dict[str, Any] = field(default_factory=dict)
+    factors: dict[str, Any] = field(default_factory=dict)
+    structure: dict[str, Any] = field(default_factory=dict)
+    fundamentals: dict[str, Any] = field(default_factory=dict)
+    thesis: dict[str, Any] = field(default_factory=dict)
 
     def by_bucket(self, bucket: str) -> list[Entity]:
         return [e for e in self.entities if e.bucket == bucket]
@@ -189,6 +196,7 @@ def load_book(path: Path | None = None) -> Book:
                 kind=pos.get("kind", ""),
                 thesis=pos.get("thesis", ""),
                 breaks=pos.get("breaks", ""),
+                flags=list(pos.get("flags") or []),
                 price=pos.get("price"),
                 price_usd=pos.get("priceUsd"),
                 previous_close=pos.get("previousClose"),
@@ -232,4 +240,10 @@ def load_book(path: Path | None = None) -> Book:
         benchmarks=raw.get("benchmarks") or {},
         risk=raw.get("risk") or {},
         rebalancing=raw.get("rebalancing") or {},
+        tail=raw.get("tail") or {},
+        stress=raw.get("stress") or {},
+        factors=raw.get("factors") or {},
+        structure=raw.get("structure") or {},
+        fundamentals=raw.get("fundamentals") or {},
+        thesis=raw.get("thesis") or {},
     )

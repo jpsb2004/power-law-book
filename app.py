@@ -1,5 +1,5 @@
 """
-THESIS INITIATION REPORT — interactive macro research dashboard.
+THESIS INITIATION REPORT — interactive thematic equity research dashboard.
 
     streamlit run app.py
 
@@ -51,6 +51,7 @@ def _load():
             "Ticker": e.ticker,
             "Name": e.name,
             "Bucket": e.bucket_label,
+            "Flag": ", ".join(e.flags),
             "Weight": e.weight,
             "Currency": e.currency,
             "Venue": e.venue,
@@ -140,8 +141,8 @@ if partial:
         f"{len(book.entities)}."
     )
 
-tab_alloc, tab_bench, tab_note, tab_dev, tab_stress = st.tabs(
-    ["Allocation", "Benchmarks", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
+tab_alloc, tab_bench, tab_thesis, tab_note, tab_dev, tab_stress = st.tabs(
+    ["Allocation", "Benchmarks", "Thesis & Valuation", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
 )
 
 # --------------------------------------------------------------- allocation
@@ -453,6 +454,85 @@ with tab_bench:
             hide_index=True,
         )
 
+# ------------------------------------------------------- thesis & valuation
+with tab_thesis:
+    th = book.thesis
+    if th:
+        st.subheader("Variant view")
+        st.write(th["variantView"])
+        st.markdown(f"**Horizon.** {th['horizon']}")
+        st.markdown(f"**Review and exit.** {th['reviewRules']}")
+        st.subheader("Portfolio-level falsifiers, read today")
+
+        def _reading(c):
+            if c.get("reading") is None:
+                return "checked each earnings season"
+            u = c.get("unit")
+            return f"${c['reading']:.2f}" if u == "$" else f"{c['reading']:+.1f}{'pp' if u == 'pp' else '%'}"
+
+        st.dataframe(
+            pd.DataFrame([
+                {"Falsifier": c["name"], "Test": c["test"], "Reading": _reading(c),
+                 "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding")}
+                for c in th["checks"]
+            ]),
+            width="stretch", hide_index=True,
+        )
+    sx = book.structure
+    if sx:
+        st.subheader("How many bets twenty lines are")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Effective bets", f"{sx['enb']:.1f}", f"of {sx['lines']} lines", delta_color="off")
+        c2.metric("First component", f"{sx['firstPcSharePct']:.0f}%", "of book variance", delta_color="off")
+        c3.metric("Common factor", f"{sx['firstCorrPcPct']:.0f}%", "of total correlation", delta_color="off")
+        st.dataframe(
+            pd.DataFrame([
+                {"Shared failure": g["name"], "Lines": ", ".join(g["tickers"]), "Capital %": g["capitalPct"],
+                 "Share of risk %": g["riskSharePct"], "Why": g["why"]}
+                for g in sx["pointsOfFailure"]
+            ]).style.format({"Capital %": "{:.0f}", "Share of risk %": "{:.0f}"}),
+            width="stretch", hide_index=True,
+        )
+        _cdf = pd.DataFrame(
+            [{"a": a, "b": b, "rho": sx["corr"][i][j]}
+             for i, a in enumerate(sx["tickers"]) for j, b in enumerate(sx["tickers"])]
+        )
+        st.altair_chart(
+            alt.Chart(_cdf)
+            .mark_rect()
+            .encode(
+                x=alt.X("b:N", sort=sx["tickers"], title=None),
+                y=alt.Y("a:N", sort=sx["tickers"], title=None),
+                color=alt.Color("rho:Q", scale=alt.Scale(scheme="blueorange", domain=[-1, 1]), title="ρ"),
+                tooltip=["a", "b", alt.Tooltip("rho:Q", format=".2f")],
+            )
+            .properties(height=520),
+            width="stretch",
+        )
+    fu = book.fundamentals
+    if fu.get("valuation"):
+        st.subheader("Valuation by line")
+        st.caption(f"Source: {fu['source']}, retrieved {fu['asOf']}. Negative multiples mark loss-making lines.")
+        st.dataframe(
+            pd.DataFrame([
+                {"Line": v["ticker"], "Fwd P/E": v.get("forwardPE"), "Trailing P/E": v.get("trailingPE"),
+                 "EV/EBITDA": v.get("evToEbitda"), "FCF yield %": v.get("fcfYieldPct"),
+                 "Dividend yield %": v.get("dividendYieldPct"), "Note": v.get("currencyNote") or ""}
+                for v in fu["valuation"]
+            ]).style.format({"Fwd P/E": "{:.1f}", "Trailing P/E": "{:.1f}", "EV/EBITDA": "{:.1f}",
+                             "FCF yield %": "{:.1f}", "Dividend yield %": "{:.1f}"}, na_rep="—"),
+            width="stretch", hide_index=True,
+        )
+        if fu.get("lookThrough"):
+            st.subheader("Look-through: largest underlying exposures")
+            st.dataframe(
+                pd.DataFrame([
+                    {"Underlying": e["key"], "Name": e["name"], "Exposure %": e["weightPct"], "Through": ", ".join(e["via"])}
+                    for e in fu["lookThrough"][:10]
+                ]).style.format({"Exposure %": "{:.2f}"}),
+                width="stretch", hide_index=True,
+            )
+
 # ------------------------------------------------------------------- stress
 with tab_stress:
     st.subheader("Scenario shocks")
@@ -534,10 +614,49 @@ with tab_stress:
         )
         st.caption(result["note"])
 
+    # Historical windows, a factor shock and tail risk, computed by the Node
+    # pipeline over five years (snapshot["stress"], ["tail"]) -- same figures
+    # as the published page.
+    stress = book.stress
+    if stress.get("historical"):
+        st.subheader("Historical stress and tail risk")
+        tail = book.tail
+        tcols = st.columns(4)
+        for col, (lab, item) in zip(
+            tcols,
+            [("1-day VaR 95%", tail["daily"][0]), ("1-day VaR 99%", tail["daily"][1]),
+             ("1-week VaR 95%", tail["weekly"][0]), ("1-week VaR 99%", tail["weekly"][1])],
+        ):
+            if item:
+                col.metric(lab, f"−{item['varPct']:.1f}%", f"CVaR −{item['cvarPct']:.1f}%", delta_color="off")
+        rows = [
+            {"Scenario": h["name"], "Kind": "historical", "Window": f"{h['start']} → {h['end']}",
+             "Book %": h["bookPct"], "VGT %": h["benchmarks"].get("VGT"), "ACWI %": h["benchmarks"].get("ACWI"),
+             "60/40 %": h["benchmarks"].get("60/40")}
+            for h in stress["historical"]
+        ] + [
+            {"Scenario": h["name"], "Kind": "factor", "Window": f"β {h['beta']:.2f} to {h['factor']}",
+             "Book %": h["bookPct"], "VGT %": h["shockPct"] if h["factor"] == "VGT" else None}
+            for h in stress["hypothetical"]
+        ]
+        st.dataframe(
+            pd.DataFrame(rows).style.format(
+                {"Book %": "{:+.1f}", "VGT %": "{:+.1f}", "ACWI %": "{:+.1f}", "60/40 %": "{:+.1f}"}, na_rep="—"
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+        st.caption(
+            stress.get("note", "")
+            + " Stand-ins: "
+            + ", ".join(f"{k} → {v['ticker']}" for k, v in (stress.get("proxies") or {}).items())
+            + ". VaR is the loss exceeded on the worst 5% (1%) of days or weeks; CVaR the average loss beyond it."
+        )
+
 st.divider()
 st.caption(
     "Not investment advice, not a recommendation, and not an offer to buy or sell anything. "
     "A personal research exercise. Prices are delayed and sourced from a free public endpoint. "
     "Performance figures are a backward-looking simulation of the current weights over a window "
-    "ending today — not a track record."
+    "ending today — not a track record. An educational exercise, not a securities analysis report: the author is not a CVM-registered securities analyst (Resolução CVM 20) or investment adviser, and nothing here is a recommendation."
 )

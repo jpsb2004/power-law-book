@@ -155,6 +155,37 @@ if (changes) {
   if (got !== changes) fail.push(`change log rendered ${got} rows for ${changes} entries`);
 }
 
+// Structure (P1-3) and valuation/thesis (P1-4).
+if (snap.structure) {
+  if (document.getElementById("bets-section").hidden) fail.push("snapshot carries structure but the bets section is hidden");
+  const cells = document.querySelectorAll("#heatmap svg rect").length;
+  if (cells !== snap.structure.lines ** 2) fail.push(`heatmap drew ${cells} cells for ${snap.structure.lines} lines`);
+  const g = document.querySelectorAll("#pof-tbl tbody tr").length;
+  if (g !== snap.structure.pointsOfFailure.length) fail.push(`points-of-failure table rendered ${g} rows`);
+}
+if (snap.thesis) {
+  if (document.getElementById("value-section").hidden) fail.push("snapshot carries the thesis but the valuation section is hidden");
+  const f = document.querySelectorAll("#falsifier-tbl tbody tr").length;
+  if (f !== snap.thesis.checks.length) fail.push(`falsifier table rendered ${f} rows for ${snap.thesis.checks.length}`);
+}
+if (snap.fundamentals?.valuation?.length) {
+  const v = document.querySelectorAll("#val-tbl tbody tr").length;
+  if (v !== snap.fundamentals.valuation.length) fail.push(`valuation table rendered ${v} rows`);
+}
+
+// Tail risk and stress: one row per historical, factor and stated scenario.
+if (snap.stress && snap.tail) {
+  const sec = document.getElementById("stress-section");
+  if (sec.hidden) fail.push("snapshot carries stress tests but the section is hidden");
+  const want = snap.stress.historical.length + snap.stress.hypothetical.length + snap.stress.stated.length;
+  const got = document.querySelectorAll("#stress-tbl tbody tr").length;
+  if (got !== want) fail.push(`stress table rendered ${got} rows for ${want} scenarios`);
+  if (document.querySelectorAll("#tail-kv > div").length !== 4) fail.push("tail risk did not render 4 tiles");
+}
+if ((snap.factors?.rolling ?? []).length >= 10 && document.getElementById("rolling-fig").hidden) {
+  fail.push("snapshot carries a rolling beta but the chart is hidden");
+}
+
 // Rebalancing variants and the reconciliation that ties them together.
 const rebalRows = snap.rebalancing?.usd?.rows?.length ?? 0;
 const rebalBlock = document.getElementById("rebal-block");
