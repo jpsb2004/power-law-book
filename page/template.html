@@ -319,6 +319,14 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     </div>
   </section>
 
+  <section id="stress-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>When it goes wrong</h2></div>
+    <p class="lede prose" id="stress-lede"></p>
+    <div class="kv" id="tail-kv"></div>
+    <div class="tbl-scroll"><table class="mini" id="stress-tbl"></table></div>
+    <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="stress-note"></p>
+  </section>
+
   <section id="bench-section" hidden>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Against the benchmarks</h2></div>
     <p class="lede prose" id="bench-lede"></p>
@@ -400,13 +408,18 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   </section>
 
   <section id="factor-section" hidden>
-    <div class="sec-head"><span class="eyebrow secnum"></span><h2>Does the ballast ballast?</h2></div>
-    <p class="lede prose">
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>What the returns are made of</h2></div>
+    <p class="lede prose" id="factor-lede">
       Ballast exists in case the rest of the book is one trade. If it does its job, it should
       load lightly on the factors the thesis is long and explain little of its own movement
-      through them. Weekly USD returns, regressed on a tech factor and an energy factor.
+      through them.
     </p>
     <div class="tbl-scroll"><table class="mini" id="factor-tbl"></table></div>
+    <p style="color:var(--ink-2);margin-top:1rem;max-width:var(--measure)" id="factor-conclusion"></p>
+    <figure id="rolling-fig" hidden>
+      <div class="chart-box rel"><div id="rolling"></div><div class="tip" id="rolling-tip"></div></div>
+      <figcaption id="rolling-cap"></figcaption>
+    </figure>
     <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="factor-note"></p>
   </section>
 
@@ -610,6 +623,17 @@ function renderStats() {
 }
 
 /* ----------------------------------------------------------------- chain */
+// What the bucket actually trades like, beside what it is called (review P0-3):
+// its three-year weekly loadings from the factor section.
+function measured(id) {
+  const f = DATA.factors;
+  const r = f?.rows?.find((x) => x.key === id && x.kind === "bucket" && !x.insufficient);
+  if (!r) return "";
+  const parts = f.factors.map((x) => "β " + x.ticker + " " + r.betas[x.id].toFixed(2));
+  return '<p class="meta" style="color:var(--ink-3)">Trades like: ' + escape(parts.join("  ·  ")) +
+    "  (R² " + r.r2.toFixed(2) + ", weekly" + (f.window ? ", since " + escape(f.window.start.slice(0, 4)) : "") + ")</p>";
+}
+
 function renderChain() {
   const order = Object.keys(SLEEVES);
   $("chain").innerHTML = order
@@ -628,6 +652,7 @@ function renderChain() {
         "<h3>" + escape(s.name) + "</h3>" +
         '<p class="claim">' + escape(s.claim) + "</p>" +
         '<p class="meta">' + DATA.sleeveWeights[id] + "% of book  ·  " + escape(names) + "</p>" +
+        measured(id) +
         "</div></article>"
       );
     })
@@ -1201,6 +1226,52 @@ function renderProxy() {
   $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
 }
 
+/* ---------------------------------------------------------- tail & stress */
+function renderStress() {
+  const T = DATA.tail, S = DATA.stress;
+  if (!T || !S) return;
+  $("stress-section").hidden = false;
+  const loss = (v) => (v == null ? "—" : "−" + Math.abs(v).toFixed(1) + "%");
+  const dd = T.daily ?? [], wk = T.weekly ?? [];
+  $("stress-lede").textContent =
+    "The drawdown in the headline comes from one strong year. These are the losses the book would have taken in " +
+    "the bad stretches of the last five years, today's weights held through each, and the tail of its own " +
+    "distribution. Historical figures are what happened to these lines, or to a stated stand-in where a line did " +
+    "not exist yet; they are not forecasts.";
+  const tiles = [
+    dd[0] && { k: "1-day VaR 95%", v: loss(dd[0].varPct), n: "CVaR " + loss(dd[0].cvarPct) + " · " + dd[0].n + " days" },
+    dd[1] && { k: "1-day VaR 99%", v: loss(dd[1].varPct), n: "CVaR " + loss(dd[1].cvarPct) },
+    wk[0] && { k: "1-week VaR 95%", v: loss(wk[0].varPct), n: "CVaR " + loss(wk[0].cvarPct) + " · " + wk[0].n + " weeks" },
+    wk[1] && { k: "1-week VaR 99%", v: loss(wk[1].varPct), n: "CVaR " + loss(wk[1].cvarPct) },
+  ].filter(Boolean);
+  $("tail-kv").innerHTML = tiles.map((c) =>
+    '<div><div class="k">' + c.k + '</div><div class="v neg">' + c.v + '</div><div class="n">' + escape(c.n) + "</div></div>").join("");
+
+  const cell = (v) => '<td class="n ' + signClass(v) + '">' + pct(v) + "</td>";
+  const row = (name, kind, when, book, b = {}) =>
+    '<tr><td class="lbl">' + escape(name) + '</td><td><span class="tag">' + kind + "</span></td>" +
+    '<td style="font-size:.8rem;color:var(--ink-3);white-space:nowrap">' + escape(when) + "</td>" +
+    '<td class="n ' + signClass(book) + '" style="font-weight:600">' + pct(book) + "</td>" +
+    cell(b.VGT) + cell(b.ACWI) + cell(b["60/40"]) + "</tr>";
+  $("stress-tbl").innerHTML =
+    "<thead><tr><th>Scenario</th><th>Kind</th><th>Window</th><th>Book</th><th>VGT</th><th>ACWI</th><th>60/40</th></tr></thead><tbody>" +
+    S.historical.map((h) => row(h.name, "historical", h.start + " → " + h.end, h.bookPct, h.benchmarks)).join("") +
+    S.hypothetical.map((h) => row(h.name, "factor", "β " + (h.beta ?? 0).toFixed(2) + " to " + h.factor, h.bookPct,
+      { [h.factor]: h.shockPct })).join("") +
+    S.stated.map((h) => row(h.name, "stated", "assumed shocks", h.bookPct)).join("") +
+    "</tbody>";
+
+  const proxies = Object.entries(S.proxies ?? {}).map(([k, v]) => k + " → " + v.ticker).join(", ");
+  const worst = S.historical.filter((h) => h.bookPct != null).sort((a, b) => a.bookPct - b.bookPct)[0];
+  $("stress-note").textContent =
+    (worst ? "The worst historical window is " + worst.name + ", " + pct(worst.bookPct) + " against " + pct(worst.benchmarks.ACWI) +
+      " for ACWI. " : "") +
+    "VaR is the loss exceeded on the worst 5% (or 1%) of days or weeks; CVaR is the average loss on those days. One-day " +
+    "figures use the headline year, one-week figures three years. " + (S.note ?? "") + " Stand-ins where a line did not exist: " +
+    proxies + ". Factor rows apply the book's measured beta to a hypothetical move. Stated rows are the judgement " +
+    "shocks in data/scenarios.json, the same ones the dashboard's Stress Tests tab uses.";
+}
+
 /* ------------------------------------------------------------ change log */
 function renderChanges() {
   const ch = DATA.bookChanges ?? [];
@@ -1519,20 +1590,97 @@ function renderFactors() {
         '<td class="n">' + r.n + "</td></tr>";
     }).join("") + "</tbody>";
 
+  const yrs = f.window ? ((Date.parse(f.window.end) - Date.parse(f.window.start)) / 3.15576e10).toFixed(0) : null;
+  const fnames = f.factors.map((x) => x.ticker + " (" + x.id + ")").join(", ");
+  $("factor-lede").textContent =
+    "Ballast exists in case the rest of the book is one trade. If it does its job, it should load lightly on the " +
+    "factors the thesis is long and explain little of its own movement through them. Weekly USD returns" +
+    (f.excessOf ? " in excess of " + f.excessOf + " (T-bills)" : "") +
+    (f.window ? ", " + fmtDate(Date.parse(f.window.start)) + " to " + fmtDate(Date.parse(f.window.end)) + " (" + yrs + " years)" : "") +
+    ", regressed on " + fnames + ". None of the factors is a holding, so no bucket is regressed on itself.";
+
   const b = f.rows.find((r) => r.key === "ballast" && !r.insufficient);
+  const lead = (r) => {
+    const top = ids.reduce((a, id) => (Math.abs(r.betas[id]) > Math.abs(r.betas[a]) ? id : a));
+    return name(top) + " (" + r.betas[top].toFixed(2) + ")";
+  };
   const read = b
-    ? "Ballast loads " + b.betas.tech.toFixed(2) + " on tech and " + b.betas.energy.toFixed(2) + " on energy, and the two together explain " +
-      (b.r2 * 100).toFixed(0) + "% of its weekly variance; its correlation with " + thesisList + " combined is " +
-      num(b.rhoThesis) + ". " +
-      (b.betas.tech > 0 && (b.rhoThesis ?? 0) > 0
-        ? "That is diversification, not a hedge: it still rises and falls with the thesis, only less. A hedge would show a negative beta. "
-        : "A negative loading is what a hedge looks like; with ~50 observations, check the t-stat before believing it. ")
+    ? "Ballast's largest loading is on " + lead(b) + "; the factors together explain " + (b.r2 * 100).toFixed(0) +
+      "% of its weekly variance, and its correlation with " + thesisList + " combined is " + num(b.rhoThesis) + ". " +
+      (ids.some((id) => b.betas[id] > 0.3 && (b.tStats[id] ?? 0) > 2)
+        ? "That is not a hedge: it rises and falls with the market, only by different amounts. A hedge would show negative loadings. "
+        : "Its loadings are small; a hedge would show them negative. ")
     : "";
+  const sig = f.rows.filter((r) => !r.insufficient && r.kind !== "position" && Math.abs(r.alphaT ?? 0) >= 2);
+  $("factor-conclusion").textContent =
+    "Returns are explained by factor exposure; there is no evidence of skill. " +
+    (sig.length
+      ? sig.map((r) => r.label).join(", ") + " show" + (sig.length === 1 ? "s" : "") + " an intercept with a t-statistic near or " +
+        "above 2, but this is a backtest of positions chosen knowing how these years went: an intercept there measures " +
+        "the selection, not an edge that would have been available in advance."
+      : "No intercept clears a t-statistic of 2.");
   $("factor-note").textContent =
     read +
-    "t-statistics in brackets. An annualised intercept from ~50 weekly observations is noise unless its t-stat clears about 2, " +
-    "so this table cannot show alpha — it shows exposure. " + name("tech") + " is also a Compute holding, so part of that bucket's tech beta is mechanical. " +
-    "Weekly sampling is used because Seoul and Taipei close before New York opens, which biases daily cross-market betas toward zero.";
+    "t-statistics in brackets; alpha is the annualised intercept. Weekly sampling is used because Seoul, Taipei and " +
+    "Riyadh close before New York opens, which biases daily cross-market betas toward zero. The long-run curve " +
+    "replays today's weights; lines that listed later join when they list.";
+
+  renderRolling();
+}
+
+function renderRolling() {
+  const pts = (DATA.factors?.rolling ?? []).filter((p) => p.market != null);
+  if (pts.length < 10) return;
+  $("rolling-fig").hidden = false;
+  const host = $("rolling");
+  host.innerHTML = "";
+  const W = 1000, H = 240, m = { t: 14, r: 120, b: 26, l: 8 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xs = pts.map((p) => p.t), ys = pts.flatMap((p) => [p.market, p.semis]).filter((v) => v != null);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let lo = Math.min(0, ...ys), hi = Math.max(...ys);
+  const pad = (hi - lo) * 0.1 || 0.1; lo -= pad; hi += pad;
+  const X = (t) => m.l + ((t - x0) / (x1 - x0)) * iw;
+  const Y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Rolling 52-week beta of the book to global equity and semiconductors" });
+  for (const v of [0, 0.5, 1, 1.5, 2].filter((v) => v >= lo && v <= hi)) {
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: css(v === 0 ? "--rule-strong" : "--rule"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: m.l + 4, y: Y(v) - 4, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, v.toFixed(1)));
+  }
+  const series = [
+    { key: "market", label: "β to ACWI", stroke: "--accent", dash: null, width: 2 },
+    { key: "semis", label: "β to SMH", stroke: "--ink-2", dash: "6 4", width: 1.6 },
+  ];
+  for (const s of series) {
+    const d = pts.filter((p) => p[s.key] != null).map((p, i) => (i ? "L" : "M") + X(p.t).toFixed(2) + " " + Y(p[s.key]).toFixed(2)).join(" ");
+    svg.appendChild(el("path", { d, fill: "none", stroke: css(s.stroke), "stroke-width": s.width, ...(s.dash ? { "stroke-dasharray": s.dash } : {}) }));
+    const last = pts.at(-1)[s.key];
+    svg.appendChild(el("text", { x: m.l + iw + 8, y: Y(last) + 4, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-mono)" }, s.label + " " + last.toFixed(2)));
+  }
+  svg.appendChild(el("text", { x: m.l, y: H - 6, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, fmtDate(x0)));
+  svg.appendChild(el("text", { x: m.l + iw, y: H - 6, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "end" }, fmtDate(x1)));
+  const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(hit);
+  host.appendChild(svg);
+  const tip = $("rolling-tip");
+  hit.addEventListener("mousemove", (ev) => {
+    const box = svg.getBoundingClientRect();
+    const t = x0 + ((((ev.clientX - box.left) / box.width) * W - m.l) / iw) * (x1 - x0);
+    let best = pts[0];
+    for (const p of pts) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    cross.setAttribute("x1", X(best.t)); cross.setAttribute("x2", X(best.t)); cross.setAttribute("opacity", 0.4);
+    tip.classList.add("on");
+    tip.innerHTML = "52 weeks to " + fmtDate(best.t) + "<br>β to ACWI " + best.market.toFixed(2) + "<br>β to SMH " + (best.semis ?? 0).toFixed(2);
+    const hb = host.getBoundingClientRect();
+    tip.style.left = Math.min(Math.max(ev.clientX - hb.left + 12, 0), hb.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = ev.clientY - hb.top - 10 + "px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.classList.remove("on"); cross.setAttribute("opacity", 0); });
+  $("rolling-cap").textContent =
+    "Rolling 52-week beta of the book's weekly excess return to ACWI (solid) and, separately, to SMH (dashed). " +
+    "A rising line means the book has become more of a leveraged bet on that factor.";
 }
 
 /* ------------------------------------------------------------- view toggle */
@@ -1573,7 +1721,7 @@ function secNumberOf(id) {
 function renderAll() {
   renderStamp(); renderToggles(); renderStats(); renderChain();
   renderCurve(); renderAlloc(); renderYtd(); renderFx();
-  renderRebalancing(); renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderChanges(); renderRefreshLog();
+  renderRebalancing(); renderBenchmarks(); renderStress(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderChanges(); renderRefreshLog();
   renderProxy(); numberSections();
 }
 renderAll();

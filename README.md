@@ -224,14 +224,28 @@ year, Riyadh trades Sundays), so the old `sqrt(252)` understated it by about a
 tenth; measured on a single New York calendar it agrees with the corrected
 figure.
 
-### Factor exposure
+### Factor exposure (three years, three factors)
 
-Weekly USD returns of the book, each bucket and each Ballast line, regressed on
-a tech factor (VGT) and an energy factor (XLE), with t-stats, R² and correlation
-to the rest of the book (Energy, Compute and Materials) combined. It answers whether Ballast behaves differently
-from the thesis. It is **not** an alpha test: ~50 weekly observations cannot
-distinguish an annualised intercept from zero, and the page says so. VGT is also
-a Compute holding, so that bucket's tech beta is partly mechanical.
+Weekly USD returns in excess of T-bills (SGOV) for the book, each bucket and
+each Ballast line, over three years, regressed on global equity (ACWI),
+semiconductors (SMH) and energy (XLE) — none of them a holding, so no bucket is
+regressed on itself. Lines that listed later join the long-run curve when they
+list. The page adds a rolling 52-week beta to ACWI and SMH, shows each bucket's
+loadings beside its name, and states the conclusion the numbers support:
+returns are explained by exposure; an intercept in a hindsight backtest
+measures selection, not an edge. Over three years Ballast loads 0.74 on global
+equity — diversification by degree, not a hedge.
+
+### Tail risk and stress tests
+
+Historical one-day VaR/CVaR (95%, 99%) from the headline year and one-week
+VaR/CVaR from three years; today's weights held through 2022's bear market, the
+2023 rate spike, the DeepSeek day and the April 2025 tariff shock, beside VGT,
+ACWI and 60/40 over the same dates; a hypothetical 40% tech fall through the
+book's measured beta; and the three stated scenarios. Windows, stated shocks
+(with their rationale) and the stand-ins for lines that did not exist yet
+(NBIS/CRWV → SMH, LB → TPL, RARA11.SA → REMX, AINF.L → VGT) live in
+`data/scenarios.json`, which the page, the dashboard and the PDF all read.
 
 ---
 

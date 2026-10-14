@@ -4,6 +4,30 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P1-1 Tail risk and stress tests; P1-2 three-factor, three-year exposure; P0-3 loadings
+
+- **P1-2.** Factor regression moved from one year on VGT + XLE to three years
+  (weekly, excess of SGOV) on ACWI + SMH + XLE. VGT dropped as a factor because
+  it is a holding. Rolling 52-week beta chart. The page states the conclusion:
+  returns are explained by exposure; intercepts near t = 2 in a hindsight
+  backtest measure selection. Also fixes a method error: raw returns had put
+  the risk-free rate into alpha (SGOV showed +4.4% "alpha" at t = 57; ~0 now).
+  Book (2023-10 → 2026-10): β ACWI 0.66, SMH 0.26, XLE 0.07, R² 0.69. Ballast:
+  β ACWI 0.74 (t 13), R² 0.66 — not a hedge over three years (one-year VGT/XLE
+  view had shown 0.14).
+- **P0-3.** Each bucket card shows its measured loadings ("trades like"):
+  Energy β ACWI 0.67 / SMH 0.27 / XLE 0.20 — it trades as AI and market risk
+  more than as energy, which the page now says beside the name.
+- **P1-1.** One-day VaR 95% 2.4% (CVaR 3.0%), 99% 3.5% (3.9%); one-week VaR
+  95% 4.1% (5.5%), 99% 8.8%. Today's weights held through: 2022 bear −17.1%
+  (ACWI −26.4%, VGT −34.5%), 2023 rate spike −2.4%, DeepSeek day −6.1%, April
+  2025 tariff shock −13.4%; tech −40% via β 0.73 → −29.1%. Stated scenarios
+  now carry numbers in the PDF too (CapEx −17.1%, Taiwan −8.6%), which the PDF
+  had described as "unmodelled".
+- Stated shocks moved from `research/scenarios.py` to `data/scenarios.json`
+  (with each scenario's rationale), so Python and Node read one table.
+- Tests: `tests/longrun.test.mjs` (3 cases).
+
 ## 2026-10-14 — P1-5 FX labels, dated hedge rates, BRL view; P0-3/P0-4 remainders; P2 wording
 
 - **P1-5.** FX labels now give both numbers, named: the percentage-point gap

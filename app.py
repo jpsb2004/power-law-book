@@ -535,6 +535,45 @@ with tab_stress:
         )
         st.caption(result["note"])
 
+    # Historical windows, a factor shock and tail risk, computed by the Node
+    # pipeline over five years (snapshot["stress"], ["tail"]) -- same figures
+    # as the published page.
+    stress = book.stress
+    if stress.get("historical"):
+        st.subheader("Historical stress and tail risk")
+        tail = book.tail
+        tcols = st.columns(4)
+        for col, (lab, item) in zip(
+            tcols,
+            [("1-day VaR 95%", tail["daily"][0]), ("1-day VaR 99%", tail["daily"][1]),
+             ("1-week VaR 95%", tail["weekly"][0]), ("1-week VaR 99%", tail["weekly"][1])],
+        ):
+            if item:
+                col.metric(lab, f"−{item['varPct']:.1f}%", f"CVaR −{item['cvarPct']:.1f}%", delta_color="off")
+        rows = [
+            {"Scenario": h["name"], "Kind": "historical", "Window": f"{h['start']} → {h['end']}",
+             "Book %": h["bookPct"], "VGT %": h["benchmarks"].get("VGT"), "ACWI %": h["benchmarks"].get("ACWI"),
+             "60/40 %": h["benchmarks"].get("60/40")}
+            for h in stress["historical"]
+        ] + [
+            {"Scenario": h["name"], "Kind": "factor", "Window": f"β {h['beta']:.2f} to {h['factor']}",
+             "Book %": h["bookPct"], "VGT %": h["shockPct"] if h["factor"] == "VGT" else None}
+            for h in stress["hypothetical"]
+        ]
+        st.dataframe(
+            pd.DataFrame(rows).style.format(
+                {"Book %": "{:+.1f}", "VGT %": "{:+.1f}", "ACWI %": "{:+.1f}", "60/40 %": "{:+.1f}"}, na_rep="—"
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+        st.caption(
+            stress.get("note", "")
+            + " Stand-ins: "
+            + ", ".join(f"{k} → {v['ticker']}" for k, v in (stress.get("proxies") or {}).items())
+            + ". VaR is the loss exceeded on the worst 5% (1%) of days or weeks; CVaR the average loss beyond it."
+        )
+
 st.divider()
 st.caption(
     "Not investment advice, not a recommendation, and not an offer to buy or sell anything. "

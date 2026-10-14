@@ -155,6 +155,19 @@ if (changes) {
   if (got !== changes) fail.push(`change log rendered ${got} rows for ${changes} entries`);
 }
 
+// Tail risk and stress: one row per historical, factor and stated scenario.
+if (snap.stress && snap.tail) {
+  const sec = document.getElementById("stress-section");
+  if (sec.hidden) fail.push("snapshot carries stress tests but the section is hidden");
+  const want = snap.stress.historical.length + snap.stress.hypothetical.length + snap.stress.stated.length;
+  const got = document.querySelectorAll("#stress-tbl tbody tr").length;
+  if (got !== want) fail.push(`stress table rendered ${got} rows for ${want} scenarios`);
+  if (document.querySelectorAll("#tail-kv > div").length !== 4) fail.push("tail risk did not render 4 tiles");
+}
+if ((snap.factors?.rolling ?? []).length >= 10 && document.getElementById("rolling-fig").hidden) {
+  fail.push("snapshot carries a rolling beta but the chart is hidden");
+}
+
 // Rebalancing variants and the reconciliation that ties them together.
 const rebalRows = snap.rebalancing?.usd?.rows?.length ?? 0;
 const rebalBlock = document.getElementById("rebal-block");

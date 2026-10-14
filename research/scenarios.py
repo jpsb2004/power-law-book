@@ -11,8 +11,8 @@ Sensitivities are attached at position level rather than bucket level, because
 the buckets are not internally uniform: a grid bottleneck is good for a uranium
 miner and bad for a neocloud, and both sit in Energy.
 
-Every number below is a judgement. They are stated in one table so they can be
-argued with, which is the point.
+Every number is a judgement. They are stated in one table, data/scenarios.json,
+so they can be argued with, which is the point.
 
 The Korea line's shocks were set for ^KS11 and carried over unchanged when the
 book swapped it for EWY (14 Oct 2026). EWY is in dollars, so a won move now
@@ -21,7 +21,9 @@ lands inside the shock; revisit them rather than reading them as re-estimated.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 
 from .ontology import BUCKET_LABELS, BUCKET_ORDER, Book, Entity
 
@@ -39,121 +41,17 @@ class Scenario:
         return self.shocks.get(entity.ticker, 0.0)
 
 
-GRID_BOTTLENECK = Scenario(
-    key="grid",
-    name="Grid Bottleneck",
-    premise=(
-        "Interconnection queues and transformer lead times, not chips, become the "
-        "binding constraint on new capacity. Announced data-centre build slips."
-    ),
-    shocks={
-        # Owners of power and land capture scarcity rent.
-        "URA": 18.0,
-        "NLR": 12.0,
-        "LB": 15.0,
-        "PETR4.SA": 4.0,
-        "2222.SR": 3.0,
-        # The neoclouds are the losers: they have signed for capacity they
-        # cannot energise, and their capex is already committed.
-        "NBIS": -22.0,
-        "CRWV": -28.0,
-        # Compute demand is deferred, not destroyed.
-        "TSM": -8.0,
-        "AMD": -10.0,
-        "2357.TW": -12.0,
-        "EWY": -7.0,
-        "VGT": -6.0,
-        "AINF.L": -9.0,
-        "PLTR": -5.0,
-        # Ballast roughly holds; rare earths bid on grid hardware demand.
-        "GLD": 3.0,
-        "RARA11.SA": 8.0,
-        "JPM": -2.0,
-        "AVDV": -1.0,
-        # Bills hold par; staples pay a little more for energy and freight.
-        "SGOV": 0.0,
-        "XLP": -1.0,
-    },
-    note="The thesis trade working: the bottleneck is physical, and the book is long the bottleneck.",
-)
-
-CAPEX_RETRENCHMENT = Scenario(
-    key="capex",
-    name="CapEx Retrenchment",
-    premise=(
-        "Hyperscalers cut AI capital spending guidance. The supercycle is "
-        "re-rated as a cycle."
-    ),
-    shocks={
-        "CRWV": -45.0,
-        "NBIS": -40.0,
-        "AMD": -30.0,
-        "TSM": -25.0,
-        "2357.TW": -28.0,
-        "EWY": -22.0,
-        "AINF.L": -30.0,
-        "VGT": -20.0,
-        "PLTR": -32.0,
-        # Fuel demand is a derivative of the buildout, so it goes too -- just
-        # less, because reactors serve grids rather than data centres alone.
-        "URA": -18.0,
-        "NLR": -10.0,
-        "LB": -20.0,
-        "PETR4.SA": -8.0,
-        "2222.SR": -6.0,
-        # This is the scenario ballast exists for.
-        "GLD": 8.0,
-        "AVDV": -4.0,
-        "JPM": -12.0,
-        "RARA11.SA": -15.0,
-        # Bills hold par; money leaving AI rotates into staples, as it did in
-        # the book's Jun-Jul 2026 drawdown (+7.5%) and on the DeepSeek day (+2.7%).
-        "SGOV": 0.0,
-        "XLP": 6.0,
-    },
-    # {ballast} is filled from the live weights: this note said "30%" by hand
-    # and would have gone stale the day Ballast was resized.
-    note="The book's central risk. Note ballast is only {ballast:.0f}% — it cushions, it does not rescue.",
-)
-
-GEOPOLITICAL_SHOCK = Scenario(
-    key="geopolitics",
-    name="Geopolitical Shock",
-    premise=(
-        "A Taiwan Strait escalation. Advanced foundry output is interrupted and "
-        "export controls tighten on strategic materials."
-    ),
-    shocks={
-        # Not a drawdown — an impairment. Three positions share one failure.
-        "TSM": -45.0,
-        "2357.TW": -50.0,
-        "EWY": -35.0,
-        "AMD": -30.0,
-        "VGT": -22.0,
-        "AINF.L": -28.0,
-        "NBIS": -25.0,
-        "CRWV": -25.0,
-        # Defence-adjacent software is the one compute line that can rise.
-        "PLTR": 10.0,
-        # Energy bids on supply fear; rare earths bid hard on export controls.
-        "PETR4.SA": 12.0,
-        "2222.SR": 14.0,
-        "URA": 6.0,
-        "NLR": 4.0,
-        "LB": -5.0,
-        "RARA11.SA": 35.0,
-        "GLD": 18.0,
-        "AVDV": -12.0,
-        "JPM": -15.0,
-        # Bills hold par; staples are still equity and fall with the market,
-        # less than it (-5.9% in the spring 2025 tariff sell-off).
-        "SGOV": 0.0,
-        "XLP": -8.0,
-    },
-    note="Concentrated single-point risk: TSM, 2357.TW and EWY are one bet, not three.",
-)
-
-SCENARIOS = {s.key: s for s in (GRID_BOTTLENECK, CAPEX_RETRENCHMENT, GEOPOLITICAL_SHOCK)}
+# The shocks live in data/scenarios.json so the Node pipeline (published page)
+# and this module (dashboard, PDF, daily note) read one table. Each scenario
+# carries its rationale there.
+_DATA = json.loads((Path(__file__).resolve().parents[1] / "data" / "scenarios.json").read_text(encoding="utf-8"))
+SCENARIOS = {
+    s["key"]: Scenario(key=s["key"], name=s["name"], premise=s["premise"], shocks=s["shocks"], note=s["note"])
+    for s in _DATA["scenarios"]
+}
+GRID_BOTTLENECK = SCENARIOS["grid"]
+CAPEX_RETRENCHMENT = SCENARIOS["capex"]
+GEOPOLITICAL_SHOCK = SCENARIOS["geopolitics"]
 
 
 def apply_scenario(book: Book, scenario: Scenario) -> dict:

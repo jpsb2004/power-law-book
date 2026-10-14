@@ -1,0 +1,170 @@
+{
+  "note": "Stated-assumption scenario shocks, in percent, per position. Judgements, not estimates: edit here; the dashboard, the published page and the PDF all read this file. The Korea line's shocks were set for ^KS11 and carried over unchanged when the book swapped it for EWY on 14 Oct 2026; EWY is in dollars, so a won move now lands inside the shock.",
+  "scenarios": [
+    {
+      "key": "grid",
+      "name": "Grid Bottleneck",
+      "premise": "Interconnection queues and transformer lead times, not chips, become the binding constraint on new capacity. Announced data-centre build slips.",
+      "note": "The thesis trade working: the bottleneck is physical, and the book is long the bottleneck.",
+      "shocks": {
+        "URA": 18.0,
+        "NLR": 12.0,
+        "LB": 15.0,
+        "PETR4.SA": 4.0,
+        "2222.SR": 3.0,
+        "NBIS": -22.0,
+        "CRWV": -28.0,
+        "TSM": -8.0,
+        "AMD": -10.0,
+        "2357.TW": -12.0,
+        "EWY": -7.0,
+        "VGT": -6.0,
+        "AINF.L": -9.0,
+        "PLTR": -5.0,
+        "GLD": 3.0,
+        "RARA11.SA": 8.0,
+        "JPM": -2.0,
+        "AVDV": -1.0,
+        "SGOV": 0.0,
+        "XLP": -1.0
+      },
+      "rationale": [
+        "URA, NLR, LB, PETR4.SA, 2222.SR: owners of power and land capture scarcity rent.",
+        "NBIS, CRWV: the neoclouds are the losers; they have signed for capacity they cannot energise, and their capex is already committed.",
+        "Compute lines: demand is deferred, not destroyed.",
+        "GLD, JPM, AVDV: Ballast roughly holds. RARA11.SA: rare earths bid on grid hardware demand.",
+        "SGOV, XLP: bills hold par; staples pay a little more for energy and freight."
+      ]
+    },
+    {
+      "key": "capex",
+      "name": "CapEx Retrenchment",
+      "premise": "Hyperscalers cut AI capital spending guidance. The supercycle is re-rated as a cycle.",
+      "note": "The book's central risk. Note ballast is only {ballast:.0f}% — it cushions, it does not rescue.",
+      "shocks": {
+        "CRWV": -45.0,
+        "NBIS": -40.0,
+        "AMD": -30.0,
+        "TSM": -25.0,
+        "2357.TW": -28.0,
+        "EWY": -22.0,
+        "AINF.L": -30.0,
+        "VGT": -20.0,
+        "PLTR": -32.0,
+        "URA": -18.0,
+        "NLR": -10.0,
+        "LB": -20.0,
+        "PETR4.SA": -8.0,
+        "2222.SR": -6.0,
+        "GLD": 8.0,
+        "AVDV": -4.0,
+        "JPM": -12.0,
+        "RARA11.SA": -15.0,
+        "SGOV": 0.0,
+        "XLP": 6.0
+      },
+      "rationale": [
+        "Compute and neocloud lines take the hit first.",
+        "URA, NLR, LB, PETR4.SA, 2222.SR: fuel demand is a derivative of the buildout, so it goes too, just less, because reactors serve grids rather than data centres alone.",
+        "GLD, AVDV, JPM, RARA11.SA: this is the scenario Ballast exists for.",
+        "SGOV, XLP: bills hold par; money leaving AI rotates into staples, as it did in the book's Jun-Jul 2026 drawdown (+7.5%) and on the DeepSeek day (+2.7%)."
+      ]
+    },
+    {
+      "key": "geopolitics",
+      "name": "Geopolitical Shock",
+      "premise": "A Taiwan Strait escalation. Advanced foundry output is interrupted and export controls tighten on strategic materials.",
+      "note": "Concentrated single-point risk: TSM, 2357.TW and EWY are one bet, not three.",
+      "shocks": {
+        "TSM": -45.0,
+        "2357.TW": -50.0,
+        "EWY": -35.0,
+        "AMD": -30.0,
+        "VGT": -22.0,
+        "AINF.L": -28.0,
+        "NBIS": -25.0,
+        "CRWV": -25.0,
+        "PLTR": 10.0,
+        "PETR4.SA": 12.0,
+        "2222.SR": 14.0,
+        "URA": 6.0,
+        "NLR": 4.0,
+        "LB": -5.0,
+        "RARA11.SA": 35.0,
+        "GLD": 18.0,
+        "AVDV": -12.0,
+        "JPM": -15.0,
+        "SGOV": 0.0,
+        "XLP": -8.0
+      },
+      "rationale": [
+        "TSM, 2357.TW, EWY: not a drawdown, an impairment. Three positions share one failure.",
+        "PLTR: defence-adjacent software is the one compute line that can rise.",
+        "Energy bids on supply fear; RARA11.SA bids hard on export controls.",
+        "SGOV, XLP: bills hold par; staples are still equity and fall with the market, less than it (-5.9% in the spring 2025 tariff sell-off)."
+      ]
+    }
+  ],
+  "historical": [
+    {
+      "key": "bear2022",
+      "name": "2022 bear market",
+      "start": "2022-01-03",
+      "end": "2022-10-12",
+      "why": "Rate-driven de-rating of long-duration tech; S&P 500 close-to-close peak to trough."
+    },
+    {
+      "key": "rates2023",
+      "name": "Rate spike, 10-year to 5%",
+      "start": "2023-07-31",
+      "end": "2023-10-19",
+      "why": "The US 10-year yield rose from ~4.0% to 5.0%."
+    },
+    {
+      "key": "deepseek",
+      "name": "DeepSeek day",
+      "start": "2025-01-24",
+      "end": "2025-01-27",
+      "why": "A cheaper Chinese model questioned AI capex in one session."
+    },
+    {
+      "key": "tariff2025",
+      "name": "Tariff shock, oil to ~$60",
+      "start": "2025-04-02",
+      "end": "2025-04-08",
+      "why": "US tariff announcement; Brent fell to around $60."
+    }
+  ],
+  "hypothetical": [
+    {
+      "key": "tech40",
+      "name": "Tech falls 40% (dot-com style)",
+      "factor": "VGT",
+      "shockPct": -40,
+      "why": "Book loss = weekly 3-year beta to VGT × −40%. Assumes the book keeps its measured sensitivity; the dot-com bust was worse for the most speculative names."
+    }
+  ],
+  "proxies": {
+    "NBIS": {
+      "ticker": "SMH",
+      "why": "Neocloud listed Oct 2024; semiconductor ETF as the nearest liquid stand-in for GPU-capacity demand."
+    },
+    "CRWV": {
+      "ticker": "SMH",
+      "why": "Listed Mar 2025; same stand-in as NBIS."
+    },
+    "LB": {
+      "ticker": "TPL",
+      "why": "Listed Jun 2024; Texas Pacific Land is the closest listed Permian surface-and-royalty business."
+    },
+    "RARA11.SA": {
+      "ticker": "REMX",
+      "why": "Listed Jul 2026; VanEck Rare Earth/Strategic Metals tracks the same MVIS index family in USD."
+    },
+    "AINF.L": {
+      "ticker": "VGT",
+      "why": "Listed Dec 2024; US tech ETF as the nearest stand-in for an AI-infrastructure basket."
+    }
+  },
+  "historical_note": "Historical windows use each line's own USD total-return series where it existed at the window start, and the stated proxy otherwise. Book loss is today's weights held through the window (no rebalancing). Benchmarks are shown over the same dates for context."
+}
