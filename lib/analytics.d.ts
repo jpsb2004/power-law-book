@@ -26,8 +26,9 @@ export declare const dayKey: (t: number) => string;
 export declare function fetchSeries(
   symbol: string,
   range?: string,
-  init?: RequestInit
-): Promise<{ meta: QuoteMeta; points: Point[] }>;
+  init?: RequestInit,
+  opts?: { completedOnly?: boolean }
+): Promise<{ meta: QuoteMeta; points: Point[]; sessionOpen: boolean; lastBar: string | null }>;
 export declare function pctFrom(points: Point[], days: number): number | null;
 export declare function ytdPct(points: Point[]): number | null;
 export declare function annualisedVol(points: Point[]): number | null;
