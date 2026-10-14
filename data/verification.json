@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-14 19:12 UTC",
-  "snapshotAsOf": "2026-10-14 19:12 UTC",
+  "asOf": "2026-10-14 19:14 UTC",
+  "snapshotAsOf": "2026-10-14 19:14 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "rows": [
     {
@@ -26,7 +26,7 @@
       "ticker": "PETR4.SA",
       "independent": {
         "ytd": 117.8908,
-        "ret1y": 127.7337,
+        "ret1y": 127.7338,
         "vol": 30.4573
       },
       "pipeline": {
