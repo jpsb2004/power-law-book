@@ -366,7 +366,8 @@ with tab_bench:
             f"One shared window, {win['start']} to {win['end']}, USD total return. Sharpe and Sortino are in "
             f"excess of {rf.get('ticker')}'s total return ({(rf.get('annRetPct') or 0):.1f}% annualised); beta, "
             "tracking error and information ratio use weekly returns because Asian venues close before New York "
-            "opens. The book and the 60/40 are rebalanced daily. Same figures as the published page."
+            f"opens. The book and the 60/40 are rebalanced {book.rebalancing.get('base', 'daily')}. Same figures "
+            "as the published page."
         )
         st.dataframe(
             pd.DataFrame(
