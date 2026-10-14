@@ -140,6 +140,18 @@ if (benchRows.length) {
   fail.push("benchmark section is visible without benchmark data");
 }
 
+// Rebalancing variants and the reconciliation that ties them together.
+const rebalRows = snap.rebalancing?.usd?.rows?.length ?? 0;
+const rebalBlock = document.getElementById("rebal-block");
+if (rebalRows) {
+  if (rebalBlock.hidden) fail.push("snapshot carries rebalancing variants but the block is hidden");
+  const got = document.querySelectorAll("#rebal-tbl tbody tr").length;
+  if (got !== rebalRows) fail.push(`rebalancing table rendered ${got} rows for ${rebalRows} variants`);
+  if (document.querySelectorAll("#recon-tbl tbody tr").length !== 4) fail.push("reconciliation did not render 4 steps");
+} else if (!rebalBlock.hidden) {
+  fail.push("rebalancing block is visible without data");
+}
+
 // Risk contribution: one row per line with enough history, one per bucket.
 const riskRows = (snap.risk?.usd?.rows ?? []).filter((r) => !r.insufficient).length;
 const riskBlock = document.getElementById("risk-block");

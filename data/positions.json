@@ -7,6 +7,17 @@
     "materials": 5,
     "ballast": 25
   },
+  "rebalance": {
+    "base_case": "monthly",
+    "note": "The headline curve rebalances to target weight on the first session of each month. Daily rebalancing and buy-and-hold are shown beside it for comparison."
+  },
+  "cost_assumptions": {
+    "as_of": "2026-10-14",
+    "note": "Stated assumptions for the net-of-cost series, not quotes. trade_bps is commission plus half the bid-ask spread per dollar traded, by listing currency. fx_spread_bps is charged on every dollar traded in a non-USD line. withholding_pct is charged on each distribution as if held by a non-US individual investor without treaty relief; interest-related dividends from US T-bill funds can be exempt in practice, so SGOV's drag is overstated, and Brazilian JCP (15%) is ignored. Fund expense ratios are already inside fund prices and are not charged again.",
+    "trade_bps": { "USD": 5, "default": 15 },
+    "fx_spread_bps": 10,
+    "withholding_pct": { "USD": 30, "BRL": 0, "SAR": 5, "TWD": 21, "GBP": 0 }
+  },
   "fx_hedge": {
     "note": "Policy rates used to model a rolled FX hedge back to USD. Held flat across the window; they stand in for forward points, so cross-currency basis and onshore/offshore gaps are ignored. Update with the as_of date when a central bank moves.",
     "as_of": "2026-10-08",

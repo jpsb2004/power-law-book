@@ -292,7 +292,8 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Performance</h2></div>
     <p class="lede prose">
-      The book indexed to 100 twelve months ago, in USD, rebalanced daily to target weight.
+      The book indexed to 100 twelve months ago, in USD, rebalanced to target weight on the
+      first session of each <span id="rebal-word">month</span>.
       This is a backward-looking simulation of the current weights, not a track record —
       the positions were chosen with the benefit of knowing this window.
     </p>
@@ -302,6 +303,13 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
       <div class="chart-box rel"><div id="curve"></div><div class="tip" id="curve-tip"></div></div>
       <figcaption id="curve-cap"></figcaption>
     </figure>
+    <div id="rebal-block" hidden>
+      <h3 class="subhead">How the headline is built, and what costs take off it</h3>
+      <div class="tbl-scroll"><table class="mini" id="rebal-tbl"></table></div>
+      <h3 class="subhead">Reconciliation</h3>
+      <div class="tbl-scroll"><table class="mini" id="recon-tbl"></table></div>
+      <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="rebal-note"></p>
+    </div>
   </section>
 
   <section id="bench-section" hidden>
@@ -439,13 +447,13 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
           than the true economic relationship; weekly sampling would reduce it.</p></li>
       </ul>
       <ul class="note-list">
-        <li><h3>Daily rebalancing is a modelling choice</h3><p>
-          The curve rebalances to target weight every session. A held book would drift with its
+        <li><h3>Rebalancing is a modelling choice</h3><p id="rebal-limit">
+          The curve rebalances to target weight on a fixed schedule. A held book would drift with its
           winners, so this understates the concentration that would actually have built up.</p></li>
-        <li><h3>Total return, before your costs</h3><p>
+        <li><h3>Headline returns are gross</h3><p id="cost-limit">
           Returns include reinvested dividends and are net of each fund's own fee, which is already in
-          its price. They are gross of commission, spread, withholding on Brazilian and Saudi dividends,
-          and the FX spread on five currencies. The lived return would be lower.</p></li>
+          its price. The headline is gross of commission, spread, withholding and the FX spread; the
+          net-of-cost series in the performance section charges stated assumptions for each.</p></li>
         <li><h3>One window, chosen after the fact</h3><p>
           Twelve months, ending on the day the note was written, for positions selected today.
           That is the most flattering possible framing, and the reason the drawdown column matters
@@ -556,7 +564,7 @@ function renderStamp() {
 function renderStats() {
   const s = V().stats();
   const cards = [
-    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: (VIEW === "hedged" ? "FX-hedged USD" : "USD") + ", rebalanced daily" },
+    { k: "1-year return", v: pct(s.ret1y), c: signClass(s.ret1y), n: (VIEW === "hedged" ? "FX-hedged USD" : "USD") + ", rebalanced " + (DATA.rebalancing?.base ?? "daily") },
     { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
     { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
     { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
@@ -1140,6 +1148,66 @@ function renderProxy() {
   $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
 }
 
+/* ----------------------------------------------------- rebalancing & costs */
+function renderRebalancing() {
+  const RB = DATA.rebalancing;
+  const R = RB?.[VIEW === "hedged" ? "hedged" : "usd"];
+  if (!R?.rows?.length) return;
+  $("rebal-block").hidden = false;
+  const unit = { monthly: "month", quarterly: "quarter", daily: "session" }[RB.base] ?? RB.base;
+  $("rebal-word").textContent = unit;
+  const ppx = (v) => (v == null ? "—" : v.toFixed(2) + "pp");
+
+  $("rebal-tbl").innerHTML =
+    "<thead><tr><th>Series</th><th>Return</th><th>Volatility</th><th>Max DD</th><th>Rebalances</th>" +
+    "<th>Turnover / yr</th><th>Trading cost</th><th>Withholding</th></tr></thead><tbody>" +
+    R.rows.map((r) =>
+      '<tr class="' + (r.key === "base" ? "em" : r.costs ? "sub" : "") + '"><td class="lbl">' + escape(r.label) + "</td>" +
+      '<td class="n ' + signClass(r.windowRetPct) + '">' + pct(r.windowRetPct) + "</td>" +
+      '<td class="n">' + (r.stats.vol ?? 0).toFixed(1) + "%</td>" +
+      '<td class="n neg">' + pct(r.stats.maxDrawdown) + "</td>" +
+      '<td class="n">' + r.rebalances + "</td>" +
+      '<td class="n">' + r.turnoverPctPerYear.toFixed(0) + "%</td>" +
+      '<td class="n">' + (r.costs ? ppx(r.tradingCostPct) : "—") + "</td>" +
+      '<td class="n">' + (r.costs ? ppx(r.withholdingPct) : "—") + "</td></tr>"
+    ).join("") + "</tbody>";
+
+  const rc = R.reconciliation;
+  const steps = [
+    { label: "Each line's own return, weighted", v: rc.weightedSumPct, why: "Σ weight × return over the window" },
+    { label: "Buy and hold", v: rc.holdPct, why: rc.lateListings.length
+        ? rc.lateListings.join(", ") + " listed part-way through and was bought by trimming the others"
+        : "identical when every line trades from day one" },
+    { label: "Rebalanced " + RB.base + " (base case)", v: rc.basePct, why: "selling winners and buying laggards each " + unit },
+    { label: "Rebalanced daily", v: rc.dailyPct, why: "the same, every session (the previous headline)" },
+  ];
+  $("recon-tbl").innerHTML =
+    "<thead><tr><th>Step</th><th>Return</th><th>Change</th><th>Why</th></tr></thead><tbody>" +
+    steps.map((s, i) =>
+      '<tr class="' + (s.label.includes("base case") ? "em" : "") + '"><td class="lbl">' + escape(s.label) + "</td>" +
+      '<td class="n">' + pct(s.v) + "</td>" +
+      '<td class="n">' + (i && s.v != null && steps[i - 1].v != null ? pp(s.v - steps[i - 1].v) : "") + "</td>" +
+      '<td style="color:var(--ink-2);font-size:.82rem">' + escape(s.why) + "</td></tr>"
+    ).join("") + "</tbody>";
+
+  const c = RB.costs;
+  const wh = Object.entries(c.withholdingPct ?? {}).map(([k, v]) => k + " " + v + "%").join(", ");
+  const net = R.rows.find((r) => r.key === "base-net");
+  $("rebal-note").textContent =
+    "All rows use the same lines, dates and " + V().label + " view; only the rule and the costs differ. " +
+    "Net of costs, the base case returned " + pct(net?.windowRetPct) + " against " + pct(rc.basePct) + " gross. " +
+    "Cost assumptions (" + (c.asOf ?? "undated") + "): trading " + (c.tradeBps?.USD ?? 0) + " bps per dollar traded in US " +
+    "listings and " + (c.tradeBps?.default ?? 0) + " bps elsewhere, including the initial purchase; FX spread " + c.fxSpreadBps +
+    " bps on every non-USD trade; withholding on distributions at " + wh + ", as for a non-US investor without treaty relief. " +
+    "These are stated assumptions, not quotes; tax on gains is not modelled.";
+
+  $("rebal-limit").textContent =
+    "The headline rebalances to target weight on the first session of each " + unit + ". Over the window, buy and hold " +
+    "returned " + pct(rc.holdPct) + " against " + pct(rc.basePct) + " for the base case and " + pct(rc.dailyPct) +
+    " rebalanced daily. A held book drifts with its winners, so the base case understates the concentration that " +
+    "would actually have built up.";
+}
+
 /* ------------------------------------------------------------------ risk */
 function renderRisk() {
   const R = DATA.risk?.[VIEW === "hedged" ? "hedged" : "usd"];
@@ -1294,7 +1362,8 @@ function renderBenchmarks() {
 
   $("bench-cap").textContent =
     "Index = 100 at " + from + ". Solid: " + book.label + ". Dashed, labelled at the end: " +
-    benches.map((r) => r.label).join(", ") + ". The 60/40 and the book are rebalanced daily. Gross of all costs.";
+    benches.map((r) => r.label).join(", ") + ". The 60/40 and the book are rebalanced " +
+    (DATA.rebalancing?.base ?? "daily") + ". Gross of all costs.";
 
   // ---- table: absolute
   const s = (r) => r.stats ?? {};
@@ -1407,7 +1476,7 @@ document.addEventListener("click", (ev) => {
   const btn = ev.target.closest?.(".fxview button");
   if (!btn || btn.dataset.view === VIEW) return;
   VIEW = btn.dataset.view;
-  renderToggles(); renderStats(); renderCurve(); renderBenchmarks(); renderRisk(); renderYtd(); renderTable(); renderRefreshLog();
+  renderToggles(); renderStats(); renderCurve(); renderRebalancing(); renderBenchmarks(); renderRisk(); renderYtd(); renderTable(); renderRefreshLog();
 });
 
 /* --------------------------------------------------------- section numbers */
@@ -1430,7 +1499,7 @@ function secNumberOf(id) {
 function renderAll() {
   renderStamp(); renderToggles(); renderStats(); renderChain();
   renderCurve(); renderAlloc(); renderYtd(); renderFx();
-  renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderRefreshLog();
+  renderRebalancing(); renderBenchmarks(); renderRisk(); renderFactors(); renderTable(); renderDossier(); renderRefreshLog();
   renderProxy(); numberSections();
 }
 renderAll();

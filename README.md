@@ -138,9 +138,17 @@ adjust and use the plain close.
 
 ### Index construction
 
-The curve is the weight-averaged **daily return** of the legs, compounded:
-rebalanced to target weight every session, renormalised over whatever is
-trading. An earlier version averaged weighted *prices* instead. That is a
+The headline curve holds each line in value and **rebalances to target weight
+on the first session of each month** (`rebalance.base_case` in
+`data/positions.json`). Until 14 Oct 2026 it rebalanced every session, which
+harvests a rebalancing premium no real book collects at zero cost; the page
+now shows daily, monthly and buy-and-hold side by side, each gross and net of
+stated costs (trading bps, FX spread, dividend withholding — `cost_assumptions`),
+with a reconciliation from the weighted sum of line returns to the headline.
+A line that lists mid-window joins at the next rebalance (buy and hold: at its
+first close, by trimming the others).
+
+Before the daily-rebalanced version, the curve averaged weighted *prices*. That is a
 price-weighted index, where a $400 GLD share outvoted a $5 KOSPI point (in USD)
 eighty to one and a fund listing mid-window moved the level by its price alone.
 It understated the 1-year return by ~8pp. The method is folded into the refresh

@@ -4,6 +4,51 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-5 Monthly rebalancing as the base case; buy-and-hold and net-of-cost series; reconciliation
+
+**What changed**
+
+- `lib/analytics.js` — `rebalancedIndex`: holdings tracked in value, rebalanced
+  to target on the first session of each period (`daily` / `monthly` /
+  `quarterly` / `never` = buy and hold), optionally net of costs; with
+  `daily` and no costs it reproduces the old index exactly (tested).
+  `dividendYields` reads each ex-date from the adjusted vs unadjusted close;
+  `fetchSeries` now keeps the unadjusted close (`p`) for that.
+- `data/positions.json` — `rebalance.base_case: "monthly"` and
+  `cost_assumptions` (trading 5 bps US / 15 bps elsewhere per dollar traded,
+  FX spread 10 bps on non-USD trades, withholding by listing currency: USD 30,
+  BRL 0, SAR 5, TWD 21, GBP 0), with their caveats. All stated assumptions.
+- `lib/build-snapshot.js` — the headline and every book-like curve (bucket
+  curves, the index re-run, the 60/40 blend) use the base rule;
+  `snapshot.rebalancing` carries five variants per view and the
+  reconciliation. `INDEX_METHOD` bumped, so the refresh log shows "rebased".
+- `page/template.html` — table of variants and a four-step reconciliation in
+  §Performance; KPI note, method notes and benchmark caption name the rule.
+- `app.py` — the same table in the Benchmarks tab. `README.md` updated.
+- Tests: `tests/rebalance.test.mjs` (5 cases); `check-page.mjs` covers it.
+
+**Numbers** — same market data; FX-hedged unless stated:
+
+| | Before (daily) | After (monthly base case) |
+|---|---|---|
+| 1y / YTD | +34.91% / +42.53% | +33.88% / +42.23% |
+| Unhedged 1y / YTD | +36.62% / +44.33% | +35.62% / +44.06% |
+| Volatility / max DD | 24.53% / −14.33% | 24.42% / −14.20% |
+| Index level (unhedged / hedged) | 136.62 / 134.91 | 135.62 / 133.88 |
+| Sharpe | 1.19 | 1.17 |
+| Excess vs VGT / ACWI / 60/40 | −1.4 / +16.4 / +24.9 pp | −2.4 / +15.4 / +24.0 pp |
+| IR vs VGT / ACWI / 60/40 | 0.00 / 1.02 / 1.37 | −0.06 / 0.96 / 1.33 |
+
+Variants over the window (hedged): daily +34.9% (309 rebalances, 241%
+turnover/yr); monthly +33.9% (12, 56%); buy and hold +31.7% (15%, the one
+trade being RARA11's listing). Net of costs: monthly +33.2% (trading −0.22pp,
+withholding −0.47pp); buy and hold +31.1%.
+
+Reconciliation: weighted sum of line returns +31.7% = buy and hold +31.7%;
+monthly rebalancing adds +2.2pp; daily adds a further +1.0pp. The review's
+rough estimate of a ~6pp gap compared a weighted YTD column with the headline
+YTD; measured over one window, the rebalancing effect is ~3pp.
+
 ## 2026-10-14 — P0-4 Sizing rule stated; risk contribution table
 
 **Decision (author):** keep the weights; state the rule as near equal-weight

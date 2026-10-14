@@ -395,6 +395,40 @@ with tab_bench:
             "about 2 to be told apart from luck."
         )
 
+    rb = book.rebalancing.get("usd") or {}
+    if rb.get("rows"):
+        st.subheader("Rebalancing rule and costs")
+        rc = rb["reconciliation"]
+        st.caption(
+            f"The headline rebalances {book.rebalancing.get('base')} and is gross of costs. Same lines and "
+            f"dates in every row (unhedged USD). Reconciliation: each line's own return, weighted, "
+            f"{rc['weightedSumPct']:+.1f}%; buy and hold {rc['holdPct']:+.1f}%; base case {rc['basePct']:+.1f}%; "
+            f"daily {rc['dailyPct']:+.1f}%. Cost assumptions are stated in data/positions.json."
+        )
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Series": r["label"],
+                        "Return %": r["windowRetPct"],
+                        "Volatility %": r["stats"]["vol"],
+                        "Max DD %": r["stats"]["maxDrawdown"],
+                        "Rebalances": r["rebalances"],
+                        "Turnover %/yr": r["turnoverPctPerYear"],
+                        "Trading cost pp": r["tradingCostPct"] if r["costs"] else None,
+                        "Withholding pp": r["withholdingPct"] if r["costs"] else None,
+                    }
+                    for r in rb["rows"]
+                ]
+            ).style.format(
+                {"Return %": "{:+.1f}", "Volatility %": "{:.1f}", "Max DD %": "{:.1f}", "Turnover %/yr": "{:.0f}",
+                 "Trading cost pp": "{:.2f}", "Withholding pp": "{:.2f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+
 # ------------------------------------------------------------------- stress
 with tab_stress:
     st.subheader("Scenario shocks")
