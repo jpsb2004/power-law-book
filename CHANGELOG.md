@@ -4,6 +4,44 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-6 Every line investable: EWY replaces ^KS11
+
+**What changed**
+
+- `data/positions.json` — `^KS11` is `status: "substituted"` (kept as history,
+  with `substituted_by`, `substituted_on`, `substitution_reason`); `EWY` (iShares
+  MSCI South Korea ETF, NYSE Arca, USD) is active in Compute at the same 4%, with
+  `^KS11` as its `reference` index.
+- `lib/build-snapshot.js` — `buildReferences` measures a held fund against its
+  reference index: the index is converted to USD date by date, tracking keeps
+  the one-session Seoul/New York lag, and the book is re-run holding the index
+  instead. The old index→proxy path is kept for any future index line.
+- `page/template.html` — the section now says the book **holds** EWY and reports
+  the **difference in exposure** (was "tracking difference"/"substitution
+  cost"); the method note reads "Korea is held through a fund, not the index".
+- `research/scenarios.py`, `research/feeds.py`, `scripts/make_pdf.py`,
+  `README.md` — EWY in place of ^KS11. The scenario shocks were set for the
+  index and carried over unchanged; the module docstring says so.
+
+**Numbers** — same market data, P0-3 code vs P0-6 code:
+
+| | Before (^KS11 held) | After (EWY held) |
+|---|---|---|
+| Unhedged YTD / 1y | +43.85% / +36.09% | +44.33% / +36.62% |
+| Hedged YTD / 1y | +41.70% / +34.08% | +42.53% / +34.91% |
+| Hedged vol / max DD | 21.21% / −14.46% | 22.15% / −14.33% |
+| Unhedged index level | 136.09 | 136.62 (log shows "rebased") |
+| Currencies in the book | 6 | 5 (KRW leaves) |
+| Book β to tech (VGT) / R² | 0.82 / 0.65 | 0.85 / 0.67 |
+| Compute β to tech / R² | 1.21 / 0.78 | 1.28 / 0.81 |
+| EWY vs ^KS11, USD: TE / ρ / β | 30.1% / 0.81 / 0.93 | unchanged |
+| EWY − ^KS11, YTD / 1y | +13.0pp / +26.3pp | unchanged |
+| Book-level difference, YTD / 1y | +0.48pp / +0.53pp | unchanged (sign now "held minus index") |
+
+Volatility and tech beta rise because EWY trades in New York hours alongside
+the rest of the book; the Seoul close was partly out of sync with it, which
+damped measured co-movement.
+
 ## 2026-10-14 — P0-3 Bucket classification: RARA11.SA moves to a Materials bucket
 
 **Decision (author):** keep Energy at 38% and Compute at 32%; move RARA11.SA out

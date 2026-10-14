@@ -32,7 +32,7 @@ one trade wearing three hats.
 | Bucket | Target | Claim | Positions |
 |---|---|---|---|
 | **I · Energy** | 38% | The buildout is constrained by fuel, molecules and the ground it stands on | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV |
-| **II · Compute** | 32% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, ^KS11, AINF.L |
+| **II · Compute** | 32% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L |
 | **III · Materials** | 5% | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
 | **IV · Ballast** | 25% | What survives if the rest of the book is the same bet | GLD, AVDV, JPM, SGOV, XLP |
 
@@ -169,12 +169,15 @@ most of the FX gain on Petrobras. Rates are a dated table in
 fails if a book currency has no rate. Not modelled: cross-currency basis, the
 onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
 
-### ^KS11 → EWY
+### EWY, measured against ^KS11
 
-The book holds the KOSPI because the index is the cleanest statement of the
-view. You cannot buy it. `EWY` is measured as the tradable stand-in: weekly
-tracking error, correlation, beta, tracking difference, average traded value,
-and the whole book re-run with EWY in place of the index.
+Every line in the book is investable. Until 14 Oct 2026 the Korea line was the
+KOSPI index itself (`^KS11`), which cannot be bought; the book now holds `EWY`
+and keeps the index as its reference. The page reports the **difference in
+exposure** rather than a "substitution cost", since MSCI's 25/50 caps and New
+York trading hours make EWY a different exposure that can run ahead of the index
+as easily as behind it: weekly tracking error, correlation, beta, the return gap,
+average traded value, and the whole book re-run with the index in place of EWY.
 
 Seoul closes ~10 hours after one New York close and ~14 before the next, so each
 Seoul close is paired with the **previous** NY close (`clock_lag_sessions: 1`).

@@ -398,13 +398,13 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     </p>
     <div class="cols">
       <ul class="note-list">
-        <li><h3>One line is not directly buyable</h3><p id="kospi-note">
+        <li><h3 id="kospi-head">One line is not directly buyable</h3><p id="kospi-note">
           The KOSPI is an index, so a real book expresses it through a tracking fund or futures and
           eats the tracking error and FX. Gold is held as spot-backed shares rather than a dated
           future, so there is no roll and no expiry to manage.</p></li>
         <li><h3>The hedged view is a model, not a quote</h3><p>
           It accrues the policy-rate differential day by day on the full marked value. Real forward
-          points also carry cross-currency basis, and KRW, TWD and BRL hedge offshore through
+          points also carry cross-currency basis, and TWD and BRL hedge offshore through
           non-deliverable forwards whose implied rates can sit well away from the onshore policy rate.</p></li>
         <li><h3>Not every position covers the full window</h3><p id="coverage-note">
           A fund that listed part-way through the year has no history before it existed. The curve
@@ -1047,14 +1047,24 @@ const money = (v) =>
 function renderProxy() {
   const px = (DATA.proxies ?? []).find((x) => !x.error);
   if (!px) return;
-  const target = POS.find((p) => p.ticker === px.for);
-  if (!target) return;
+  // Two shapes. `held`: the book holds the fund and measures it against the
+  // index (EWY vs ^KS11, since 14 Oct 2026). Otherwise the older one, where the
+  // book carried the index and the fund was only measured.
+  const held = Boolean(px.held);
+  const line = POS.find((p) => p.ticker === (held ? px.ticker : px.for));
+  if (!line) return;
+  const indexUsd = held ? px.indexUsd : line.usd;
+  const fundUsd = held ? line.usd : px.usd;
+  const altBook = held ? px.indexBookStats : px.investableStats;
   $("proxy-section").hidden = false;
 
-  $("proxy-lede").textContent =
-    "The book carries " + px.for + " because the index is the cleanest statement of the view, but nobody can buy an index. " +
-    "The tradable stand-in is " + px.ticker + " (" + px.name + "), held in dollars on " + px.venue + ". " +
-    "This measures what the substitution costs rather than asserting it.";
+  $("proxy-lede").textContent = held
+    ? "The book holds " + px.ticker + " (" + px.name + ") in dollars on " + px.venue + ". The cleaner statement of the " +
+      "view is the index itself, " + px.for + ", but nobody can buy an index. This measures the difference in exposure " +
+      "between the two rather than calling it a cost: the fund can run ahead of the index as easily as behind it."
+    : "The book carries " + px.for + " because the index is the cleanest statement of the view, but nobody can buy an index. " +
+      "The tradable stand-in is " + px.ticker + " (" + px.name + "), held in dollars on " + px.venue + ". " +
+      "This measures what the substitution costs rather than asserting it.";
 
   const t = px.tracking;
   const kv = [
@@ -1067,18 +1077,18 @@ function renderProxy() {
   $("proxy-kv").innerHTML = kv.map((c) =>
     '<div><div class="k">' + c.k + '</div><div class="v">' + c.v + '</div><div class="n">' + escape(c.n) + "</div></div>").join("");
 
-  const ib = px.investableStats ?? {};
+  const ib = altBook ?? {};
   const row = (label, a, b, cls = "") =>
     '<tr class="' + cls + '"><td class="lbl">' + label + '</td>' +
     '<td class="n ' + signClass(a) + '">' + pct(a) + '</td><td class="n ' + signClass(b) + '">' + pct(b) + "</td></tr>";
   $("proxy-tbl").innerHTML =
     "<thead><tr><th>USD</th><th>YTD</th><th>1 year</th></tr></thead><tbody>" +
-    row(escape(px.for) + " (index)", target.usd.ytd, target.usd.ret1y) +
-    row(escape(px.ticker) + " (tradable)", px.usd.ytd, px.usd.ret1y) +
-    '<tr class="em"><td class="lbl">Tracking difference</td><td class="n">' + pp(px.trackingDiff.ytd) +
-      '</td><td class="n">' + pp(px.trackingDiff.ret1y) + "</td></tr>" +
+    row(escape(px.for) + (held ? " (index, reference)" : " (index)"), indexUsd.ytd, indexUsd.ret1y) +
+    row(escape(px.ticker) + (held ? " (held)" : " (tradable)"), fundUsd.ytd, fundUsd.ret1y) +
+    '<tr class="em"><td class="lbl">' + (held ? "Difference in exposure" : "Tracking difference") +
+      '</td><td class="n">' + pp(px.trackingDiff.ytd) + '</td><td class="n">' + pp(px.trackingDiff.ret1y) + "</td></tr>" +
     row("Book, as published", DATA.curveStats.ytd, DATA.curveStats.ret1y, "sub") +
-    row("Book, holding " + escape(px.ticker), ib.ytd, ib.ret1y, "sub") +
+    row(held ? "Book, holding " + escape(px.for) + " instead" : "Book, holding " + escape(px.ticker), ib.ytd, ib.ret1y, "sub") +
     '<tr class="em"><td class="lbl">Book-level difference</td><td class="n">' + pp(px.bookImpact.ytd) +
       '</td><td class="n">' + pp(px.bookImpact.ret1y) + "</td></tr>" +
     "</tbody>";
@@ -1092,13 +1102,19 @@ function renderProxy() {
       ? "A " + t.trackingErrorPct.toFixed(0) + "% tracking error alongside a " + t.correlation.toFixed(2) +
         " correlation means the fund follows the index's direction but not its size from week to week. "
       : "") +
-    "The book-level cost scales with the line's weight, here " + target.weight + "%." + lag;
+    "The book-level difference scales with the line's weight, here " + line.weight + "%." + lag;
 
-  $("kospi-note").textContent =
-    "The KOSPI is an index. Section " + secNumberOf("proxy-section") + " prices the substitution through " + px.ticker +
-    ": " + (t ? t.trackingErrorPct.toFixed(0) + "% tracking error, " : "") + pp(px.trackingDiff.ret1y) +
-    " of tracking difference over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
-    "shares rather than a dated future, so there is no roll and no expiry to manage.";
+  $("kospi-note").textContent = held
+    ? "The book holds " + px.ticker + ", not the KOSPI, which cannot be bought; every line is now investable. Section " +
+      secNumberOf("proxy-section") + " measures the difference in exposure: " +
+      (t ? t.trackingErrorPct.toFixed(0) + "% tracking error, " : "") + pp(px.trackingDiff.ret1y) +
+      " against the index over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
+      "shares rather than a dated future, so there is no roll and no expiry to manage."
+    : "The KOSPI is an index. Section " + secNumberOf("proxy-section") + " prices the substitution through " + px.ticker +
+      ": " + (t ? t.trackingErrorPct.toFixed(0) + "% tracking error, " : "") + pp(px.trackingDiff.ret1y) +
+      " of tracking difference over the year, and " + pp(px.bookImpact.ret1y) + " at book level. Gold is held as spot-backed " +
+      "shares rather than a dated future, so there is no roll and no expiry to manage.";
+  $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
 }
 
 /* ------------------------------------------------------- factor exposure */

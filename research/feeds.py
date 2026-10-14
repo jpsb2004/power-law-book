@@ -63,7 +63,7 @@ QUERY_HINTS = {
     "2222.SR": "Saudi Aramco",
     "LB": "LandBridge Permian land",
     "2357.TW": "ASUSTeK AI server",
-    "^KS11": "Korea KOSPI semiconductor exports",
+    "EWY": "Korea KOSPI semiconductor exports",
     "PLTR": "Palantir",
     "AINF.L": "AI infrastructure ETF",
     "AMD": "AMD data center GPU",

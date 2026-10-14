@@ -571,7 +571,7 @@ story += [gt, Spacer(1, 8), Paragraph(
     "number, is the hedge.", body), Paragraph(
     "<b>Geopolitical Shock</b> (Taiwan Strait escalation): advanced foundry output is "
     "interrupted and export controls tighten on strategic materials. The tail scenario the "
-    "portfolio is least hedged against: TSM, 2357.TW and ^KS11 all sit in the impact zone and "
+    "portfolio is least hedged against: TSM, 2357.TW and EWY all sit in the impact zone and "
     "are closer to one bet than three. RARA11.SA is the one line that works here, since the same "
     f"export controls that interrupt foundry output bid rare earths up, but at {RARA_W:.0f}% it cannot "
     f"offset a Compute bucket {BUCKET_W['Compute'] / (RARA_W or 1):.0f} times its size. Also left unmodelled rather than assigned a "

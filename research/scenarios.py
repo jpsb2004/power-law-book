@@ -13,6 +13,10 @@ miner and bad for a neocloud, and both sit in Energy.
 
 Every number below is a judgement. They are stated in one table so they can be
 argued with, which is the point.
+
+The Korea line's shocks were set for ^KS11 and carried over unchanged when the
+book swapped it for EWY (14 Oct 2026). EWY is in dollars, so a won move now
+lands inside the shock; revisit them rather than reading them as re-estimated.
 """
 
 from __future__ import annotations
@@ -57,7 +61,7 @@ GRID_BOTTLENECK = Scenario(
         "TSM": -8.0,
         "AMD": -10.0,
         "2357.TW": -12.0,
-        "^KS11": -7.0,
+        "EWY": -7.0,
         "VGT": -6.0,
         "AINF.L": -9.0,
         "PLTR": -5.0,
@@ -86,7 +90,7 @@ CAPEX_RETRENCHMENT = Scenario(
         "AMD": -30.0,
         "TSM": -25.0,
         "2357.TW": -28.0,
-        "^KS11": -22.0,
+        "EWY": -22.0,
         "AINF.L": -30.0,
         "VGT": -20.0,
         "PLTR": -32.0,
@@ -123,7 +127,7 @@ GEOPOLITICAL_SHOCK = Scenario(
         # Not a drawdown — an impairment. Three positions share one failure.
         "TSM": -45.0,
         "2357.TW": -50.0,
-        "^KS11": -35.0,
+        "EWY": -35.0,
         "AMD": -30.0,
         "VGT": -22.0,
         "AINF.L": -28.0,
@@ -146,7 +150,7 @@ GEOPOLITICAL_SHOCK = Scenario(
         "SGOV": 0.0,
         "XLP": -8.0,
     },
-    note="Concentrated single-point risk: TSM, 2357.TW and ^KS11 are one bet, not three.",
+    note="Concentrated single-point risk: TSM, 2357.TW and EWY are one bet, not three.",
 )
 
 SCENARIOS = {s.key: s for s in (GRID_BOTTLENECK, CAPEX_RETRENCHMENT, GEOPOLITICAL_SHOCK)}

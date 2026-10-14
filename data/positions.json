@@ -316,11 +316,44 @@
           "clock_lag_sessions": 1
         }
       },
-      "status": "active",
+      "status": "substituted",
+      "substituted_by": "EWY",
+      "substituted_on": "2026-10-14",
+      "substitution_reason": "Every line in the book must be investable. The index stays as the reference EWY is measured against.",
       "tradability": "index",
       "memo": {
         "name": "KOSPI Composite Index",
         "rationale": "An index proxy for Korea's memory manufacturing exposure to the buildout, avoiding having to pick between the two dominant memory makers."
+      }
+    },
+    {
+      "ticker": "EWY",
+      "name": "iShares MSCI South Korea ETF",
+      "bucket": "compute",
+      "exchange": "NYSE Arca",
+      "currency": "USD",
+      "weight": 4,
+      "instrument_type": "ETF",
+      "factor_role": "Country-level exposure to memory, held through the MSCI Korea fund. HBM pricing runs through Korean national accounts, and the market carries a persistent governance discount that is finally being addressed.",
+      "falsification_metric": "It is not the KOSPI: MSCI's 25/50 caps hold Samsung and SK Hynix below their index weight, and the fund trades in New York hours against a Seoul close, so a year can open a double-digit gap to the Korean market in either direction.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": "^KS11",
+        "tracking_notes": "MSCI Korea 25/50 caps single names, so Samsung and SK Hynix are held below their KOSPI weight; EWY also trades in New York hours against a Seoul close, and carries a 0.59% expense ratio.",
+        "expense_ratio_pct": 0.59,
+        "reference": {
+          "ticker": "^KS11",
+          "name": "KOSPI Composite",
+          "venue": "KRX",
+          "currency": "KRW",
+          "clock_lag_sessions": 1
+        }
+      },
+      "status": "active",
+      "memo": {
+        "name": "iShares MSCI South Korea ETF",
+        "rationale": "Korea's memory manufacturing exposure to the buildout, held through the country fund rather than by picking between the two dominant memory makers. It replaced the KOSPI index itself on 14 October 2026 so that every line in the book can actually be bought."
       }
     },
     {
