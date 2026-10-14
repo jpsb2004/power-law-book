@@ -57,11 +57,11 @@ st.set_page_config(
 )
 
 
-# Keyed on the snapshot's modification time: Streamlit Cloud pulls a new
-# commit into the running process, and a time-only cache kept serving the old
-# snapshot for minutes after the new one landed.
+# Keyed on the snapshot's modification time and the research code's: Streamlit
+# Cloud pulls a new commit into the running process, and a time-only cache kept
+# serving the old snapshot (or rows labelled by the old code) after it landed.
 @st.cache_data(ttl=300)
-def _load(snapshot_mtime: float):
+def _load(snapshot_mtime: float, code_stamp: float):
     book = load_book()
     rows = [
         {
@@ -92,7 +92,7 @@ def _load(snapshot_mtime: float):
 
 
 try:
-    book, df = _load((ROOT / "data" / "snapshot.json").stat().st_mtime)
+    book, df = _load((ROOT / "data" / "snapshot.json").stat().st_mtime, _RESEARCH_STAMP)
 except SchemaError as exc:
     st.error(f"**Snapshot unavailable.**\n\n{exc}")
     st.stop()
