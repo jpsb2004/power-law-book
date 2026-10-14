@@ -314,12 +314,17 @@ with tab_dev:
         "Sigma is the day's move in standard deviations of that position's own trailing "
         "return distribution — the only way to compare a 3% day in GLD with a 3% day in CRWV."
     )
-    dev = df.dropna(subset=["Sigma"]).sort_values("Sigma")
-    st.altair_chart(
+    dev = df.dropna(subset=["Sigma"]).sort_values("Sigma", ascending=False)
+    # Every ticker labelled and every bar valued: at a fixed height Vega
+    # dropped overlapping labels, and a near-zero sigma (TSM, +0.07) drew no
+    # visible bar, so lines looked missing.
+    dev_y = alt.Y("Ticker:N", sort=list(dev["Ticker"]), title=None,
+                  axis=alt.Axis(labelOverlap=False, labelLimit=200))
+    dev_bars = (
         alt.Chart(dev)
         .mark_bar(cornerRadiusEnd=3)
         .encode(
-            y=alt.Y("Ticker:N", sort=alt.EncodingSortField("Sigma", order="descending"), title=None),
+            y=dev_y,
             x=alt.X("Sigma:Q", title="Standard deviations"),
             color=alt.condition(alt.datum.Sigma > 0, alt.value(GAIN), alt.value(LOSS)),
             tooltip=[
@@ -330,7 +335,16 @@ with tab_dev:
                 alt.Tooltip("Volume x avg:Q", format=".2f"),
             ],
         )
-        .properties(height=460),
+    )
+    # Value at the end of each bar: right of positives, left of negatives.
+    dev_labels = alt.layer(
+        alt.Chart(dev[dev["Sigma"] >= 0]).mark_text(align="left", dx=4, fontSize=11)
+        .encode(y=dev_y, x="Sigma:Q", text=alt.Text("Sigma:Q", format="+.2f")),
+        alt.Chart(dev[dev["Sigma"] < 0]).mark_text(align="right", dx=-4, fontSize=11)
+        .encode(y=dev_y, x="Sigma:Q", text=alt.Text("Sigma:Q", format="+.2f")),
+    )
+    st.altair_chart(
+        (dev_bars + dev_labels).properties(height=max(24 * len(dev), 300)),
         width="stretch",
     )
 

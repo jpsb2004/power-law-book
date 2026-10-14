@@ -839,7 +839,7 @@ function renderAlloc() {
     top === "ballast"
       ? "Ballast carries the largest single allocation (" + sw.ballast + "%)"
       : "Ballast carries " + sw.ballast + "% of the book, against " + SLEEVES[top].name + "'s " + sw[top] + "%";
-  const W = 1000, H = 150, m = { t: 34, r: 2, b: 34, l: 2 };
+  const W = 1000, H = 160, m = { t: 34, r: 2, b: 44, l: 2 };
   const iw = W - m.l - m.r, bh = H - m.t - m.b;
   const total = POS.reduce((a, p) => a + p.weight, 0);
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Allocation by sleeve and position" });
@@ -855,9 +855,15 @@ function renderAlloc() {
     // A 5% block is ~50 units wide: its full heading ran into the next one.
     // Narrow blocks show the numeral alone; the legend below carries the name.
     const heading = SLEEVES[id].numeral + "  " + SLEEVES[id].name.toUpperCase();
-    svg.appendChild(el("text", { x: x, y: m.t - 18, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-display)", "letter-spacing": "0.08em" },
-      heading.length * 8.5 > blockW - 6 ? SLEEVES[id].numeral : heading));
-    svg.appendChild(el("text", { x: x, y: m.t - 4, fill: colour, "font-size": 13, "font-family": "var(--font-mono)" }, sw + "%"));
+    if (heading.length * 8.5 > blockW - 6) {
+      // Too narrow for its heading above the bar: name and weight go below it,
+      // where nothing else is drawn, so the bucket is never shown unnamed.
+      svg.appendChild(el("text", { x: x, y: m.t + bh + 16, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-display)", "letter-spacing": "0.08em" }, heading));
+      svg.appendChild(el("text", { x: x, y: m.t + bh + 30, fill: colour, "font-size": 13, "font-family": "var(--font-mono)" }, sw + "%"));
+    } else {
+      svg.appendChild(el("text", { x: x, y: m.t - 18, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-display)", "letter-spacing": "0.08em" }, heading));
+      svg.appendChild(el("text", { x: x, y: m.t - 4, fill: colour, "font-size": 13, "font-family": "var(--font-mono)" }, sw + "%"));
+    }
 
     let ix = x;
     members.forEach((p, i) => {
