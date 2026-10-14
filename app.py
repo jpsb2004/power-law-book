@@ -194,7 +194,8 @@ with tab_alloc:
 
     targets = " / ".join(f"{BUCKET_LABELS[k]} {book.bucket_weight(k):.0f}" for k in BUCKET_ORDER)
     st.info(
-        f"Bucket targets are {targets}, split equally within each bucket. One classification "
+        f"Sizing is near equal-weight by design: bucket targets are {targets}, split equally within "
+        "each bucket, so no single stock call carries the thesis. One classification "
         "note worth arguing with: **NBIS and CRWV sit in Energy** but are compute landlords that "
         "consume power rather than supply it. **RARA11.SA has its own Materials bucket** rather "
         "than sitting in Ballast: a concentrated, policy-driven rare-earth basket tracks the same "
@@ -202,6 +203,41 @@ with tab_alloc:
         "book rather than against it. The exception is an export-control shock — toggle "
         "Geopolitical Shock under Stress Tests and it is the largest positive contributor in the book."
     )
+
+    # Same decomposition the published page shows (snapshot["risk"]), not a
+    # second implementation: the Node pipeline owns the maths.
+    risk = book.risk.get("usd") or {}
+    if risk.get("rows"):
+        st.subheader("Equal capital is not equal risk")
+        st.caption(
+            "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
+            f"book ÷ the book's variance), on weekly USD returns over {risk['weeks']} weeks. The column sums "
+            f"to {risk['sumPct']:.0f}%; lines marked short have under 26 weeks of history and are indicative."
+        )
+        rdf = pd.DataFrame(
+            [
+                {
+                    "Ticker": r["key"] + (" (short)" if r.get("short") else ""),
+                    "Bucket": next((e.bucket_label for e in book.entities if e.ticker == r["key"]), ""),
+                    "Weight %": r["weightPct"],
+                    "Share of risk %": r.get("riskSharePct"),
+                    "Risk ÷ weight": r.get("riskPerWeight"),
+                    "Vol, weekly %": r.get("volPct"),
+                    "ρ to book": r.get("corrToBook"),
+                }
+                for r in risk["rows"]
+                if not r.get("insufficient")
+            ]
+        ).sort_values("Share of risk %", ascending=False)
+        st.dataframe(
+            rdf.style.format(
+                {"Weight %": "{:.0f}", "Share of risk %": "{:+.1f}", "Risk ÷ weight": "{:.2f}",
+                 "Vol, weekly %": "{:.0f}", "ρ to book": "{:.2f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
 
     # Both blocks below share their text with the thesis PDF via
     # research/discipline.py -- edit there, not here, or the two drift apart.

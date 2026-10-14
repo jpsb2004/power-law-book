@@ -140,6 +140,20 @@ if (benchRows.length) {
   fail.push("benchmark section is visible without benchmark data");
 }
 
+// Risk contribution: one row per line with enough history, one per bucket.
+const riskRows = (snap.risk?.usd?.rows ?? []).filter((r) => !r.insufficient).length;
+const riskBlock = document.getElementById("risk-block");
+if (riskRows) {
+  if (riskBlock.hidden) fail.push("snapshot carries risk contributions but the risk block is hidden");
+  const got = document.querySelectorAll("#risk-tbl tbody tr").length;
+  if (got !== riskRows) fail.push(`risk table rendered ${got} rows for ${riskRows} lines`);
+  const buckets = snap.risk.usd.buckets.length;
+  const gotB = document.querySelectorAll("#risk-bucket-tbl tbody tr").length;
+  if (gotB !== buckets) fail.push(`risk bucket table rendered ${gotB} rows for ${buckets} buckets`);
+} else if (!riskBlock.hidden) {
+  fail.push("risk block is visible without risk data");
+}
+
 const factorRows = snap.factors?.rows?.length ?? 0;
 const factorSection = document.getElementById("factor-section");
 if (factorRows) {

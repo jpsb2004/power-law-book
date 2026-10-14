@@ -4,6 +4,45 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-4 Sizing rule stated; risk contribution table
+
+**Decision (author):** keep the weights; state the rule as near equal-weight
+by design instead of "weight is the only real expression of conviction".
+
+**What changed**
+
+- `page/template.html` — §Allocation now opens with the sizing rule in one
+  sentence, and adds "Equal capital is not equal risk": share of the book's
+  variance per bucket and per line, risk ÷ weight, weekly vol and correlation
+  to the book, with a computed lead sentence and method note.
+- `lib/analytics.js` — `riskContributions`: Euler decomposition, weight ×
+  cov(line, book) ÷ var(book), on weekly log returns; lines under 26 weeks of
+  history are flagged `short`.
+- `lib/build-snapshot.js` — `snapshot.risk` for both the unhedged and hedged
+  views, with bucket totals.
+- `app.py` — the same table in the Allocation tab; sizing sentence updated.
+- `scripts/make_pdf.py` — one computed sentence in §2 on capital vs risk.
+- Tests: 2 cases in `tests/risk.test.mjs`; `check-page.mjs` covers the block.
+
+**Numbers** (FX-hedged view, 52 weeks to 2026-10-13):
+
+| Bucket | Weight | Share of risk | Risk ÷ weight |
+|---|---|---|---|
+| Energy | 38% | 48.6% | 1.28 |
+| Compute | 32% | 40.4% | 1.26 |
+| Materials | 5% | 9.4% (11 weeks, indicative) | 1.88 |
+| Ballast | 25% | 5.0% | 0.20 |
+
+Largest lines: CRWV 17.0% of risk on 5% of capital, NBIS 15.7%, URA 10.2%.
+Negative (diversifying): PETR4.SA −2.8%, 2222.SR −0.2%, XLP −0.1%. Shares sum
+to 103% because RARA11.SA's covariance covers 11 weeks only.
+
+**For the author:** a few memo texts in `data/positions.json` still argue from
+conviction-sized weights that the book does not hold — AMD ("kept smaller than
+a conviction bet would be", at the same 5% as its peers), NLR ("conviction is
+high enough to accept concentration") and LB ("the hinge of the whole book",
+at 5%). Left as written; they are the author's voice.
+
 ## 2026-10-14 — P0-1 Benchmarks and risk-adjusted metrics; volatility annualisation fix
 
 **What changed**

@@ -451,6 +451,24 @@ story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
     "stalls. Ballast is sized to absorb drawdown from the rest of the book rather than to add "
     "a competing return thesis.", body)]
 
+# Equal capital is not equal risk: the same Euler decomposition the page shows,
+# read from the snapshot rather than recomputed here.
+_risk = (book.risk or {}).get("usd") or {}
+_rrows = sorted((r for r in _risk.get("rows", []) if r.get("riskSharePct") is not None),
+                key=lambda r: -r["riskSharePct"])
+if _rrows:
+    _top = _rrows[:2]
+    _bk = {b["sleeve"]: b for b in _risk.get("buckets", [])}
+    _bal = _bk.get("ballast")
+    story.append(Paragraph(
+        "Near equal weight is not equal risk. Measured as each line's share of the book's variance "
+        f"(weekly USD returns, {_risk['weeks']} weeks), {_top[0]['key']} and {_top[1]['key']} hold "
+        f"{sum(r['weightPct'] for r in _top):.0f}% of the capital and "
+        f"{sum(r['riskSharePct'] for r in _top):.0f}% of the risk"
+        + (f"; Ballast holds {_bal['weightPct']:.0f}% of the capital and {_bal['riskSharePct']:.0f}% of the risk"
+           if _bal else "")
+        + ". The full table is on the published page.", body))
+
 # ---- NEW: valuation discipline
 val_rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Initiation threshold and trim discipline")]]
 for label, rule in VALUATION_RULES:

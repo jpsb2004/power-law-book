@@ -133,6 +133,7 @@ class Book:
     # Optional analysis blocks, carried through as the Node side wrote them.
     curve_hedged_stats: dict[str, Any] = field(default_factory=dict)
     benchmarks: dict[str, Any] = field(default_factory=dict)
+    risk: dict[str, Any] = field(default_factory=dict)
 
     def by_bucket(self, bucket: str) -> list[Entity]:
         return [e for e in self.entities if e.bucket == bucket]
@@ -228,4 +229,5 @@ def load_book(path: Path | None = None) -> Book:
         source=source,
         curve_hedged_stats=raw.get("curveHedgedStats") or {},
         benchmarks=raw.get("benchmarks") or {},
+        risk=raw.get("risk") or {},
     )

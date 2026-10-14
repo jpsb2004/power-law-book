@@ -5,7 +5,15 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { periodsPerYear, annualisedVol, riskStats, relativeStats, windowed } from "../lib/analytics.js";
+import {
+  periodsPerYear,
+  annualisedVol,
+  riskStats,
+  relativeStats,
+  windowed,
+  riskContributions,
+  portfolioIndex,
+} from "../lib/analytics.js";
 
 const DAY = 864e5;
 const T0 = Date.UTC(2025, 9, 14);
@@ -85,4 +93,28 @@ test("windowed compares calendar dates, not timestamps", () => {
     close(w[0].c, 100);
     close(w[1].c, 110, 1e-9);
   }
+});
+
+test("risk shares follow the Euler decomposition and sum to the whole book", () => {
+  // Two lines, 70/30, the second three times as volatile and uncorrelated-ish.
+  const a = series(Array.from({ length: 400 }, (_, i) => Math.sin(i * 0.7) * 0.01));
+  const b = series(Array.from({ length: 400 }, (_, i) => Math.cos(i * 1.3) * 0.03));
+  const legs = [{ key: "A", weight: 70, points: a }, { key: "B", weight: 30, points: b }];
+  const book = portfolioIndex(legs);
+  const rc = riskContributions(legs, book);
+  // Weekly log returns of a daily-rebalanced book are not exactly the weighted
+  // sum of the legs' weekly log returns, so allow a little slack.
+  close(rc.sumPct, 100, 1.5);
+  const B = rc.rows.find((r) => r.key === "B");
+  assert.ok(B.riskSharePct > 30, "the more volatile line carries more than its weight");
+  close(B.riskPerWeight, B.riskSharePct / 100 / 0.3, 1e-9);
+});
+
+test("a line with a short history is computed but flagged", () => {
+  const a = series(Array.from({ length: 400 }, (_, i) => Math.sin(i) * 0.01));
+  const young = a.slice(-100); // ~14 weeks
+  const rc = riskContributions([{ key: "A", weight: 90, points: a }, { key: "Y", weight: 10, points: young }], a);
+  const y = rc.rows.find((r) => r.key === "Y");
+  assert.equal(y.short, true);
+  assert.ok(y.riskSharePct != null);
 });
