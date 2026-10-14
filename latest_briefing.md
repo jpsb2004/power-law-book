@@ -2,7 +2,7 @@
 ## The Power Law Book: Quantifying Physical Bottlenecks of the Global AI CapEx Supercycle
 
 **Daily note — 14 October 2026**  
-*Data as of 2026-10-14 19:56 UTC · 23 positions · base USD · index 136.69*
+*Data as of 2026-10-14 20:00 UTC · 23 positions · base USD · index 136.69*
 
 ---
 
@@ -32,6 +32,6 @@ Substrate carried -0.74% on the day against Compute at -0.08%, a spread of -0.66
 
 ---
 
-*Generated 2026-10-14 19:57 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
+*Generated 2026-10-14 20:00 UTC by the data pipeline, rule-based (no model in the loop). Sources: google-news-rss, sec-edgar-atom, yahoo-chart-v8.*
 
 *Not investment advice. A personal research exercise. Prices are delayed and sourced from a free public endpoint. Performance figures are a backward-looking simulation of current weights, not a track record.*

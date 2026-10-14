@@ -1,14 +1,14 @@
 {
-  "asOf": "2026-10-14 19:57 UTC",
-  "snapshotAsOf": "2026-10-14 19:56 UTC",
+  "asOf": "2026-10-14 20:00 UTC",
+  "snapshotAsOf": "2026-10-14 20:00 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "rows": [
     {
       "ticker": "AMD",
       "independent": {
-        "ytd": 170.967,
-        "ret1y": 177.6514,
-        "vol": 67.3646
+        "ytd": 155.3944,
+        "ret1y": 139.1995,
+        "vol": 67.1064
       },
       "pipeline": {
         "ytd": 170.967,
@@ -16,18 +16,18 @@
         "vol": 67.3646
       },
       "diffPp": {
-        "ytd": 0.0,
-        "ret1y": 0.0,
-        "vol": 0.0
+        "ytd": -15.5726,
+        "ret1y": -38.4519,
+        "vol": -0.2582
       },
-      "lastClose": "2026-10-13"
+      "lastClose": "2026-10-14"
     },
     {
       "ticker": "PETR4.SA",
       "independent": {
-        "ytd": 117.8908,
-        "ret1y": 127.7338,
-        "vol": 30.4573
+        "ytd": 120.1137,
+        "ret1y": 130.057,
+        "vol": 30.423
       },
       "pipeline": {
         "ytd": 117.8907,
@@ -35,18 +35,18 @@
         "vol": 30.4573
       },
       "diffPp": {
-        "ytd": 0.0001,
-        "ret1y": -0.0004,
-        "vol": -0.0
+        "ytd": 2.2229,
+        "ret1y": 2.3229,
+        "vol": -0.0344
       },
-      "lastClose": "2026-10-13"
+      "lastClose": "2026-10-14"
     },
     {
       "ticker": "GLD",
       "independent": {
-        "ytd": -4.1704,
-        "ret1y": 0.2311,
-        "vol": 29.678
+        "ytd": -5.6104,
+        "ret1y": -2.957,
+        "vol": 29.6662
       },
       "pipeline": {
         "ytd": -4.1704,
@@ -54,12 +54,12 @@
         "vol": 29.678
       },
       "diffPp": {
-        "ytd": 0.0,
-        "ret1y": 0.0,
-        "vol": -0.0
+        "ytd": -1.4399,
+        "ret1y": -3.1881,
+        "vol": -0.0118
       },
-      "lastClose": "2026-10-13"
+      "lastClose": "2026-10-14"
     }
   ],
-  "maxAbsDiffPp": 0.0004
+  "maxAbsDiffPp": 38.4519
 }
