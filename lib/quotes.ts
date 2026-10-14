@@ -158,7 +158,7 @@ export async function getBook(): Promise<Book> {
   };
 }
 
-export const sleeveOrder: SleeveId[] = ["energy", "compute", "ballast"];
+export const sleeveOrder: SleeveId[] = ["energy", "compute", "materials", "ballast"];
 
 export const sleeveWeightOf = (id: SleeveId) =>
   HOLDINGS.filter((h) => h.sleeve === id).reduce((a, h) => a + h.weight, 0);

@@ -29,6 +29,12 @@ VALUATION_RULES: tuple[tuple[str, str], ...] = (
         "pure valuation-disciplined macro insurance.",
     ),
     (
+        # DRAFT for the author: written when RARA11.SA moved out of Ballast.
+        "Materials",
+        "Held at the 5% bucket target. Add only when the fund trades at or below NAV; "
+        "cap the position at five sessions of average traded value on B3.",
+    ),
+    (
         "Ballast",
         "Rebalance when yield spread / discount to NAV deviates by >1.5 standard "
         "deviations from the 3-year trailing mean.",

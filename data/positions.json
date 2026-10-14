@@ -4,7 +4,8 @@
   "bucket_targets": {
     "energy": 38,
     "compute": 32,
-    "ballast": 30
+    "materials": 5,
+    "ballast": 25
   },
   "fx_hedge": {
     "note": "Policy rates used to model a rolled FX hedge back to USD. Held flat across the window; they stand in for forward points, so cross-currency basis and onshore/offshore gaps are ignored. Update with the as_of date when a central bank moves.",
@@ -413,13 +414,13 @@
     {
       "ticker": "RARA11.SA",
       "name": "Investo MVIS Global Rare Earth & Strategic Metals",
-      "bucket": "ballast",
+      "bucket": "materials",
       "exchange": "B3 São Paulo",
       "currency": "BRL",
       "weight": 5,
       "instrument_type": "ETF",
       "factor_role": "The materials upstream of everything else here: magnets, motors, turbines. Exposure to export controls on rare earths, which is the supply chokepoint the compute bucket cannot design around.",
-      "falsification_metric": "This is not ballast. It is a concentrated, policy-driven, high-beta commodity-equity basket that will likely fall with the rest of the book rather than against it — and it is a thin BRL listing carrying currency risk on top.",
+      "falsification_metric": "A concentrated, policy-driven, high-beta commodity-equity basket that will likely fall with the rest of the book rather than against it — and it is a thin BRL listing carrying currency risk on top.",
       "investable": {
         "br_retail": null,
         "blocker": null,
@@ -429,7 +430,7 @@
       "status": "active",
       "memo": {
         "name": "Rare Earths / Critical Minerals ETF",
-        "rationale": "The other classification stretch I flag openly: a concentrated, policy-driven basket that tracks the same technology-materials cycle as the rest of the book, so in most states it does less true ballasting than its bucket label implies. The exception is an export-control shock, where it is the one line in the book that re-rates upward. It also traded in only about {coverage} of the measured window, which limits how much its long-horizon return figures should be trusted."
+        "rationale": "Held in its own Materials bucket rather than in Ballast: a concentrated, policy-driven basket that tracks the same technology-materials cycle as the rest of the book, so in most states it falls with the book rather than against it. The exception is an export-control shock, where it is the one line in the book that re-rates upward. It also traded in only about {coverage} of the measured window, which limits how much its long-horizon return figures should be trusted."
       }
     },
     {

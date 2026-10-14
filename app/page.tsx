@@ -6,6 +6,7 @@ import { Sparkline } from "@/components/Sparkline";
 const SLEEVE_VAR: Record<SleeveId, string> = {
   energy: "var(--s1)",
   compute: "var(--s2)",
+  materials: "var(--s4)",
   ballast: "var(--s3)",
 };
 

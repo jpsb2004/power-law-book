@@ -21,7 +21,10 @@
   --s1: #AE6A12;
   --s2: #0F7BC0;
   --s3: #B02D6E;
-
+  /* Materials. Picked by running the dataviz palette validator against the
+     three hues above (all pairs, light #EAEEEA / dark #171C1F surfaces):
+     every check passes, worst CVD ΔE 10.0 light / 9.2 dark. */
+  --s4: #65389F;
 
   --font-display: Bahnschrift, "DIN Condensed", "Franklin Gothic Medium", "Arial Narrow", "Helvetica Neue", sans-serif;
   --font-body: Charter, "Bitstream Charter", "Iowan Old Style", "Source Serif 4", Georgia, serif;
@@ -46,7 +49,7 @@
     --s1: #BE8829;
     --s2: #3D93D4;
     --s3: #D45E9C;
-
+    --s4: #8156C0;
   }
 }
 :root[data-theme="dark"] {
@@ -64,7 +67,7 @@
   --s1: #BE8829;
   --s2: #3D93D4;
   --s3: #D45E9C;
-
+  --s4: #8156C0;
 }
 
 /* ----------------------------------------------------------------- base */
@@ -278,8 +281,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>The argument</h2></div>
     <p class="lede prose">
       The buckets are ordered because they depend on each other. Fuel, molecules and
-      land are upstream of compute; and the third bucket exists because the first two
-      could turn out to be one trade wearing two hats.
+      land are upstream of compute, and the minerals in its hardware sit beside them;
+      the last bucket exists because the first three could turn out to be one trade
+      wearing three hats.
     </p>
     <div class="chain" id="chain"></div>
   </section>
@@ -360,7 +364,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section id="factor-section" hidden>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Does the ballast ballast?</h2></div>
     <p class="lede prose">
-      Bucket III exists in case the first two are one trade. If it does its job, it should
+      Ballast exists in case the rest of the book is one trade. If it does its job, it should
       load lightly on the factors the thesis is long and explain little of its own movement
       through them. Weekly USD returns, regressed on a tech factor and an energy factor.
     </p>
@@ -458,7 +462,7 @@ const DATA = __SNAPSHOT__;
 
 /* ------------------------------------------------------------- utilities */
 const $ = (id) => document.getElementById(id);
-const SLEEVE_VAR = { energy: "--s1", compute: "--s2", ballast: "--s3" };
+const SLEEVE_VAR = { energy: "--s1", compute: "--s2", materials: "--s4", ballast: "--s3" };
 /**
  * Colours go into the SVG as `var(--token)`, not as resolved hex.
  *
@@ -708,8 +712,11 @@ function renderAlloc() {
     const blockW = (sw / total) * iw;
     const colour = css(SLEEVE_VAR[id]);
 
+    // A 5% block is ~50 units wide: its full heading ran into the next one.
+    // Narrow blocks show the numeral alone; the legend below carries the name.
+    const heading = SLEEVES[id].numeral + "  " + SLEEVES[id].name.toUpperCase();
     svg.appendChild(el("text", { x: x, y: m.t - 18, fill: css("--ink-2"), "font-size": 12, "font-family": "var(--font-display)", "letter-spacing": "0.08em" },
-      SLEEVES[id].numeral + "  " + SLEEVES[id].name.toUpperCase()));
+      heading.length * 8.5 > blockW - 6 ? SLEEVES[id].numeral : heading));
     svg.appendChild(el("text", { x: x, y: m.t - 4, fill: colour, "font-size": 13, "font-family": "var(--font-mono)" }, sw + "%"));
 
     let ix = x;
@@ -1104,10 +1111,15 @@ function renderFactors() {
   const num = (v, d = 2) => (v == null ? "—" : v.toFixed(d));
   const tstat = (t) => (t == null ? "" : ' <span style="color:var(--ink-3);font-size:.75rem">(' + t.toFixed(1) + ")</span>");
   const tcell = (text, t) => '<td class="n">' + text + tstat(t) + "</td>";
+  // "The thesis" is every bucket except Ballast, as build-snapshot defines it.
+  const thesis = Object.keys(SLEEVES).filter((id) => id !== "ballast");
+  const thesisNumerals = SLEEVES[thesis[0]].numeral + "–" + SLEEVES[thesis.at(-1)].numeral;
+  const thesisNames = thesis.map((id) => SLEEVES[id].name);
+  const thesisList = thesisNames.slice(0, -1).join(", ") + " and " + thesisNames.at(-1);
 
   $("factor-tbl").innerHTML =
     "<thead><tr><th>Series</th>" + ids.map((id) => "<th>β " + escape(name(id)) + "</th>").join("") +
-    "<th>R²</th><th>α / yr</th><th>ρ to I + II</th><th>Weeks</th></tr></thead><tbody>" +
+    "<th>R²</th><th>α / yr</th><th>ρ to " + thesisNumerals + "</th><th>Weeks</th></tr></thead><tbody>" +
     f.rows.map((r) => {
       const cls = r.kind === "position" ? "sub" : r.key === "ballast" ? "em" : "";
       const label = r.kind === "bucket" ? SLEEVES[r.key].numeral + " · " + escape(r.label) : escape(r.label);
@@ -1127,7 +1139,7 @@ function renderFactors() {
   const b = f.rows.find((r) => r.key === "ballast" && !r.insufficient);
   const read = b
     ? "Ballast loads " + b.betas.tech.toFixed(2) + " on tech and " + b.betas.energy.toFixed(2) + " on energy, and the two together explain " +
-      (b.r2 * 100).toFixed(0) + "% of its weekly variance; its correlation with Energy and Compute combined is " +
+      (b.r2 * 100).toFixed(0) + "% of its weekly variance; its correlation with " + thesisList + " combined is " +
       num(b.rhoThesis) + ". " +
       (b.betas.tech > 0 && (b.rhoThesis ?? 0) > 0
         ? "That is diversification, not a hedge: it still rises and falls with the thesis, only less. A hedge would show a negative beta. "

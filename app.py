@@ -22,7 +22,7 @@ import pandas as pd
 import streamlit as st
 
 from research.discipline import CATALYSTS, VALUATION_RULES
-from research.ontology import BUCKET_ORDER, SchemaError, load_book
+from research.ontology import BUCKET_LABELS, BUCKET_ORDER, SchemaError, load_book
 from research.scenarios import SCENARIOS, combined
 
 ROOT = Path(__file__).resolve().parent
@@ -30,7 +30,9 @@ BRIEFING = ROOT / "latest_briefing.md"
 
 # Same hues as the published page, validated for colourblind separation and
 # contrast across all pairs rather than picked by eye.
-BUCKET_COLOUR = {"Energy": "#AE6A12", "Compute": "#0F7BC0", "Ballast": "#B02D6E"}
+BUCKET_COLOUR = {"Energy": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65389F", "Ballast": "#B02D6E"}
+# Display order, from the ontology rather than restated here.
+BUCKET_RANK = {BUCKET_LABELS[k]: i for i, k in enumerate(BUCKET_ORDER)}
 GAIN, LOSS, MUTED = "#2E7D5B", "#B4382F", "#6E7A7F"
 
 st.set_page_config(
@@ -126,7 +128,7 @@ with tab_alloc:
     bucket_df = (
         df.groupby("Bucket", as_index=False)["Weight"]
         .sum()
-        .assign(Order=lambda d: d["Bucket"].map({"Energy": 0, "Compute": 1, "Ballast": 2}))
+        .assign(Order=lambda d: d["Bucket"].map(BUCKET_RANK))
         .sort_values("Order")
     )
 
@@ -156,7 +158,7 @@ with tab_alloc:
         # labelOverlap is off: at a fixed height Vega silently dropped tick
         # labels (JPM among them) once the book reached twenty lines.
         by_pos = df.assign(
-            Order=lambda d: d["Bucket"].map({"Energy": 0, "Compute": 1, "Ballast": 2})
+            Order=lambda d: d["Bucket"].map(BUCKET_RANK)
         ).sort_values(["Order", "Weight", "Ticker"], ascending=[True, False, True])
         y_enc = alt.Y(
             "Ticker:N",
@@ -190,15 +192,15 @@ with tab_alloc:
             width="stretch",
         )
 
+    targets = " / ".join(f"{BUCKET_LABELS[k]} {book.bucket_weight(k):.0f}" for k in BUCKET_ORDER)
     st.info(
-        "Bucket targets are Energy 38 / Compute 32 / Ballast 30, split equally within each "
-        "bucket. Two classification notes worth arguing with: **NBIS and CRWV sit in Energy** "
-        "but are compute landlords that consume power rather than supply it, and "
-        "**RARA11.SA sits in Ballast** but is a concentrated, policy-driven rare-earth basket "
-        "that tracks the same technology-materials cycle as the rest of the book, so in most "
-        "states it falls with the book rather than against it. The exception is an "
-        "export-control shock — toggle Geopolitical Shock under Stress Tests and it is the "
-        "largest positive contributor in the book."
+        f"Bucket targets are {targets}, split equally within each bucket. One classification "
+        "note worth arguing with: **NBIS and CRWV sit in Energy** but are compute landlords that "
+        "consume power rather than supply it. **RARA11.SA has its own Materials bucket** rather "
+        "than sitting in Ballast: a concentrated, policy-driven rare-earth basket tracks the same "
+        "technology-materials cycle as the rest of the book, so in most states it falls with the "
+        "book rather than against it. The exception is an export-control shock — toggle "
+        "Geopolitical Shock under Stress Tests and it is the largest positive contributor in the book."
     )
 
     # Both blocks below share their text with the thesis PDF via
@@ -331,7 +333,7 @@ with tab_stress:
             alt.Chart(bucket_impact)
             .mark_bar(cornerRadiusEnd=3)
             .encode(
-                x=alt.X("Bucket:N", title=None, sort=["Energy", "Compute", "Ballast"]),
+                x=alt.X("Bucket:N", title=None, sort=list(BUCKET_RANK)),
                 y=alt.Y("Impact:Q", title="Contribution to portfolio (%)"),
                 color=alt.Color(
                     "Bucket:N",
@@ -366,7 +368,7 @@ with tab_stress:
             .properties(height=460),
             width="stretch",
         )
-        st.caption(result["scenario"].note)
+        st.caption(result["note"])
 
 st.divider()
 st.caption(

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .ontology import Book, Entity
+from .ontology import BUCKET_LABELS, BUCKET_ORDER, Book, Entity
 
 
 @dataclass(frozen=True)
@@ -107,7 +107,9 @@ CAPEX_RETRENCHMENT = Scenario(
         "SGOV": 0.0,
         "XLP": 6.0,
     },
-    note="The book's central risk. Note ballast is only 30% — it cushions, it does not rescue.",
+    # {ballast} is filled from the live weights: this note said "30%" by hand
+    # and would have gone stale the day Ballast was resized.
+    note="The book's central risk. Note ballast is only {ballast:.0f}% — it cushions, it does not rescue.",
 )
 
 GEOPOLITICAL_SHOCK = Scenario(
@@ -175,13 +177,18 @@ def apply_scenario(book: Book, scenario: Scenario) -> dict:
         )
 
     rows.sort(key=lambda r: r["contribution_pct"])
-    by_bucket = {}
+    # Seeded in display order, so every renderer lists buckets the same way
+    # regardless of the order positions appear in the roster.
+    by_bucket = {BUCKET_LABELS[k]: 0.0 for k in BUCKET_ORDER if book.by_bucket(k)}
     for entity in book.entities:
         by_bucket.setdefault(entity.bucket_label, 0.0)
         by_bucket[entity.bucket_label] += scenario.shock_for(entity) * entity.weight / 100.0
 
     return {
         "scenario": scenario,
+        # The note with any live figures filled in; renderers show this, not
+        # `scenario.note`, which may carry placeholders.
+        "note": scenario.note.format(ballast=book.bucket_weight("ballast")),
         "portfolio_pct": total,
         "by_bucket": by_bucket,
         "rows": rows,

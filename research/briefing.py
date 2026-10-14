@@ -26,7 +26,7 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-from .ontology import Book, Entity
+from .ontology import BUCKET_LABELS, BUCKET_ORDER, Book, Entity
 from .scenarios import SCENARIOS, apply_scenario
 
 MODEL = "claude-opus-5"
@@ -226,8 +226,8 @@ def _book_context(book: Book) -> str:
         f"as of {book.as_of:%Y-%m-%d %H:%M UTC}.",
         "Buckets: "
         + ", ".join(
-            f"{label} {book.bucket_weight(key):.0f}%"
-            for key, label in (("energy", "Energy"), ("compute", "Compute"), ("ballast", "Ballast"))
+            f"{BUCKET_LABELS[key]} {book.bucket_weight(key):.0f}%"
+            for key in BUCKET_ORDER
         ),
     ]
     if book.index_level is not None:
@@ -343,7 +343,8 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
     )
 
     out.append("\n## Signals\n")
-    for key, label in (("energy", "Energy"), ("compute", "Compute"), ("ballast", "Ballast")):
+    for key in BUCKET_ORDER:
+        label = BUCKET_LABELS[key]
         members = [e for e, _ in notes if e.bucket == key]
         if not members:
             continue
@@ -374,7 +375,7 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
         f"**{sc.name}** — {sc.premise} Modelled portfolio impact "
         f"**{scenario['portfolio_pct']:+.1f}%**, with "
         + ", ".join(f"{k} {v:+.1f}%" for k, v in scenario["by_bucket"].items())
-        + f". {sc.note} These shocks are stated assumptions, not estimates from a covariance matrix.\n"
+        + f". {scenario['note']} These shocks are stated assumptions, not estimates from a covariance matrix.\n"
     )
 
     out.append("\n## Watch\n")

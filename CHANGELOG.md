@@ -4,6 +4,46 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-3 Bucket classification: RARA11.SA moves to a Materials bucket
+
+**Decision (author):** keep Energy at 38% and Compute at 32%; move RARA11.SA out
+of Ballast into a new **Materials** bucket (5%); Ballast becomes 25%. NBIS and
+CRWV stay in Energy with their existing caveat. No position weight changes, so
+the index, returns, volatility and drawdown are unchanged.
+
+**What changed**
+
+- `data/positions.json` — `bucket_targets` now Energy 38 / Compute 32 /
+  Materials 5 / Ballast 25; RARA11.SA `bucket: "materials"`; its falsification
+  note and PDF rationale no longer say "this is not ballast".
+- `lib/holdings.js`, `research/ontology.py`, `lib/holdings.d.ts`, `lib/quotes.ts`
+  — fourth sleeve, numeral III; Ballast becomes IV. Python and the PDF read the
+  bucket order from `ontology.BUCKET_ORDER` instead of hand-kept lists.
+- Colour: Materials `#65389F` (light) / `#8156C0` (dark), chosen with the
+  dataviz palette validator against the three existing hues (all pairs; every
+  check passes, worst CVD ΔE 10.0 light / 9.2 dark).
+- `page/template.html` — prose no longer assumes three buckets; the factor
+  table's thesis column reads "ρ to I–III" from the sleeve list; a bucket block
+  too narrow for its heading shows the numeral only (the 5% heading collided
+  with Ballast's).
+- `research/scenarios.py` — the capex note's "ballast is only 30%" is filled
+  from live weights.
+- `research/discipline.py` — **draft** Materials entry rule, for the author to
+  edit.
+- `scripts/make_pdf.py`, `app.py`, `README.md` — four buckets everywhere.
+
+**Numbers** — both snapshots built from the same market data minutes apart:
+
+| | Before | After |
+|---|---|---|
+| Bucket weights | Energy 38 / Compute 32 / Ballast 30 | Energy 38 / Compute 32 / Materials 5 / Ballast 25 |
+| Hedged YTD / 1y / vol | +41.70% / +34.08% / 21.21% | unchanged |
+| Ballast β tech (t) | 0.17 (2.1) | 0.14 (1.9) |
+| Ballast β energy (t) | 0.00 (0.0) | 0.00 (0.1) |
+| Ballast R² | 0.10 | 0.09 |
+| Ballast ρ to rest of book | 0.29 (to Energy + Compute) | 0.28 (to Energy + Compute + Materials) |
+| Materials regression | — | 11 weeks of history, too short to regress |
+
 ## 2026-10-14 — D-1 Data integrity: stale final bars, intraday prints, date and log labels
 
 Covers review items P2 "Date/number mismatches" and P2 "Suspicious data point",

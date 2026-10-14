@@ -1,4 +1,4 @@
-export type SleeveId = "energy" | "compute" | "ballast";
+export type SleeveId = "energy" | "compute" | "materials" | "ballast";
 
 export interface Sleeve {
   id: SleeveId;
