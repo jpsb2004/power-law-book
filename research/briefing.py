@@ -175,7 +175,7 @@ def run_worker(client, entity: Entity) -> str:
 
     prompt = (
         f"{HOUSE_STYLE}\n\n"
-        "Below is one position from a global macro book on AI infrastructure "
+        "Below is one position from a long-only thematic equity book on AI infrastructure "
         "bottlenecks. Write 2-3 sentences on what happened and whether it speaks "
         "to the standing thesis or the stated falsification. If the headlines do "
         "not explain the move, say the move is unexplained by available sources "

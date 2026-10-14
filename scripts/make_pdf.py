@@ -341,7 +341,8 @@ def position(p):
     esc = lambda s: s.replace("&", "&amp;")
     name = esc(p["memo"]["name"])
     text = esc(p["memo"]["rationale"]).replace("{coverage}", RARA_COVER)
-    return [Paragraph(f"<b>{esc(p['ticker'])}: {name}</b> · {p['weight']:.1f}%",
+    flags = "".join(f" · <i>{esc(f)}</i>" for f in p.get("classification_flags", []))
+    return [Paragraph(f"<b>{esc(p['ticker'])}: {name}</b> · {p['weight']:.1f}%{flags}",
                       POS_HEAD[label], bulletText="•"),
             Paragraph(text, pos_body)]
 
@@ -431,7 +432,7 @@ story += [
 rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Weight", "N", "Structural exposure")]]
 exposure = {
     "Energy": "Baseload generation, transmission, fuel supply, land and<br/>interconnect rights: the most direct expression of the thesis",
-    "Compute": "The hardware layer itself: a macro counterweight against<br/>being wrong about the timing of the rotation",
+    "Compute": "The hardware layer itself: a counterweight against<br/>being wrong about the timing of the rotation",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
     "Ballast": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
 }
@@ -521,7 +522,7 @@ story.append(Paragraph(f"Critical Materials ({BUCKET_W.get('Materials', 0):.1f}%
 for _p in positions_in("materials"):
     story.append(KeepTogether(position(_p)))
 
-story.append(Paragraph(f"Macro Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
+story.append(Paragraph(f"Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
 for _p in positions_in("ballast"):
     story.append(KeepTogether(position(_p)))
 

@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>The Power Law Book — a macro portfolio on compute and the energy it eats</title>
+<title>The Power Law Book — a thematic equity portfolio on compute and the energy it eats</title>
 <style>
 /* ---------------------------------------------------------------- tokens */
 :root {
@@ -271,7 +271,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
 <div class="wrap">
 
   <header class="masthead">
-    <p class="eyebrow">Global macro · single-book research note</p>
+    <p class="eyebrow">Thematic equity portfolio · long-only research note</p>
     <h1>The Power<br>Law Book<span class="thin">compute, and the energy it eats</span></h1>
     <p class="standfirst">
       <span id="npos-word">Twenty</span> positions built on one claim: that the demand curve for computation is
@@ -447,9 +447,10 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
           eats the tracking error and FX. Gold is held as spot-backed shares rather than a dated
           future, so there is no roll and no expiry to manage.</p></li>
         <li><h3>The hedged view is a model, not a quote</h3><p>
-          It accrues the policy-rate differential day by day on the full marked value. Real forward
+          It accrues the short-rate differential day by day on the full marked value, from dated daily
+          series for USD (T-bills) and BRL (CDI) and a dated policy-rate table elsewhere. Real forward
           points also carry cross-currency basis, and TWD and BRL hedge offshore through
-          non-deliverable forwards whose implied rates can sit well away from the onshore policy rate.</p></li>
+          non-deliverable forwards; the hedge note shows what one point a year of basis would cost.</p></li>
         <li><h3>Not every position covers the full window</h3><p id="coverage-note">
           A fund that listed part-way through the year has no history before it existed. The curve
           renormalises across whatever is trading on each date, so the headline return describes the
@@ -869,6 +870,8 @@ function renderYtd() {
 }
 
 /* ------------------------------------------------- chart: FX slope chart */
+const ccyMove = (r) => ((1 + r.usd.ytd / 100) / (1 + r.local.ytd / 100) - 1) * 100;
+
 function renderFx() {
   const host = $("fx");
   host.innerHTML = "";
@@ -914,7 +917,10 @@ function renderFx() {
 
     const g = el("text", { x: m.l + iw + 12, y: y2 + 4, "font-size": 11.5, "font-family": "var(--font-mono)", fill: css("--ink-2") });
     g.appendChild(el("tspan", {}, pct(r.usd.ytd) + "  "));
-    g.appendChild(el("tspan", { fill: colour }, "(" + pct(r.usd.ytd - r.local.ytd) + " FX)"));
+    // Two different numbers, labelled as such: the gap between the columns in
+    // percentage points, and the currency's own move against the dollar,
+    // (1 + USD) / (1 + local) - 1. They differ by the cross term.
+    g.appendChild(el("tspan", { fill: colour }, "(" + pp(r.usd.ytd - r.local.ytd) + "; ccy " + pct(ccyMove(r)) + ")"));
     svg.appendChild(g);
 
     const hit = el("rect", { x: m.l, y: Math.min(y1, y2) - 7, width: iw, height: Math.abs(y2 - y1) + 14, fill: "transparent", style: "cursor:pointer" });
@@ -922,7 +928,8 @@ function renderFx() {
       const hb = host.getBoundingClientRect();
       tip.classList.add("on");
       tip.innerHTML = r.ticker + " · " + r.currency + "<br>Local " + pct(r.local.ytd) + " → USD " + pct(r.usd.ytd) +
-        "<br>FX contributed " + pp(r.usd.ytd - r.local.ytd) +
+        "<br>FX added " + pp(r.usd.ytd - r.local.ytd) + " to the USD return" +
+        "<br>The currency itself moved " + pct(ccyMove(r)) + " against the dollar" +
         (r.hedged?.ytd != null ? "<br>Hedged instead " + pct(r.hedged.ytd) : "");
       tip.style.left = Math.min(ev.clientX - hb.left + 12, hb.width - tip.offsetWidth - 4) + "px";
       tip.style.top = ev.clientY - hb.top - 10 + "px";
@@ -938,7 +945,14 @@ function renderFx() {
 
   const rates = Object.entries(DATA.fx).filter(([c]) => c !== "USD")
     .map(([c, f]) => c + " " + (f.quoted ?? 0).toFixed(c === "GBP" ? 4 : 2)).join("  ·  ");
-  $("fx-cap").textContent = "Converted at each day's rate, not today's. Closing rates: " + rates + ".";
+  const brl = DATA.baseViews?.BRL;
+  $("fx-cap").textContent = "Converted at each day's rate, not today's. Closing rates: " + rates + ". " +
+    "Labels show the percentage-point gap and, after “ccy”, the currency's own move against the dollar." +
+    (brl
+      ? " USD is the base because most lines and every benchmark are dollar assets. Measured in reais, the unhedged book returned " +
+        pct(brl.stats.ytd) + " year to date and " + pct(brl.stats.ret1y) + " over twelve months, against " +
+        pct(brl.usdStats.ytd) + " and " + pct(brl.usdStats.ret1y) + " in dollars."
+      : "");
 
   renderHedge(rows);
 }
@@ -952,7 +966,7 @@ function renderHedge(rows) {
   for (const r of rows) (byCcy[r.currency] ??= []).push(r);
 
   $("hedge-tbl").innerHTML =
-    "<thead><tr><th>Currency</th><th>Policy rate</th><th>Hedge carry / yr</th>" +
+    "<thead><tr><th>Currency</th><th>Rate today</th><th>Hedge carry / yr</th>" +
     "<th>Position</th><th>YTD local</th><th>YTD unhedged</th><th>YTD hedged</th></tr></thead><tbody>" +
     Object.keys(h.carryPct).flatMap((ccy) =>
       (byCcy[ccy] ?? []).map((r, i) =>
@@ -968,10 +982,19 @@ function renderHedge(rows) {
       )
     ).join("") + "</tbody>";
 
+  const dated = h.dated ?? [];
+  const bs = h.basisSensitivity;
   $("hedge-note").textContent =
-    "Carry is the USD rate (" + usdRate.toFixed(2) + "%) minus the local policy rate, as of " + h.asOf +
-    ", held flat across the window. Positive means the hedge earns. Sources: " +
-    Object.entries(h.sources).map(([c, s]) => c + " " + s).join("; ") + ".";
+    "Carry is the USD rate (" + usdRate.toFixed(2) + "% today) minus the local rate, accrued day by day. " +
+    (dated.length
+      ? dated.join(" and ") + " use dated daily series, so the carry moves with the rate path; the others hold the " +
+        "policy rate as of " + h.asOf + " flat. "
+      : "Rates are held flat as of " + h.asOf + ". ") +
+    "Positive means the hedge earns. Sources: " + Object.entries(h.sources).map(([c, s]) => c + " " + s).join("; ") + "." +
+    (bs?.delta1y != null
+      ? " Sensitivity: if offshore NDF basis made every non-dollar hedge 1 point a year dearer, the hedged book would " +
+        "return " + pct(bs.ret1y) + " over twelve months (" + pp(bs.delta1y, 2) + ")."
+      : "");
 }
 
 /* ---------------------------------------------------------------- tables */
@@ -1022,6 +1045,7 @@ function renderDossier() {
       if (p.proxy) tags.push("tradable via " + p.proxy.ticker);
       if (p.tradability === "future") tags.push("expires " + p.expiry);
       if (p.tradability === "private") tags.push("illiquid · stale mark");
+      for (const f of p.flags ?? []) tags.push(f);
       const tagHtml = tags.map((t, i) =>
         '<span class="tag' + (i > 0 ? " warn" : "") + '">' + escape(t) + "</span>").join(" ");
       return (

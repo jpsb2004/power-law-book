@@ -4,6 +4,30 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P1-5 FX labels, dated hedge rates, BRL view; P0-3/P0-4 remainders; P2 wording
+
+- **P1-5.** FX labels now give both numbers, named: the percentage-point gap
+  between USD and local returns, and the currency's own move,
+  (1 + USD) / (1 + local) − 1 (PETR4.SA: +21.0pp gap, real +10.7%). The hedge
+  carry uses dated daily rates for USD (13-week T-bills, ^IRX) and BRL (CDI,
+  Banco Central SGS 4389); SAR, TWD and GBP keep the dated policy-rate table. A
+  sensitivity shows the hedged book with every non-USD hedge 1pp a year
+  dearer (NDF basis). The FX caption justifies the USD base and shows the
+  unhedged book measured in reais.
+  Numbers (same data): hedged 1y +33.88% → +33.75%, YTD +42.23% → +42.13%;
+  PETR4.SA hedged YTD +81.6% → +80.3% (CDI was 14.90% a year ago, not the
+  13.75% table). Basis −1pp: hedged 1y −0.31pp. In BRL: 1y +24.6%, YTD +32.5%.
+- **P0-3.** JPM tagged "credit beta, not ballast"; NBIS and CRWV tagged "power
+  consumer, not supplier" (page, dashboard table, PDF headings).
+- **P0-4.** Memo text no longer argues from sizes the book does not hold: AMD
+  ("held at the same weight as its bucket peers"), NLR (thematic
+  concentration "at an ordinary 5% line"), LB ("the hinge of the thesis, held
+  at an ordinary 5% line").
+- **P2 wording.** "Global macro" replaced by "thematic equity portfolio" (page
+  title and eyebrow, Next.js app, dashboard docstring, briefing prompt).
+- Tests: `tests/fx.test.mjs` (7 cases: FX conversion, currency move, flat and
+  dated hedge carry, basis shift, OLS).
+
 ## 2026-10-14 — P0-2 Backtest vs track record: labels, live record, change log
 
 **Decision (author):** the live record's inception is the first scheduled

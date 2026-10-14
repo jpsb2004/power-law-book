@@ -76,6 +76,7 @@ class Entity:
     kind: str = ""
     thesis: str = ""
     breaks: str = ""
+    flags: list[str] = field(default_factory=list)
 
     price: float | None = None
     price_usd: float | None = None
@@ -189,6 +190,7 @@ def load_book(path: Path | None = None) -> Book:
                 kind=pos.get("kind", ""),
                 thesis=pos.get("thesis", ""),
                 breaks=pos.get("breaks", ""),
+                flags=list(pos.get("flags") or []),
                 price=pos.get("price"),
                 price_usd=pos.get("priceUsd"),
                 previous_close=pos.get("previousClose"),

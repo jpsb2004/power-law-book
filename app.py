@@ -1,5 +1,5 @@
 """
-THESIS INITIATION REPORT — interactive macro research dashboard.
+THESIS INITIATION REPORT — interactive thematic equity research dashboard.
 
     streamlit run app.py
 
@@ -51,6 +51,7 @@ def _load():
             "Ticker": e.ticker,
             "Name": e.name,
             "Bucket": e.bucket_label,
+            "Flag": ", ".join(e.flags),
             "Weight": e.weight,
             "Currency": e.currency,
             "Venue": e.venue,

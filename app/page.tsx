@@ -19,7 +19,7 @@ export default function Page() {
   return (
     <div className="wrap">
       <header className="top">
-        <p className="eyebrow">Global macro · live book</p>
+        <p className="eyebrow">Thematic equity portfolio · live book</p>
         <h1>
           The Power
           <br />
