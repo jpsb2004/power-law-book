@@ -44,6 +44,12 @@
       "kind": "method",
       "change": "Headline rebalanced monthly instead of daily; volatility annualised at each series' own observation frequency.",
       "why": "Daily rebalancing harvests a premium no real book collects at zero cost; the union-calendar curve has ~309 observations a year, not 252."
+    },
+    {
+      "date": "2026-10-14",
+      "kind": "method",
+      "change": "Bars keyed by each exchange's own trading date; hedge carry from dated USD and BRL rates; three-factor, three-year regressions on excess returns.",
+      "why": "FX bars arrive stamped the day before, so every non-USD close had been converted at the next day's rate; an independent recomputation of PETR4.SA found it."
     }
   ],
   "thesis": {

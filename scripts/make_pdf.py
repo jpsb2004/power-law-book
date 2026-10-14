@@ -82,6 +82,7 @@ SIDE_L, SIDE_R = 374.4, 518.4          # cover sidebar
 COVER_RULE_Y = PAGE_H - 57.0           # 735
 BODY_RULE_Y = PAGE_H - 63.0            # 729
 
+LEGAL = ("An educational exercise, not a securities analysis report: the author is not a CVM-registered securities analyst (Resolução CVM 20) or investment adviser, and nothing here is a recommendation.")
 DISCLAIMER = ("Independent personal research. Not investment advice. "
               "Not affiliated with any bank or financial institution.")
 
@@ -821,7 +822,7 @@ disc = Table([[boxed_header("IMPORTANT DISCLOSURES", R - L)],
                   "track record. The thesis, positions and weights are the author's; all "
                   "software behind this report, the data pipeline and the published page was "
                   "written by Claude Code, Anthropic's AI coding agent, under the author's "
-                  "direction.", disc_body)]], colWidths=[R - L])
+                  "direction. " + LEGAL, disc_body)]], colWidths=[R - L])
 disc.setStyle(TableStyle([
     ("BOX", (0, 1), (-1, 1), 0.5, RULE),
     ("LEFTPADDING", (0, 0), (-1, 0), 0),

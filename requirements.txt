@@ -5,9 +5,11 @@
 # data/snapshot.json. This layer consumes that artifact. Two implementations of
 # the same return maths in two languages would drift, and the brief for this
 # work was explicitly "zero breakage to existing deviation math".
-streamlit>=1.65  # width="stretch" replaces the removed use_container_width
-pandas>=2.2
-altair>=5.4
-feedparser>=6.0
-requests>=2.32
-anthropic>=0.40
+streamlit==1.65.0  # width="stretch" replaces the removed use_container_width
+pandas==3.0.6
+altair==6.3.0
+feedparser==6.0.14
+requests==2.34.2
+anthropic==1.13.0
+# Builds the thesis PDF in CI (scripts/make_pdf.py).
+reportlab==5.0.1

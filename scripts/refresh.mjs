@@ -114,6 +114,16 @@ async function main() {
     JSON.stringify(history.slice(-HISTORY_LIMIT), null, 2)
   );
 
+  // Every line's USD total-return closes as a plain CSV: the data behind every
+  // figure, readable without this code (review item P2, reproducibility).
+  const days = [...new Set(next.positions.flatMap((p) => (p.usdPoints ?? []).map((q) => new Date(q.t).toISOString().slice(0, 10))))].sort();
+  const cols = next.positions.filter((p) => p.usdPoints?.length);
+  const maps = cols.map((p) => new Map(p.usdPoints.map((q) => [new Date(q.t).toISOString().slice(0, 10), q.c])));
+  const csv = ["date," + cols.map((p) => p.ticker).join(",")]
+    .concat(days.map((d) => d + "," + maps.map((m) => (m.has(d) ? Number(m.get(d).toFixed(6)) : "")).join(",")))
+    .join("\n") + "\n";
+  await writeFile(path("data/prices.csv"), csv);
+
   // The live track record: chain-linked forward from its inception, never
   // revised, and never truncated -- unlike the backtest curve, which is the
   // current book replayed over the past year. Created by the first run that

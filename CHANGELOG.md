@@ -4,6 +4,32 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P2 Second source, independent recomputation, reproducibility, legal; FX dating fix
+
+- **Fix: FX dating.** Yahoo stamps FX daily bars at 23:00 UTC of the previous
+  day; keyed by UTC date, every non-USD close was converted at the next day's
+  rate. Bars are now keyed by the exchange's trading date. Found by the
+  independent recomputation: PETR4.SA one-year return 128.46% (pipeline) vs
+  127.73% (independent) before the fix, 127.734% vs 127.734% after; volatility
+  31.77% → 30.46%. Book unhedged one-year +35.5% → +35.3%; hedged +33.6%
+  unchanged at one decimal.
+- **Second source.** `lib/crosscheck.js` compares Yahoo's unadjusted closes for
+  AMD, TSM, JPM, GLD and VGT with Nasdaq's, session by session, every refresh
+  (125 sessions, largest gap 0.001%); a gap above 0.5% is a validator warning.
+- **Independent recomputation.** `scripts/verify_independent.py` (standard
+  library only) and `research/verification.xlsx` (Excel formulas) recompute
+  AMD, PETR4.SA and GLD; largest difference 0.0004pp. Runs in CI.
+- **Reproducibility.** Python dependencies pinned (`requirements.txt`, with
+  `reportlab`, which the PDF needed but was missing; `requirements-dev.txt`);
+  `data/prices.csv` saved on every refresh; the PDF is rebuilt and committed
+  by CI from the same snapshot; pytest runs in CI. README documents adjusted
+  closes, splits, dividends, the second source and how to rerun everything.
+- **Legal.** Page, dashboard, PDF and README state it is an educational
+  exercise and the author is not a CVM-registered securities analyst
+  (Resolução CVM 20) or adviser.
+- **CV summary** in the README rewritten to the review's wording, with the
+  instruction to label any return as a backtest.
+
 ## 2026-10-14 — P1-3 Overlap and concentration; P1-4 valuation and testable thesis
 
 - **P1-3.** New section "How many bets twenty lines are": correlation heatmap

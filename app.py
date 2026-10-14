@@ -658,5 +658,5 @@ st.caption(
     "Not investment advice, not a recommendation, and not an offer to buy or sell anything. "
     "A personal research exercise. Prices are delayed and sourced from a free public endpoint. "
     "Performance figures are a backward-looking simulation of the current weights over a window "
-    "ending today — not a track record."
+    "ending today — not a track record. An educational exercise, not a securities analysis report: the author is not a CVM-registered securities analyst (Resolução CVM 20) or investment adviser, and nothing here is a recommendation."
 )

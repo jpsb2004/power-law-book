@@ -506,6 +506,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
         <li><h3>Rebalancing is a modelling choice</h3><p id="rebal-limit">
           The curve rebalances to target weight on a fixed schedule. A held book would drift with its
           winners, so this understates the concentration that would actually have built up.</p></li>
+        <li><h3>Prices are checked against a second source</h3><p id="xcheck-note">
+          Each refresh compares Yahoo's closes for five US-listed lines against Nasdaq's published
+          closes, session by session.</p></li>
         <li><h3>Headline returns are gross</h3><p id="cost-limit">
           Returns include reinvested dividends and are net of each fund's own fee, which is already in
           its price. The headline is gross of commission, spread, withholding and the FX spread; the
@@ -613,8 +616,27 @@ function renderStamp() {
   $("disclaimer").textContent =
     "Not investment advice, not a recommendation, and not an offer to buy or sell anything. " +
     "A personal research exercise built to practise market analysis. Prices are delayed and " +
-    "sourced from a free public endpoint; they have not been reconciled against a paid vendor " +
-    "and may contain errors. Past performance says nothing about future returns.";
+    "sourced from a free public endpoint and cross-checked against a second free source, not a paid " +
+    "vendor; they may contain errors. Past performance says nothing about future returns. " +
+    "An educational exercise, not a securities analysis report: the author is not a CVM-registered securities analyst (Resolução CVM 20) or investment adviser, and nothing here is a recommendation.";
+
+  const xc = DATA.sourceCheck;
+  const ok = (xc?.rows ?? []).filter((r) => !r.error);
+  if (ok.length) {
+    const sessions = ok.reduce((a, r) => a + r.sessions, 0);
+    const worst = ok.reduce((a, r) => (r.maxAbsDiffPct > a.maxAbsDiffPct ? r : a));
+    $("xcheck-note").textContent =
+      "Each refresh compares Yahoo's unadjusted closes for " + ok.map((r) => r.ticker).join(", ") + " against " +
+      xc.source + ": " + sessions + " sessions on this run, largest gap " + worst.maxAbsDiffPct.toFixed(3) + "% (" +
+      worst.ticker + "). A gap above 0.5% is flagged by the validator. Dividend adjustment is Yahoo's ratio method; " +
+      "splits are applied to the whole history by the provider, and the validator flags a clean 2x/3x/4x jump.";
+  }
+  const vf = DATA.verification;
+  if (vf?.rows?.length) {
+    $("xcheck-note").textContent += " " + vf.rows.map((r) => r.ticker).join(", ") + " are also recomputed independently " +
+      "(standard-library Python and Excel formulas, research/verification.xlsx): largest difference from the pipeline " +
+      vf.maxAbsDiffPp.toFixed(4) + "pp, checked " + vf.asOf + ".";
+  }
 }
 
 function renderStats() {

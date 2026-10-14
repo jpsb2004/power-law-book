@@ -62,3 +62,23 @@ test("ols recovers known coefficients and reports R² = 1 on an exact fit", () =
   close(fit.coef[2], -3, 1e-9);
   close(fit.r2, 1, 1e-12);
 });
+
+test("FX bars stamped 23:00 UTC the day before are keyed to their London trading date", async () => {
+  const { fetchSeries } = await import("../lib/analytics.js");
+  const D = Date.UTC(2026, 9, 8, 23, 0) / 1000; // the bar for 9 Oct, as Yahoo stamps it
+  const body = {
+    chart: { result: [{
+      meta: { currency: "BRL", gmtoffset: 3600, regularMarketPrice: 5.0, regularMarketTime: D + 86400 },
+      timestamp: [D - 86400, D],
+      indicators: { quote: [{ close: [5.02, 5.01] }] },
+    }] },
+  };
+  const real = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: true, json: async () => body });
+  try {
+    const { points } = await fetchSeries("USDBRL=X", "1y");
+    assert.deepEqual(points.map((p) => dayKey(p.t)), ["2026-10-08", "2026-10-09"]);
+  } finally {
+    globalThis.fetch = real;
+  }
+});
