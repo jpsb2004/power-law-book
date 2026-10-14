@@ -243,6 +243,7 @@ td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .kv .k { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
 .kv .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.25rem; margin-top: 0.3rem; }
 .kv .n { font-size: 0.8rem; color: var(--ink-3); }
+.subhead { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 1.75rem 0 0.6rem; }
 
 .cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .note-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.1rem; }
@@ -301,6 +302,19 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
       <div class="chart-box rel"><div id="curve"></div><div class="tip" id="curve-tip"></div></div>
       <figcaption id="curve-cap"></figcaption>
     </figure>
+  </section>
+
+  <section id="bench-section" hidden>
+    <div class="sec-head"><span class="eyebrow secnum"></span><h2>Against the benchmarks</h2></div>
+    <p class="lede prose" id="bench-lede"></p>
+    <figure>
+      <div class="chart-box rel"><div id="bench-chart"></div><div class="tip" id="bench-tip"></div></div>
+      <figcaption id="bench-cap"></figcaption>
+    </figure>
+    <div class="tbl-scroll"><table class="mini" id="bench-tbl"></table></div>
+    <h3 class="subhead" id="bench-rel-head"></h3>
+    <div class="tbl-scroll"><table class="mini" id="bench-rel-tbl"></table></div>
+    <p style="color:var(--ink-3);font-size:.85rem;margin-top:.9rem;max-width:var(--measure)" id="bench-note"></p>
   </section>
 
   <section>
@@ -1117,6 +1131,152 @@ function renderProxy() {
   $("kospi-head").textContent = held ? "Korea is held through a fund, not the index" : "One line is not directly buyable";
 }
 
+/* ------------------------------------------------------------- benchmarks */
+// Benchmarks are neutral ink with distinct dashes and a direct end label, so
+// identity never rests on colour and the categorical hues stay with buckets.
+const BENCH_STYLE = {
+  vgt: { stroke: "--ink-2", dash: "7 4", width: 1.6 },
+  acwi: { stroke: "--ink-3", dash: "2 3", width: 1.6 },
+  "6040": { stroke: "--ink-3", dash: "9 3 2 3", width: 1.3 },
+};
+
+function renderBenchmarks() {
+  const B = DATA.benchmarks;
+  if (!B?.rows?.length) return;
+  $("bench-section").hidden = false;
+  const bookKey = VIEW === "hedged" ? "book-hedged" : "book-usd";
+  const book = B.rows.find((r) => r.key === bookKey) ?? B.rows.find((r) => r.kind === "book");
+  const otherBook = B.rows.find((r) => r.kind === "book" && r !== book);
+  const benches = B.rows.filter((r) => r.kind === "benchmark" && r.stats);
+  // No "-0.00": a value that rounds to zero prints as zero.
+  const num = (v, d = 2) => (v == null ? "—" : (Math.abs(v) < 0.5 * 10 ** -d ? 0 : v).toFixed(d));
+  const from = fmtDate(Date.parse(B.window.start)), to = fmtDate(Date.parse(B.window.end));
+  const rfTxt = B.riskFree?.annRetPct == null ? "" : " (" + B.riskFree.annRetPct.toFixed(1) + "% annualised over the window)";
+
+  $("bench-lede").textContent =
+    "A return means nothing on its own. This is the book beside what a reader could have held instead, over one " +
+    "shared window (" + from + " to " + to + "), in USD total return, rebased to 100 at its start. Sharpe and Sortino " +
+    "are in excess of " + B.riskFree.ticker + "'s total return" + rfTxt + ". Beta, tracking error and information ratio " +
+    "use weekly returns, because Seoul, Taipei and Riyadh close before New York opens.";
+
+  // ---- chart
+  const host = $("bench-chart");
+  host.innerHTML = "";
+  const lines = [book, ...benches].filter((r) => r.points?.length > 1);
+  const W = 1000, H = 300, m = { t: 14, r: 150, b: 28, l: 8 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xs = lines.flatMap((r) => r.points.map((p) => p.t)), ys = lines.flatMap((r) => r.points.map((p) => p.c));
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+  const X = (t) => m.l + ((t - x0) / (x1 - x0)) * iw;
+  const Y = (v) => m.t + ih - ((v - lo) / (hi - lo)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Book and benchmarks, rebased to 100, " + from + " to " + to });
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + ((hi - lo) * i) / 4;
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: css("--rule"), "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: m.l + 4, y: Y(v) - 4, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, v.toFixed(0)));
+  }
+  if (lo < 100 && hi > 100) {
+    svg.appendChild(el("line", { x1: m.l, x2: m.l + iw, y1: Y(100), y2: Y(100), stroke: css("--rule-strong"), "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  }
+  const path = (pts) => pts.map((p, i) => (i ? "L" : "M") + X(p.t).toFixed(2) + " " + Y(p.c).toFixed(2)).join(" ");
+  // Benchmarks first, so the book's line sits on top.
+  for (const r of benches) {
+    const s = BENCH_STYLE[r.key] ?? { stroke: "--ink-3", dash: "3 3", width: 1.3 };
+    svg.appendChild(el("path", { d: path(r.points), fill: "none", stroke: css(s.stroke), "stroke-width": s.width, "stroke-dasharray": s.dash }));
+  }
+  svg.appendChild(el("path", { d: path(book.points), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round" }));
+
+  // Direct end labels, nudged apart so none overlap (min 15 units).
+  const ends = lines.map((r) => ({ r, y: Y(r.points.at(-1).c) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
+  for (const e of ends) {
+    const isBook = e.r === book;
+    const short = isBook ? "Book" : e.r.label.split(" (")[0];
+    svg.appendChild(el("text", {
+      x: m.l + iw + 8, y: e.y + 4, fill: isBook ? css("--ink") : css("--ink-2"), "font-size": 12,
+      "font-family": "var(--font-mono)", "font-weight": isBook ? 600 : 400,
+    }, short + " " + (e.r.points.at(-1).c - 100 >= 0 ? "+" : "") + (e.r.points.at(-1).c - 100).toFixed(1) + "%"));
+  }
+  svg.appendChild(el("text", { x: m.l, y: H - 8, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)" }, from));
+  svg.appendChild(el("text", { x: m.l + iw, y: H - 8, fill: css("--ink-3"), "font-size": 11, "font-family": "var(--font-mono)", "text-anchor": "end" }, to));
+
+  const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(hit);
+  host.appendChild(svg);
+
+  const tip = $("bench-tip");
+  const byDay = lines.map((r) => ({ r, map: new Map(r.points.map((p) => [new Date(p.t).toISOString().slice(0, 10), p.c])) }));
+  hit.addEventListener("mousemove", (ev) => {
+    const box = svg.getBoundingClientRect();
+    const t = x0 + ((((ev.clientX - box.left) / box.width) * W - m.l) / iw) * (x1 - x0);
+    let best = book.points[0];
+    for (const p of book.points) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    const key = new Date(best.t).toISOString().slice(0, 10);
+    cross.setAttribute("x1", X(best.t)); cross.setAttribute("x2", X(best.t)); cross.setAttribute("opacity", 0.4);
+    tip.classList.add("on");
+    tip.innerHTML = fmtDate(best.t) + byDay.map(({ r, map }) => {
+      const v = map.get(key);
+      return v == null ? "" : "<br>" + escape(r === book ? book.label : r.label) + " " + v.toFixed(1);
+    }).join("");
+    const hb = host.getBoundingClientRect();
+    tip.style.left = Math.min(Math.max(ev.clientX - hb.left + 12, 0), hb.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = ev.clientY - hb.top - 10 + "px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.classList.remove("on"); cross.setAttribute("opacity", 0); });
+
+  $("bench-cap").textContent =
+    "Index = 100 at " + from + ". Solid: " + book.label + ". Dashed, labelled at the end: " +
+    benches.map((r) => r.label).join(", ") + ". The 60/40 and the book are rebalanced daily. Gross of all costs.";
+
+  // ---- table: absolute
+  const s = (r) => r.stats ?? {};
+  const absRow = (r, cls) =>
+    '<tr class="' + cls + '"><td class="lbl">' + escape(r.label) + "</td>" +
+    '<td class="n ' + signClass(s(r).retPct) + '">' + pct(s(r).retPct) + "</td>" +
+    '<td class="n">' + num(s(r).volPct, 1) + "%</td>" +
+    '<td class="n">' + num(s(r).sharpe) + "</td>" +
+    '<td class="n">' + num(s(r).sortino) + "</td>" +
+    '<td class="n">' + num(s(r).betaMkt) + "</td>" +
+    '<td class="n neg">' + pct(s(r).maxDrawdownPct) + "</td></tr>";
+  $("bench-tbl").innerHTML =
+    "<thead><tr><th>Series</th><th>Return</th><th>Volatility</th><th>Sharpe</th><th>Sortino</th><th>β to " +
+    escape(B.market) + "</th><th>Max DD</th></tr></thead><tbody>" +
+    absRow(book, "em") + (otherBook ? absRow(otherBook, "sub") : "") + benches.map((r) => absRow(r, "")).join("") +
+    "</tbody>";
+
+  // ---- table: relative to each benchmark
+  const rel = B.relative.filter((x) => x.book === book.key);
+  $("bench-rel-head").textContent = book.label + " against each benchmark";
+  $("bench-rel-tbl").innerHTML =
+    "<thead><tr><th>Benchmark</th><th>Excess return</th><th>Tracking error</th><th>Information ratio</th><th>β (t)</th></tr></thead><tbody>" +
+    rel.map((x) =>
+      '<tr><td class="lbl">' + escape(x.label) + "</td>" +
+      '<td class="n ' + signClass(x.excessRetPct) + '">' + pp(x.excessRetPct) + "</td>" +
+      '<td class="n">' + num(x.tePct, 1) + "%</td>" +
+      '<td class="n">' + num(x.ir) + "</td>" +
+      '<td class="n">' + num(x.beta) + ' <span style="color:var(--ink-3);font-size:.75rem">(' + num(x.betaT, 1) + ")</span></td></tr>"
+    ).join("") + "</tbody>";
+
+  // ---- the reading, from the numbers
+  const top = benches.reduce((a, b) => ((s(b).sharpe ?? -Infinity) > (s(a).sharpe ?? -Infinity) ? b : a));
+  const sharpeRead = (s(book).sharpe ?? -Infinity) >= (s(top).sharpe ?? -Infinity)
+    ? "Per unit of risk the book did at least as well as every benchmark here: a Sharpe of " + num(s(book).sharpe) +
+      " against " + num(s(top).sharpe) + " for " + top.label + ". "
+    : "Per unit of risk the book did not beat " + top.label + ": a Sharpe of " + num(s(book).sharpe) + " against " +
+      num(s(top).sharpe) + ", so holding it alone would have done as well for the volatility taken. ";
+  const sig = rel.filter((x) => Math.abs(x.ir ?? 0) >= 2);
+  const irRead = sig.length
+    ? "Only the gap to " + sig.map((x) => x.label).join(" and ") + " has an information ratio above 2, the rough bar for one year of data. "
+    : "No information ratio here clears 2, the rough bar for telling one year of outperformance from luck. ";
+  const betaRead = s(book).betaMkt == null ? "" :
+    "A beta of " + num(s(book).betaMkt) + " to " + B.market + " means much of the excess over global equity is leverage to the same market, not a separate source of return.";
+  $("bench-note").textContent = sharpeRead + irRead + betaRead;
+}
+
 /* ------------------------------------------------------- factor exposure */
 function renderFactors() {
   const f = DATA.factors;
@@ -1183,7 +1343,7 @@ document.addEventListener("click", (ev) => {
   const btn = ev.target.closest?.(".fxview button");
   if (!btn || btn.dataset.view === VIEW) return;
   VIEW = btn.dataset.view;
-  renderToggles(); renderStats(); renderCurve(); renderYtd(); renderTable(); renderRefreshLog();
+  renderToggles(); renderStats(); renderCurve(); renderBenchmarks(); renderYtd(); renderTable(); renderRefreshLog();
 });
 
 /* --------------------------------------------------------- section numbers */
@@ -1206,7 +1366,7 @@ function secNumberOf(id) {
 function renderAll() {
   renderStamp(); renderToggles(); renderStats(); renderChain();
   renderCurve(); renderAlloc(); renderYtd(); renderFx();
-  renderFactors(); renderTable(); renderDossier(); renderRefreshLog();
+  renderBenchmarks(); renderFactors(); renderTable(); renderDossier(); renderRefreshLog();
   renderProxy(); numberSections();
 }
 renderAll();

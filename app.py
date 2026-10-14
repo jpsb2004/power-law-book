@@ -117,8 +117,8 @@ if partial:
         f"{len(book.entities)}."
     )
 
-tab_alloc, tab_note, tab_dev, tab_stress = st.tabs(
-    ["Allocation", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
+tab_alloc, tab_bench, tab_note, tab_dev, tab_stress = st.tabs(
+    ["Allocation", "Benchmarks", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
 )
 
 # --------------------------------------------------------------- allocation
@@ -293,6 +293,71 @@ with tab_dev:
         width="stretch",
         hide_index=True,
     )
+
+# --------------------------------------------------------------- benchmarks
+with tab_bench:
+    bench = book.benchmarks
+    rows = [r for r in bench.get("rows", []) if r.get("stats")]
+    if not rows:
+        st.info("This snapshot carries no benchmark comparison. Run `npm run refresh` to build one.")
+    else:
+        win = bench["window"]
+        rf = bench.get("riskFree", {})
+        st.caption(
+            f"One shared window, {win['start']} to {win['end']}, USD total return. Sharpe and Sortino are in "
+            f"excess of {rf.get('ticker')}'s total return ({(rf.get('annRetPct') or 0):.1f}% annualised); beta, "
+            "tracking error and information ratio use weekly returns because Asian venues close before New York "
+            "opens. The book and the 60/40 are rebalanced daily. Same figures as the published page."
+        )
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Series": r["label"],
+                        "Return %": r["stats"]["retPct"],
+                        "Volatility %": r["stats"]["volPct"],
+                        "Sharpe": r["stats"]["sharpe"],
+                        "Sortino": r["stats"]["sortino"],
+                        f"Beta to {bench['market']}": r["stats"]["betaMkt"],
+                        "Max DD %": r["stats"]["maxDrawdownPct"],
+                    }
+                    for r in rows
+                ]
+            ).style.format(
+                {"Return %": "{:+.1f}", "Volatility %": "{:.1f}", "Sharpe": "{:.2f}", "Sortino": "{:.2f}",
+                 f"Beta to {bench['market']}": "{:.2f}", "Max DD %": "{:.1f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+        st.subheader("Book against each benchmark")
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Book view": "FX-hedged USD" if x["book"] == "book-hedged" else "Unhedged USD",
+                        "Benchmark": x["label"],
+                        "Excess return pp": x["excessRetPct"],
+                        "Tracking error %": x["tePct"],
+                        "Information ratio": x["ir"],
+                        "Beta": x["beta"],
+                        "Beta t-stat": x["betaT"],
+                    }
+                    for x in bench.get("relative", [])
+                ]
+            ).style.format(
+                {"Excess return pp": "{:+.1f}", "Tracking error %": "{:.1f}", "Information ratio": "{:.2f}",
+                 "Beta": "{:.2f}", "Beta t-stat": "{:.1f}"},
+                na_rep="—",
+            ),
+            width="stretch",
+            hide_index=True,
+        )
+        st.caption(
+            "An information ratio's t-statistic is roughly IR × √years, so over one year it needs to clear "
+            "about 2 to be told apart from luck."
+        )
 
 # ------------------------------------------------------------------- stress
 with tab_stress:

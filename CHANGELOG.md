@@ -4,6 +4,50 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P0-1 Benchmarks and risk-adjusted metrics; volatility annualisation fix
+
+**What changed**
+
+- `lib/holdings.js` — `BENCHMARKS` (VGT; ACWI; 60/40 ACWI/AGG, rebalanced
+  daily), `MARKET = ACWI`, `RISK_FREE = SGOV`.
+- `lib/analytics.js` — `riskStats` (return, annualised return, vol, Sharpe and
+  Sortino in excess of the T-bill fund read on the series' own calendar, max
+  drawdown, weekly beta to the market), `relativeStats` (excess return,
+  weekly tracking error, information ratio, beta with t-stat), `windowed`
+  (shared window by calendar date, rebased to 100), `periodsPerYear`.
+- **Fix:** `annualisedVol` annualised every series with `sqrt(252)`. The book
+  curve has ~309 observations a year (union of seven venues' calendars), so
+  its volatility was understated. It now uses each series' own frequency.
+  Cross-check: the hedged book on a single New York calendar (250
+  observations) gives 24.6%; lag-1 autocorrelation of the union series is
+  −0.02, so the extra observations are real variance.
+- `lib/build-snapshot.js` — `buildBenchmarks` writes `snapshot.benchmarks`.
+- `page/template.html` — new section "Against the benchmarks": chart with a
+  dashed, end-labelled line per benchmark; absolute and relative tables; the
+  reading below them is computed (best Sharpe, which IRs clear 2, beta).
+- `app.py` — "Benchmarks" tab with the same two tables.
+- Tests: `tests/risk.test.mjs` (8 cases); `check-page.mjs` checks the section.
+
+**Numbers** — window 2025-10-14 → 2026-10-13, USD total return:
+
+| Series | Return | Vol | Sharpe | Sortino | β ACWI | Max DD |
+|---|---|---|---|---|---|---|
+| Book, FX-hedged | +34.9% | 24.6% | 1.19 | 1.79 | 1.26 | −14.3% |
+| Book, unhedged | +36.9% | 24.8% | 1.24 | 1.87 | 1.28 | −14.4% |
+| VGT | +36.3% | 24.5% | 1.24 | 1.84 | 1.47 | −16.4% |
+| ACWI | +18.5% | 13.9% | 1.03 | 1.53 | 1.00 | −9.7% |
+| 60/40 | +10.0% | 9.3% | 0.68 | 0.98 | 0.66 | −6.6% |
+
+Hedged book against each: VGT −1.4pp (TE 13.1%, IR 0.00); ACWI +16.4pp (TE
+13.5%, IR 1.02); 60/40 +24.9pp (TE 15.4%, IR 1.37). No IR clears 2.
+Risk-free (SGOV) earned 3.7% annualised.
+
+| Volatility | Before | After |
+|---|---|---|
+| Book, hedged (KPI) | 22.15% | 24.53% |
+| Book, unhedged | 22.39% | 24.81% |
+| Largest change on a single position | — | 2357.TW 42.3% → 41.4% |
+
 ## 2026-10-14 — P0-6 Every line investable: EWY replaces ^KS11
 
 **What changed**

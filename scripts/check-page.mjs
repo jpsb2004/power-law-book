@@ -123,6 +123,23 @@ if (goodProxy) {
   fail.push("proxy section is visible without proxy data");
 }
 
+// Benchmarks: one table row per series (both book views plus each benchmark),
+// one relative row per benchmark for the view on screen, and a chart line each.
+const benchRows = (snap.benchmarks?.rows ?? []).filter((r) => r.stats);
+const benchSection = document.getElementById("bench-section");
+if (benchRows.length) {
+  if (benchSection.hidden) fail.push("snapshot carries benchmarks but the benchmark section is hidden");
+  const got = document.querySelectorAll("#bench-tbl tbody tr").length;
+  if (got !== benchRows.length) fail.push(`benchmark table rendered ${got} rows for ${benchRows.length} series`);
+  const benches = benchRows.filter((r) => r.kind === "benchmark").length;
+  const rel = document.querySelectorAll("#bench-rel-tbl tbody tr").length;
+  if (rel !== benches) fail.push(`relative table rendered ${rel} rows for ${benches} benchmarks`);
+  const paths = document.querySelectorAll("#bench-chart svg path").length;
+  if (paths !== benches + 1) fail.push(`benchmark chart drew ${paths} lines, expected ${benches + 1}`);
+} else if (!benchSection.hidden) {
+  fail.push("benchmark section is visible without benchmark data");
+}
+
 const factorRows = snap.factors?.rows?.length ?? 0;
 const factorSection = document.getElementById("factor-section");
 if (factorRows) {

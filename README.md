@@ -184,6 +184,23 @@ Seoul close is paired with the **previous** NY close (`clock_lag_sessions: 1`).
 Same-date pairing measures the time zone, not the fund. SOXX was considered and
 rejected: a US semiconductor basket is a different bet, not a Korea proxy.
 
+### Benchmarks and risk-adjusted returns
+
+The book is shown beside VGT (US tech, also a holding), ACWI (global equity)
+and a 60/40 blend of ACWI and AGG, over one shared window cut by calendar date
+and rebased to 100. For each: return, volatility, Sharpe and Sortino (in excess
+of SGOV's total return, i.e. the T-bill rate actually earned), beta to ACWI and
+max drawdown; and for the book against each benchmark, excess return, tracking
+error, information ratio and beta. Beta, tracking error and IR use weekly
+returns for the same time-zone reason as the factor regressions. An IR needs to
+clear about 2 over one year before it says anything; the page states which do.
+
+Volatility is annualised at each series' **own** observation frequency. The
+book curve runs on the union of seven venues' calendars (~309 observations a
+year, Riyadh trades Sundays), so the old `sqrt(252)` understated it by about a
+tenth; measured on a single New York calendar it agrees with the corrected
+figure.
+
 ### Factor exposure
 
 Weekly USD returns of the book, each bucket and each Ballast line, regressed on
