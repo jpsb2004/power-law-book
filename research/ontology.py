@@ -139,6 +139,9 @@ class Book:
     tail: dict[str, Any] = field(default_factory=dict)
     stress: dict[str, Any] = field(default_factory=dict)
     factors: dict[str, Any] = field(default_factory=dict)
+    structure: dict[str, Any] = field(default_factory=dict)
+    fundamentals: dict[str, Any] = field(default_factory=dict)
+    thesis: dict[str, Any] = field(default_factory=dict)
 
     def by_bucket(self, bucket: str) -> list[Entity]:
         return [e for e in self.entities if e.bucket == bucket]
@@ -240,4 +243,7 @@ def load_book(path: Path | None = None) -> Book:
         tail=raw.get("tail") or {},
         stress=raw.get("stress") or {},
         factors=raw.get("factors") or {},
+        structure=raw.get("structure") or {},
+        fundamentals=raw.get("fundamentals") or {},
+        thesis=raw.get("thesis") or {},
     )

@@ -4,6 +4,29 @@ Every change to the pipeline, the analytics or the book, with the numbers it
 moved. Item IDs refer to the external review (`Power_Law_Book_Review_and_Fix_List.md`).
 Before/after figures are recomputed from data, never copied from the review.
 
+## 2026-10-14 — P1-3 Overlap and concentration; P1-4 valuation and testable thesis
+
+- **P1-3.** New section "How many bets twenty lines are": correlation heatmap
+  of weekly USD returns; effective number of bets (Meucci entropy over
+  principal components) **2.0** of 19 lines, the first component carrying
+  **83%** of the book's variance; single points of failure with their capital
+  and risk share — US AI capex 29% of capital / **57% of risk**, nuclear fuel
+  11% / 17%, Taiwan 9% / 9%, Korea memory 4% / 7%; top-10 look-through
+  exposures from each fund's published top holdings (a floor; coverage shown).
+  The PDF's "closer to 19 independent bets" now reads the measured figure.
+- **P1-4.** Valuation by line (forward and trailing P/E, EV/EBITDA, FCF and
+  dividend yield; Yahoo quoteSummary, dated). Statement ratios are dropped
+  when statements and quote are in different currencies (TSM ADR) and
+  holdings-level fund ratios are not used. The Compute trim rule is checked
+  against the data: basket forward P/E 24.1x vs the 32x cap. A variant view,
+  horizon, review/exit rules and five portfolio falsifiers with live readings
+  (`thesis` in positions.json — **drafted from the existing thesis text, for
+  the author to own**). Today one falsifier is triggered: Compute out-returned
+  Energy by 55.7pp over twelve months against a 20pp threshold.
+- Dashboard: "Thesis & Valuation" tab; PDF: valuation snapshot, variant view
+  and falsifier table, effective-bets paragraph.
+- Tests: `tests/structure.test.mjs` (3 cases).
+
 ## 2026-10-14 — P1-1 Tail risk and stress tests; P1-2 three-factor, three-year exposure; P0-3 loadings
 
 - **P1-2.** Factor regression moved from one year on VGT + XLE to three years

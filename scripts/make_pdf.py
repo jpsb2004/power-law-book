@@ -505,6 +505,45 @@ story += [
     vt,
 ]
 
+# ---- valuation snapshot (P1-4): what each line is priced at, with source and date
+_fu = book.fundamentals or {}
+if _fu.get("valuation"):
+    def _m(v, suf):
+        if v is None:
+            return "—"
+        if v < 0 and suf == "x":
+            return "n.m."
+        return f"{v:.1f}{suf}"
+    _vr = [[Paragraph(h, tbl_head) for h in ("Line", "Fwd P/E", "Trail. P/E", "EV/EBITDA", "FCF yld", "Div yld")]]
+    for v in _fu["valuation"]:
+        _vr.append([Paragraph(v["ticker"] + (" *" if v.get("currencyNote") else ""), tbl_cell),
+                    Paragraph(_m(v.get("forwardPE"), "x"), tbl_cell), Paragraph(_m(v.get("trailingPE"), "x"), tbl_cell),
+                    Paragraph(_m(v.get("evToEbitda"), "x"), tbl_cell), Paragraph(_m(v.get("fcfYieldPct"), "%"), tbl_cell),
+                    Paragraph(_m(v.get("dividendYieldPct"), "%"), tbl_cell)])
+    _vt = Table(_vr, colWidths=[90, 70, 70, 70, 70, 70], repeatRows=1)
+    _vt.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE), ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    _cn = " ".join(f"* {v['ticker']}: {v['currencyNote']}." for v in _fu["valuation"] if v.get("currencyNote"))
+    # The Compute trim rule, checked: weight-averaged earnings yield of the
+    # bucket's lines with a positive forward P/E, inverted (harmonic mean).
+    _cl = [v for v in _fu["valuation"]
+           if v.get("forwardPE") and v["forwardPE"] > 0
+           and next((e.bucket for e in book.entities if e.ticker == v["ticker"]), "") == "compute"]
+    _bpe = (sum(1 for _ in _cl) / sum(1 / v["forwardPE"] for v in _cl)) if _cl else None
+    _rule = (f" Compute basket forward P/E (harmonic mean of {', '.join(v['ticker'] for v in _cl)}): "
+             f"<b>{_bpe:.1f}x</b> against the 32x cap in the Compute rule"
+             + (" — the cap binds." if _bpe > 32 else " — inside the cap.")) if _bpe else ""
+    story += [KeepTogether([
+        Paragraph("Valuation Snapshot", sub_head),
+        Paragraph(
+            f"What each line is priced at, from {_fu['source']} on {_fu['asOf']}. Funds show the fund-level P/E and "
+            "distribution yield; n.m. marks a negative multiple. " + _cn + _rule, body),
+        _vt,
+    ])]
+
 # ========================================================== 3. RATIONALE
 story += [
     Paragraph("3. MICROECONOMIC MAPPING", eyebrow),
@@ -540,7 +579,11 @@ story += [
     Paragraph(
         "<b>Neocloud classification overlap.</b> NBIS and CRWV are functionally "
         "compute-infrastructure lessors, not power generators, and their high operational "
-        f"correlation compresses the {N_POSITIONS}-position book closer to {N_POSITIONS - 1} independent bets.", weakness),
+        "correlation is one example of a wider problem: measured on weekly returns, the "
+        f"{N_POSITIONS}-position book behaves like "
+        + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets, with "
+           f"{(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
+           if book.structure else "far fewer independent bets than it has lines."), weakness),
     Paragraph(
         "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
         "bucket rather than in Ballast, because it is correlated with the same technology-materials "
@@ -565,6 +608,40 @@ for heading, text in CATALYSTS:
     story.append(Paragraph(
         f"<b>{heading.replace('&', '&amp;')}.</b> {text.replace('**', '')}",
         catalyst_style, bulletText="•"))
+
+# ---- variant view, falsifiers, concentration (P1-4, P1-3)
+_th = book.thesis or {}
+_sx = book.structure or {}
+if _th:
+    def _rd(c):
+        if c.get("reading") is None:
+            return "checked each earnings season"
+        u = c.get("unit")
+        return f"${c['reading']:.2f}" if u == "$" else (f"{c['reading']:+.1f}pp" if u == "pp" else f"{c['reading']:+.1f}%")
+    _fr = [[Paragraph(h, tbl_head) for h in ("Falsifier", "Test", "Reading", "Status")]]
+    for c in _th.get("checks", []):
+        _st = "watch" if c.get("triggered") is None else ("<b>triggered</b>" if c["triggered"] else "holding")
+        _fr.append([Paragraph(c["name"], tbl_cell), Paragraph(c["test"], tbl_cell), Paragraph(_rd(c), tbl_cell),
+                    Paragraph(_st, tbl_cell)])
+    _ft = Table(_fr, colWidths=[95, 255, 80, 60], repeatRows=1)
+    _ft.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), SPINE), ("BOX", (0, 0), (-1, -1), 0.5, RULE),
+        ("LINEBELOW", (0, 0), (-1, -2), 0.5, RULE), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story += [
+        Paragraph("Variant View and Falsifiers", sub_head),
+        Paragraph(_th["variantView"], body),
+        Paragraph(f"<b>Horizon.</b> {_th['horizon']} <b>Review and exit.</b> {_th['reviewRules']}", body),
+        _ft,
+    ]
+if _sx:
+    _pf = "; ".join(f"{g['name']} {g['capitalPct']:.0f}% of capital, {g['riskSharePct']:.0f}% of risk"
+                    for g in _sx.get("pointsOfFailure", []))
+    story.append(Paragraph(
+        f"<b>Twenty lines, {_sx['enb']:.1f} effective bets.</b> Splitting the book's weekly variance across its "
+        f"principal components, the first carries {_sx['firstPcSharePct']:.0f}% of it; the entropy-based effective "
+        f"number of bets is {_sx['enb']:.1f} of {_sx['lines']} lines. Shared points of failure: {_pf}.", body))
 
 # ---- change log: every change to the book or its method, from positions.json
 _changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)

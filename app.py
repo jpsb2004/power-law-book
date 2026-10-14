@@ -141,8 +141,8 @@ if partial:
         f"{len(book.entities)}."
     )
 
-tab_alloc, tab_bench, tab_note, tab_dev, tab_stress = st.tabs(
-    ["Allocation", "Benchmarks", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
+tab_alloc, tab_bench, tab_thesis, tab_note, tab_dev, tab_stress = st.tabs(
+    ["Allocation", "Benchmarks", "Thesis & Valuation", "ER Daily Note", "Deviation & Alerts", "Stress Tests"]
 )
 
 # --------------------------------------------------------------- allocation
@@ -453,6 +453,85 @@ with tab_bench:
             width="stretch",
             hide_index=True,
         )
+
+# ------------------------------------------------------- thesis & valuation
+with tab_thesis:
+    th = book.thesis
+    if th:
+        st.subheader("Variant view")
+        st.write(th["variantView"])
+        st.markdown(f"**Horizon.** {th['horizon']}")
+        st.markdown(f"**Review and exit.** {th['reviewRules']}")
+        st.subheader("Portfolio-level falsifiers, read today")
+
+        def _reading(c):
+            if c.get("reading") is None:
+                return "checked each earnings season"
+            u = c.get("unit")
+            return f"${c['reading']:.2f}" if u == "$" else f"{c['reading']:+.1f}{'pp' if u == 'pp' else '%'}"
+
+        st.dataframe(
+            pd.DataFrame([
+                {"Falsifier": c["name"], "Test": c["test"], "Reading": _reading(c),
+                 "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding")}
+                for c in th["checks"]
+            ]),
+            width="stretch", hide_index=True,
+        )
+    sx = book.structure
+    if sx:
+        st.subheader("How many bets twenty lines are")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Effective bets", f"{sx['enb']:.1f}", f"of {sx['lines']} lines", delta_color="off")
+        c2.metric("First component", f"{sx['firstPcSharePct']:.0f}%", "of book variance", delta_color="off")
+        c3.metric("Common factor", f"{sx['firstCorrPcPct']:.0f}%", "of total correlation", delta_color="off")
+        st.dataframe(
+            pd.DataFrame([
+                {"Shared failure": g["name"], "Lines": ", ".join(g["tickers"]), "Capital %": g["capitalPct"],
+                 "Share of risk %": g["riskSharePct"], "Why": g["why"]}
+                for g in sx["pointsOfFailure"]
+            ]).style.format({"Capital %": "{:.0f}", "Share of risk %": "{:.0f}"}),
+            width="stretch", hide_index=True,
+        )
+        _cdf = pd.DataFrame(
+            [{"a": a, "b": b, "rho": sx["corr"][i][j]}
+             for i, a in enumerate(sx["tickers"]) for j, b in enumerate(sx["tickers"])]
+        )
+        st.altair_chart(
+            alt.Chart(_cdf)
+            .mark_rect()
+            .encode(
+                x=alt.X("b:N", sort=sx["tickers"], title=None),
+                y=alt.Y("a:N", sort=sx["tickers"], title=None),
+                color=alt.Color("rho:Q", scale=alt.Scale(scheme="blueorange", domain=[-1, 1]), title="ρ"),
+                tooltip=["a", "b", alt.Tooltip("rho:Q", format=".2f")],
+            )
+            .properties(height=520),
+            width="stretch",
+        )
+    fu = book.fundamentals
+    if fu.get("valuation"):
+        st.subheader("Valuation by line")
+        st.caption(f"Source: {fu['source']}, retrieved {fu['asOf']}. Negative multiples mark loss-making lines.")
+        st.dataframe(
+            pd.DataFrame([
+                {"Line": v["ticker"], "Fwd P/E": v.get("forwardPE"), "Trailing P/E": v.get("trailingPE"),
+                 "EV/EBITDA": v.get("evToEbitda"), "FCF yield %": v.get("fcfYieldPct"),
+                 "Dividend yield %": v.get("dividendYieldPct"), "Note": v.get("currencyNote") or ""}
+                for v in fu["valuation"]
+            ]).style.format({"Fwd P/E": "{:.1f}", "Trailing P/E": "{:.1f}", "EV/EBITDA": "{:.1f}",
+                             "FCF yield %": "{:.1f}", "Dividend yield %": "{:.1f}"}, na_rep="—"),
+            width="stretch", hide_index=True,
+        )
+        if fu.get("lookThrough"):
+            st.subheader("Look-through: largest underlying exposures")
+            st.dataframe(
+                pd.DataFrame([
+                    {"Underlying": e["key"], "Name": e["name"], "Exposure %": e["weightPct"], "Through": ", ".join(e["via"])}
+                    for e in fu["lookThrough"][:10]
+                ]).style.format({"Exposure %": "{:.2f}"}),
+                width="stretch", hide_index=True,
+            )
 
 # ------------------------------------------------------------------- stress
 with tab_stress:
