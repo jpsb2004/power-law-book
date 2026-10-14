@@ -337,7 +337,7 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
         out.append("No position moved beyond the 2σ alert threshold. ")
     out.append(
         f"The book sits at index {book.index_level:.2f}, "
-        f"{stats.get('ytd', 0):+.1f}% year to date with "
+        f"{stats.get('ytd', 0):+.1f}% year to date in the hindsight backtest, with "
         f"{stats.get('vol', 0):.1f}% annualised volatility and a "
         f"{stats.get('maxDrawdown', 0):+.1f}% maximum drawdown over the window.\n"
     )
