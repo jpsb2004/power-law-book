@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-14 19:08 UTC",
-  "snapshotAsOf": "2026-10-14 19:08 UTC",
+  "asOf": "2026-10-14 19:11 UTC",
+  "snapshotAsOf": "2026-10-14 19:10 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "rows": [
     {
