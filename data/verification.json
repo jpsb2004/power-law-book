@@ -1,65 +1,65 @@
 {
-  "asOf": "2026-10-23 00:40 UTC",
-  "snapshotAsOf": "2026-10-23 00:40 UTC",
+  "asOf": "2026-10-24 00:43 UTC",
+  "snapshotAsOf": "2026-10-24 00:42 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "rows": [
     {
       "ticker": "AMD",
       "independent": {
-        "ytd": 147.3352,
-        "ret1y": 135.21,
-        "vol": 67.3908
+        "ytd": 127.2922,
+        "ret1y": 100.8263,
+        "vol": 67.5944
       },
       "pipeline": {
-        "ytd": 127.2923,
-        "ret1y": 116.1496,
-        "vol": 67.8717
+        "ytd": 131.257,
+        "ret1y": 104.3294,
+        "vol": 67.5165
       },
       "diffPp": {
-        "ytd": 20.0429,
-        "ret1y": 19.0604,
-        "vol": -0.481
-      },
-      "lastClose": "2026-10-21"
-    },
-    {
-      "ticker": "PETR4.SA",
-      "independent": {
-        "ytd": 120.0844,
-        "ret1y": 128.5972,
-        "vol": 30.6553
-      },
-      "pipeline": {
-        "ytd": 120.0839,
-        "ret1y": 128.5968,
-        "vol": 30.6553
-      },
-      "diffPp": {
-        "ytd": 0.0005,
-        "ret1y": 0.0004,
-        "vol": -0.0
+        "ytd": -3.9647,
+        "ret1y": -3.5031,
+        "vol": 0.0779
       },
       "lastClose": "2026-10-22"
     },
     {
-      "ticker": "GLD",
+      "ticker": "PETR4.SA",
       "independent": {
-        "ytd": -4.8534,
-        "ret1y": 0.0422,
-        "vol": 28.6322
+        "ytd": 125.8016,
+        "ret1y": 131.8942,
+        "vol": 30.7262
       },
       "pipeline": {
-        "ytd": -7.3516,
-        "ret1y": -2.5845,
-        "vol": 28.7166
+        "ytd": 125.8015,
+        "ret1y": 131.8942,
+        "vol": 30.7262
       },
       "diffPp": {
-        "ytd": 2.4982,
-        "ret1y": 2.6268,
-        "vol": -0.0844
+        "ytd": 0.0001,
+        "ret1y": 0.0,
+        "vol": -0.0
       },
-      "lastClose": "2026-10-21"
+      "lastClose": "2026-10-23"
+    },
+    {
+      "ticker": "GLD",
+      "independent": {
+        "ytd": -7.3516,
+        "ret1y": -2.2568,
+        "vol": 28.7545
+      },
+      "pipeline": {
+        "ytd": -7.9517,
+        "ret1y": -2.8899,
+        "vol": 28.7219
+      },
+      "diffPp": {
+        "ytd": 0.6001,
+        "ret1y": 0.6331,
+        "vol": 0.0326
+      },
+      "lastClose": "2026-10-22"
     }
   ],
-  "maxAbsDiffPp": 20.0429
+  "maxAbsDiffPp": 3.9647
 }
