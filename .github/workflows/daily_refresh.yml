@@ -80,6 +80,10 @@ jobs:
 
       - name: Fetch and validate daily closes
         id: refresh
+        env:
+          # Optional. Second price source for PETR4.SA and AINF.L; without it
+          # those lines are recorded as single-source and the refresh proceeds.
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
         run: |
           set +e
           node scripts/refresh.mjs 2>&1 | tee refresh.log
