@@ -241,8 +241,8 @@ with tab_alloc:
 
     targets = " / ".join(f"{BUCKET_LABELS[k]} {book.bucket_weight(k):.0f}" for k in BUCKET_ORDER)
     st.info(
-        f"Sizing is near equal-weight by design: bucket targets are {targets}, split close to "
-        "equally within each bucket, so no single stock call carries the thesis. "
+        f"Bucket targets are {targets}. Weights within each bucket are set line by line, and the "
+        "change log records why. Equal capital is not equal risk: see the risk table. "
         "**RARA11.SA has its own Materials bucket** rather "
         "than sitting in Diversifiers: a concentrated, policy-driven rare-earth basket tracks the same "
         "technology-materials cycle as the rest of the book, so in most states it falls with the "

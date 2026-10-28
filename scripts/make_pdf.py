@@ -371,9 +371,9 @@ for lead, rest in [
      " Grid interconnect queues and transformer lead times, not chip supply, increasingly "
      "gate how fast new capacity can actually come online."),
     ("Construction is top-down, not stock-by-stock.",
-     " Target weights are set at the bucket level ("
-     + " / ".join(f"{b} {BUCKET_W.get(b, 0):.0f}%" for b in ORDER) + "); positions "
-     "inside each bucket are held close to equal-weight so no single stock call carries the thesis."),
+     " Bucket targets are "
+     + " / ".join(f"{b} {BUCKET_W.get(b, 0):.0f}%" for b in ORDER) + ". Weights within each bucket "
+     "are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table."),
     ("Compute is retained on purpose, not shrunk to a token hedge.",
      " A portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
      "construction than one that wins when the upstream links outpace compute but does not collapse if they fall behind."),
@@ -426,9 +426,9 @@ story += [
     Paragraph("Bucket Weights and Factor Logic", headline),
     Paragraph(
         f"The book is organized into {NUMBER_WORDS[len(ORDER)]} thematic buckets rather than picked stock-by-stock. "
-        "Target weights are set at the bucket level; positions within a bucket are then held "
-        "close to equal-weight, so no single stock-picking call inside a bucket is doing "
-        "outsized work. The bet is on the theme, not on any individual name being the best "
+        "Bucket targets are set first; weights within each bucket are set line by line, and the "
+        "change log records why. Equal capital is not equal risk: see the risk table. "
+        "The bet is on the theme, not on any individual name being the best "
         "operator in it.", body),
 ]
 
@@ -472,7 +472,7 @@ if _rrows:
     _bk = {b["sleeve"]: b for b in _risk.get("buckets", [])}
     _bal = _bk.get("ballast")
     story.append(Paragraph(
-        "Near equal weight is not equal risk. Measured as each line's share of the book's variance "
+        "Equal capital is not equal risk. Measured as each line's share of the book's variance "
         f"(weekly USD returns, {_risk['weeks']} weeks), {_top[0]['key']} and {_top[1]['key']} hold "
         f"{sum(r['weightPct'] for r in _top):.0f}% of the capital and "
         f"{sum(r['riskSharePct'] for r in _top):.0f}% of the risk"

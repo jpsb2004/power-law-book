@@ -37,7 +37,7 @@ diversifying sleeve that cushions drawdowns if the thesis is wrong.
 
 Targets are `bucket_targets` in [`data/positions.json`](data/positions.json); live weights
 are on the [page](https://jpsb2004.github.io/power-law-book/).
-Equal weight within each bucket, integer remainder to the most liquid names.
+Bucket targets are set first; weights within each bucket are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table.
 Bucket weights are fixed; there is no "provisional" allocation.
 Every position carries a thesis **and its falsification condition** in
 [`data/positions.json`](data/positions.json). Classification calls worth
