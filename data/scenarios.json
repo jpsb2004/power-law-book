@@ -73,7 +73,8 @@
       "rationale": [
         "Compute and neocloud lines take the hit first.",
         "URA, NLR, LB, PETR4.SA, 2222.SR: fuel demand is a derivative of the buildout, so it goes too, just less, because reactors serve grids rather than data centres alone.",
-        "GLD, AVDV, JPM, RARA11.SA: this is the scenario Ballast exists for.",
+        "GLD, AVDV, JPM: this is the scenario Ballast exists for.",
+        "RARA11.SA: falls with the technology-materials cycle, so it does not cushion here.",
         "SGOV: bills hold par.",
         "ETN, HUBB: data-centre electrical orders fall, utility orders hold up better. ASML: tool orders are cut with foundry capex. IEUR: falls with global equity, less than US tech."
       ]

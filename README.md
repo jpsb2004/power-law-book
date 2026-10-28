@@ -29,13 +29,15 @@ book is positioned long the constraint and long the ground it stands on, with a
 fifth of the notional held against the possibility that the whole thesis is
 one trade wearing three hats.
 
-| Bucket | Target | Claim | Positions |
-|---|---|---|---|
-| **I · Substrate** | 42% | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV, ETN, HUBB |
-| **II · Compute** | 34% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L, ASML |
-| **III · Materials** | 2% | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
-| **IV · Ballast** | 22% | What survives if the rest of the book is the same bet | GLD, SGOV, AVDV, JPM, IEUR |
+| Bucket | Claim | Positions |
+|---|---|---|
+| **I · Substrate** | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV, ETN, HUBB |
+| **II · Compute** | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L, ASML |
+| **III · Materials** | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
+| **IV · Ballast** | What survives if the rest of the book is the same bet | GLD, SGOV, AVDV, JPM, IEUR |
 
+Targets are `bucket_targets` in [`data/positions.json`](data/positions.json); live weights
+are on the [page](https://jpsb2004.github.io/power-law-book/).
 Equal weight within each bucket, integer remainder to the most liquid names.
 Bucket weights are fixed; there is no "provisional" allocation.
 Every position carries a thesis **and its falsification condition** in
@@ -100,13 +102,13 @@ onto the last session. Pairs are `USDBRL=X`, `USDSAR=X`, `USDKRW=X`, `USDTWD=X`,
 `GBPUSD=X`-style pair still converts correctly. Inverting it inflates a position
 by the square of the rate.
 
-The result is visible in the note: Petrobras runs **+36% in reais, +46% in
-dollars**; ASUSTeK **+51% locally, +47% in dollars**.
+The result is visible on the live page, which shows each line's local and USD
+return side by side.
 
 | Condition | Behaviour |
 |---|---|
 | Transient upstream error (429, 5xx) | Retry with exponential backoff; 404 is not retried — that is a wrong ticker |
-| One ticker fails | Recorded; the other 17 proceed |
+| One ticker fails | Recorded; the rest proceed |
 | A currency has no rate | Position drops out of USD figures — **not** passed through as if it were dollars |
 | Quote currency ≠ declared | Exchange wins, warning raised — catches relistings |
 | Position younger than the window | Coverage recorded and flagged |
@@ -169,11 +171,12 @@ A toggle switches the curve, headline stats, YTD chart and table between
 
 Hedged is *not* the local return. A rolled forward hedge earns or pays the rate
 differential, so hedged ≈ local + (r<sub>USD</sub> − r<sub>CCY</sub>), accrued
-daily. For reais that costs ~10pp a year (Selic 13.75% vs Fed ~3.9%), which is
-most of the FX gain on Petrobras. Rates are a dated table in
-`data/positions.json` (`fx_hedge`), held flat across the window; `check-book`
-fails if a book currency has no rate. Not modelled: cross-currency basis, the
-onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
+daily. For reais that carry is a large cost, which can absorb most of the FX
+gain on Petrobras; the current rates are on the page. Rates come from a dated
+series where one exists (USD 13-week T-bills, BRL CDI) and otherwise from the
+dated policy-rate table in `data/positions.json` (`fx_hedge`), held flat across
+the window; `check-book` fails if a book currency has no rate. Not modelled:
+cross-currency basis, the onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
 
 ### EWY, measured against ^KS11
 
@@ -373,7 +376,7 @@ labour:
 
 | Mine | Claude Code's |
 |---|---|
-| The thesis and the three-bucket structure | All code: Node data layer, Python research layer, Streamlit dashboard, this page |
+| The thesis and the four-bucket structure | All code: Node data layer, Python research layer, Streamlit dashboard, this page |
 | Every position, its weight, and what would prove it wrong | FX normalisation, total-return series, validation gate, CI/CD |
 | Which questions to test (is Ballast really a hedge? what does KOSPI cost to hold?) | The statistics that answer them: factor regressions, tracking error, hedged returns |
 | Deciding what to do with the answers | Explaining the results in plain language so I could decide |

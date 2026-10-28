@@ -67,7 +67,7 @@ jobs:
 
       # Guards the roster before anything fetches or publishes: counts must
       # agree across positions.json, holdings.js and the last snapshot, and
-      # bucket weights must still land on 38/32/30.
+      # bucket weights must still land on bucket_targets in positions.json.
       - name: Check book invariants
         run: node scripts/check-book.mjs
 
