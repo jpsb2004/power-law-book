@@ -232,9 +232,9 @@ semiconductors (SMH) and energy (XLE) — none of them a holding, so no bucket i
 regressed on itself. Lines that listed later join the long-run curve when they
 list. The page adds a rolling 52-week beta to ACWI and SMH, shows each bucket's
 loadings beside its name, and states the conclusion the numbers support:
-returns are explained by exposure; an intercept in a hindsight backtest
-measures selection, not an edge. Over three years Ballast loads 0.74 on global
-equity — diversification by degree, not a hedge.
+in a hindsight backtest an intercept measures selection, not edge, which is why
+the book is judged by its live record. The loading of the Diversifiers on global
+equity is on the page: diversification by degree, not a hedge.
 
 ### Tail risk and stress tests
 

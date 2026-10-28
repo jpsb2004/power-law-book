@@ -779,8 +779,8 @@ if _brow:
         Paragraph("Exposure, Not Alpha", sub_head),
         Paragraph(
             f"Weekly excess returns over {_f['window']['start'][:4]}–{_f['window']['end'][:4]} load {_fx} on global equity, "
-            f"semiconductors and energy, with R² {_brow['r2']:.2f}. Returns are explained by factor exposure; an "
-            "intercept in a backtest of positions chosen with hindsight measures the selection, not an edge. "
+            f"semiconductors and energy, with R² {_brow['r2']:.2f}. "
+            "In a hindsight backtest an intercept measures selection, not edge, which is why the book is judged by its live record. "
             + (f"Over the latest year the book's Sharpe ratio was {_bk['sharpe']:.2f}, against {_vgt['sharpe']:.2f} for VGT "
                f"(US tech) and {_acwi['sharpe']:.2f} for ACWI (global equity): it did not beat simply holding tech "
                "per unit of risk." if _bk.get('sharpe') is not None and _vgt.get('sharpe') is not None and _bk['sharpe'] < _vgt['sharpe']
