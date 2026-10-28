@@ -619,10 +619,23 @@ if _th:
             return "checked each earnings season"
         u = c.get("unit")
         return f"${c['reading']:.2f}" if u == "$" else (f"{c['reading']:+.1f}pp" if u == "pp" else f"{c['reading']:+.1f}%")
+    def _x(t):
+        return str(t).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     _fr = [[Paragraph(h, tbl_head) for h in ("Falsifier", "Test", "Reading", "Status")]]
     for c in _th.get("checks", []):
         _st = "watch" if c.get("triggered") is None else ("<b>triggered</b>" if c["triggered"] else "holding")
-        _fr.append([Paragraph(c["name"], tbl_cell), Paragraph(c["test"], tbl_cell), Paragraph(_rd(c), tbl_cell),
+        _tx = c["test"]
+        if c.get("consequence"):
+            _tx += f"<br/><b>If met:</b> {_x(c['consequence'])}"
+        # Snapshots before falsifier governance carry no latestResponse key: no badge for them.
+        if c.get("triggered") is True and "latestResponse" in c:
+            _r = c["latestResponse"]
+            if _r:
+                _tx += f"<br/><b>Response, {_x(_r['date'])} ({_x(_r['decision'])}):</b> {_x(_r['text'])}"
+                _st += f"<br/>{_x(_r['decision'])}, {_x(_r['date'])}"
+            else:
+                _st += "<br/><b>UNANSWERED</b>"
+        _fr.append([Paragraph(c["name"], tbl_cell), Paragraph(_tx, tbl_cell), Paragraph(_rd(c), tbl_cell),
                     Paragraph(_st, tbl_cell)])
     _ft = Table(_fr, colWidths=[95, 255, 80, 60], repeatRows=1)
     _ft.setStyle(TableStyle([

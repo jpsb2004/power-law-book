@@ -1434,10 +1434,19 @@ function renderValue() {
     const reading = (c) => c.reading == null ? "checked each earnings season"
       : c.unit === "$" ? "$" + c.reading.toFixed(2) : c.unit === "pp" ? pp(c.reading) : pct(c.reading);
     $("falsifier-tbl").innerHTML = "<thead><tr><th>Falsifier</th><th>Test</th><th>Reading</th><th>Status</th></tr></thead><tbody>" +
-      T.checks.map((c) => '<tr><td class="lbl">' + escape(c.name) + '</td><td style="font-size:.84rem;color:var(--ink-2)">' + escape(c.test) + "</td>" +
-        '<td class="n">' + escape(reading(c)) + (c.detail ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(c.detail) + "</div>" : "") + "</td>" +
-        "<td>" + (c.triggered == null ? '<span class="tag">watch</span>' : c.triggered ? '<span class="tag warn">triggered</span>' : '<span class="tag">holding</span>') +
-        "</td></tr>").join("") + "</tbody>";
+      T.checks.map((c) => {
+        // Snapshots before falsifier governance carry no latestResponse key: no badge for them.
+        const r = c.triggered ? c.latestResponse : null;
+        const unanswered = c.triggered === true && "latestResponse" in c && !c.latestResponse;
+        return '<tr><td class="lbl">' + escape(c.name) + '</td><td style="font-size:.84rem;color:var(--ink-2)">' + escape(c.test) +
+          (c.consequence ? '<div style="margin-top:.3rem"><b>If met:</b> ' + escape(c.consequence) + "</div>" : "") +
+          (r ? '<div style="margin-top:.3rem"><b>Response, ' + escape(r.date) + " (" + escape(r.decision) + "):</b> " + escape(r.text) + "</div>" : "") + "</td>" +
+          '<td class="n">' + escape(reading(c)) + (c.detail ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(c.detail) + "</div>" : "") + "</td>" +
+          "<td>" + (c.triggered == null ? '<span class="tag">watch</span>' : c.triggered ? '<span class="tag warn">triggered</span>' : '<span class="tag">holding</span>') +
+          (r ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(r.decision) + " · " + escape(r.date) + "</div>" : "") +
+          (unanswered ? ' <span class="tag warn falsifier-unanswered">UNANSWERED</span>' : "") +
+          "</td></tr>";
+      }).join("") + "</tbody>";
   }
   if (F?.valuation?.length) {
     const x = (v, d, suf) => (v == null ? "—" : v < 0 && suf === "x" ? "n.m." : v.toFixed(d) + suf);

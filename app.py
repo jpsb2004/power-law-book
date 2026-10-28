@@ -518,10 +518,19 @@ with tab_thesis:
             u = c.get("unit")
             return f"${c['reading']:.2f}" if u == "$" else f"{c['reading']:+.1f}{'pp' if u == 'pp' else '%'}"
 
+        def _response(c):
+            # Snapshots before falsifier governance carry no latestResponse key: leave blank.
+            if c.get("triggered") is not True or "latestResponse" not in c:
+                return ""
+            r = c["latestResponse"]
+            return f"{r['date']} ({r['decision']}): {r['text']}" if r else "UNANSWERED"
+
         st.dataframe(
             pd.DataFrame([
-                {"Falsifier": c["name"], "Test": c["test"], "Reading": _reading(c),
-                 "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding")}
+                {"Falsifier": c["name"], "Test": c["test"], "If met": c.get("consequence") or "",
+                 "Reading": _reading(c),
+                 "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding"),
+                 "Response": _response(c)}
                 for c in th["checks"]
             ]),
             width="stretch", hide_index=True,
