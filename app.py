@@ -249,11 +249,29 @@ with tab_alloc:
     risk = book.risk.get("usd") or {}
     if risk.get("rows"):
         st.subheader("Equal capital is not equal risk")
-        st.caption(
-            "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
-            f"book ÷ the book's variance), on weekly USD returns over {risk['weeks']} weeks. The column sums "
-            f"to {risk['sumPct']:.0f}%; lines marked short have under 26 weeks of history and are indicative."
-        )
+        _excl = risk.get("insufficient")
+        if _excl is not None:
+            st.caption(
+                "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
+                "book ÷ the book's variance), from one covariance matrix of weekly simple USD returns over "
+                f"{risk['weeks']} common weeks, so the column sums to {risk['sumPct']:.0f}%."
+                + (
+                    f" Shares cover the included lines ({risk['includedCapitalPct']:.0f}% of capital); "
+                    + ", ".join(f"{x['key']} ({x['weeks']} weeks, {x['capitalPct']:.0f}% of capital)" for x in _excl)
+                    + (" have" if len(_excl) > 1 else " has")
+                    + " fewer than 40 weeks of history and "
+                    + ("get" if len(_excl) > 1 else "gets")
+                    + " no share. Risk ÷ weight compares each share with the line's share of the included capital."
+                    if _excl
+                    else ""
+                )
+            )
+        else:
+            st.caption(
+                "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
+                f"book ÷ the book's variance), on weekly USD returns over {risk['weeks']} weeks. The column sums "
+                f"to {risk['sumPct']:.0f}%; lines marked short have under 26 weeks of history and are indicative."
+            )
         rdf = pd.DataFrame(
             [
                 {
@@ -512,9 +530,28 @@ with tab_thesis:
     if sx:
         st.subheader(f"How many bets {len(book.entities)} lines are")
         c1, c2, c3 = st.columns(3)
-        c1.metric("Effective bets", f"{sx['enb']:.1f}", f"of {sx['lines']} lines", delta_color="off")
-        c2.metric("First component", f"{sx['firstPcSharePct']:.0f}%", "of book variance", delta_color="off")
+        _er, _pr = sx.get("enbRange"), sx.get("firstPcRange")
+        c1.metric(
+            "Effective bets",
+            f"≈ {sx['enb']:.1f}" if _er else f"{sx['enb']:.1f}",
+            (f"90% sampling range {_er['p05']:.1f}–{_er['p95']:.1f} · " if _er else "") + f"of {sx['lines']} lines",
+            delta_color="off",
+        )
+        c2.metric(
+            "First component",
+            f"{sx['firstPcSharePct']:.0f}%",
+            (f"90% sampling range {_pr['p05']:.0f}–{_pr['p95']:.0f}% · " if _pr else "") + "of book variance",
+            delta_color="off",
+        )
         c3.metric("Common factor", f"{sx['firstCorrPcPct']:.0f}%", "of total correlation", delta_color="off")
+        if _er:
+            st.caption(
+                f"Estimated from {sx['weeks']} weeks on {sx['lines']} lines; the 90% sampling range is the 5th to 95th "
+                f"percentile of a block bootstrap ({sx['bootstrap']['draws']:,} resamples of "
+                f"{sx['bootstrap']['blockWeeks']}-week blocks). Small samples also overstate the first component, a "
+                "bias the range does not remove, so the effective number of bets is more likely understated than "
+                "overstated."
+            )
         st.dataframe(
             pd.DataFrame([
                 {"Shared failure": g["name"], "Lines": ", ".join(g["tickers"]), "Capital %": g["capitalPct"],
@@ -566,16 +603,10 @@ with tab_thesis:
 # ------------------------------------------------------------------- stress
 with tab_stress:
     st.subheader("Scenario shocks")
-    _ccys = len({e.currency for e in book.entities})
-    _young = [e for e in book.entities if e.partial]
-    _young_txt = (
-        " — including " + ", ".join(f"{e.ticker} with {round(52 * (e.coverage or 0))} weeks of history" for e in _young) + " —"
-        if _young else ""
-    )
     st.caption(
-        "These are **stated assumptions, not estimates from a covariance matrix.** A year of "
-        f"daily data across {_ccys} currencies{_young_txt} cannot support an estimated correlation "
-        "structure, and one built on it would look rigorous while being noise."
+        "These are **stated assumptions, not estimates.** Sample covariance describes realised co-movement "
+        "and is used for risk attribution; scenario shocks need forward-looking correlations in regimes the "
+        "sample never saw, so they are stated, not estimated."
     )
 
     chosen = []

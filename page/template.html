@@ -1347,10 +1347,17 @@ function renderBets() {
   $("bets-lede").textContent =
     words(POS.length) + " lines are not " + words(POS.length).toLowerCase() + " independent bets. Weekly USD returns over " + S.weeks + " weeks: the effective number of " +
     "bets splits the book's variance across its principal components and asks how evenly it is spread: 1 if everything " +
-    "rides one factor, " + S.lines + " if every line were its own bet.";
+    "rides one factor, " + S.lines + " if every line were its own bet." +
+    (S.enbRange
+      ? " Both figures are estimated from " + S.weeks + " weeks on " + S.lines + " lines, so each is shown with a 90% sampling " +
+        "range: the 5th to 95th percentile of a block bootstrap (" + S.bootstrap.draws.toLocaleString("en") + " resamples of " +
+        S.bootstrap.blockWeeks + "-week blocks). Small samples also overstate the first component, a bias the range does " +
+        "not remove, so the effective number of bets is more likely understated than overstated."
+      : "");
+  const rng = (r, d, u = "") => (r ? "90% sampling range " + r.p05.toFixed(d) + "–" + r.p95.toFixed(d) + u + " · " : "");
   const tiles = [
-    { k: "Effective bets", v: S.enb.toFixed(1), n: "of " + S.lines + " lines (Meucci entropy measure)" },
-    { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: "of the book's variance" },
+    { k: "Effective bets", v: (S.enbRange ? "≈ " : "") + S.enb.toFixed(1), n: rng(S.enbRange, 1) + "of " + S.lines + " lines (Meucci entropy measure)" },
+    { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: rng(S.firstPcRange, 0, "%") + "of the book's variance" },
     { k: "Common factor", v: S.firstCorrPcPct.toFixed(0) + "%", n: "of total correlation, first eigenvalue" },
   ];
   $("bets-kv").innerHTML = tiles.map((c) =>
@@ -1561,7 +1568,7 @@ function renderRisk() {
       '<tr style="--sleeve: var(' + SLEEVE_VAR[b.sleeve] + ')"><td class="lbl">' + SLEEVES[b.sleeve].numeral + " · " + escape(SLEEVES[b.sleeve].name) + "</td>" +
       '<td class="n">' + b.weightPct.toFixed(0) + "%</td>" +
       '<td class="n">' + share(b.riskSharePct) + "</td>" +
-      '<td class="n">' + num(b.riskSharePct / b.weightPct) + "</td></tr>"
+      '<td class="n">' + num(b.riskPerWeight ?? b.riskSharePct / b.weightPct) + "</td></tr>"
     ).join("") + "</tbody>";
 
   $("risk-tbl").innerHTML =
@@ -1576,8 +1583,19 @@ function renderRisk() {
       '<td class="n">' + num(r.corrToBook) + "</td></tr>"
     ).join("") + "</tbody>";
 
-  $("risk-note").textContent =
-    "Euler decomposition on weekly log returns over " + R.weeks + " weeks: weight × covariance with the book ÷ the book's " +
+  const excl = R.insufficient ?? [];
+  $("risk-note").textContent = R.insufficient
+    ? "Euler decomposition on one covariance matrix of weekly simple returns over " + R.weeks + " common weeks: each line's " +
+      "weight × its covariance with the book ÷ the book's variance, in the " + V().label + " view, so the shares sum to " +
+      R.sumPct.toFixed(0) + "%. Weekly sampling avoids the time-zone bias in daily cross-market covariances; on this basis " +
+      "the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure in the headline. " +
+      (excl.length
+        ? "Shares cover the included lines (" + R.includedCapitalPct.toFixed(0) + "% of capital); " +
+          excl.map((r) => r.key + " (" + r.weeks + " weeks, " + r.capitalPct.toFixed(0) + "% of capital)").join(", ") +
+          (excl.length > 1 ? " have" : " has") + " fewer than 40 weeks of history and " + (excl.length > 1 ? "get" : "gets") +
+          " no share. Risk ÷ weight compares each share with the line's share of the included capital."
+        : "")
+    : "Euler decomposition on weekly log returns over " + R.weeks + " weeks: weight × covariance with the book ÷ the book's " +
     "variance, in the " + V().label + " view. Weekly sampling avoids the time-zone bias in daily cross-market " +
     "covariances; on this basis the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure " +
     "in the headline. " +
