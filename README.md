@@ -26,27 +26,29 @@ built.
 
 Chips are fungible on a two-year horizon. **Interconnection queues are not.** The
 book is positioned long the constraint and long the ground it stands on, with a
-fifth of the notional held against the possibility that the whole thesis is
-one trade wearing three hats.
+diversifying sleeve that cushions drawdowns if the thesis is wrong.
 
-| Bucket | Target | Claim | Positions |
-|---|---|---|---|
-| **I · Substrate** | 42% | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV, ETN, HUBB |
-| **II · Compute** | 34% | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L, ASML |
-| **III · Materials** | 2% | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
-| **IV · Ballast** | 22% | What survives if the rest of the book is the same bet | GLD, SGOV, AVDV, JPM, IEUR |
+| Bucket | Claim | Positions |
+|---|---|---|
+| **I · Substrate** | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, ETN, HUBB, VST |
+| **II · Compute** | The demand side — silicon, fabs, and the firms selling the output | NBIS, CRWV, TSM, AMD, PLTR, 2357.TW, EWY, AINF.L, ASML |
+| **III · Materials** | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
+| **IV · Diversifiers** (formerly Ballast) | Cushions drawdowns; measured as diversification, not a hedge | GLD, SGOV, AVDV, JPM, IEUR |
 
-Equal weight within each bucket, integer remainder to the most liquid names.
+Targets are `bucket_targets` in [`data/positions.json`](data/positions.json); live weights
+are on the [page](https://jpsb2004.github.io/power-law-book/).
+Bucket targets are set first; weights within each bucket are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table.
 Bucket weights are fixed; there is no "provisional" allocation.
 Every position carries a thesis **and its falsification condition** in
 [`data/positions.json`](data/positions.json). Classification calls worth
 arguing with, stated in the repo rather than buried:
 
-- **VGT overlaps half its own bucket** — it already holds AMD's peers and the
-  megacaps, diluting single-name risk without adding a new bet.
-- **RARA11.SA is not ballast, so it has its own Materials bucket.** It is a
+- **NBIS and CRWV sit in Compute, not Substrate** — they rent out GPU capacity, so they
+  sell the output of the chips; contracted power limits how fast they grow but does not
+  make them owners of the constraint. Moved on 2026-10-28 (see the change log).
+- **RARA11.SA is not a diversifier, so it has its own Materials bucket.** It is a
   concentrated, policy-driven rare-earth basket that will likely fall *with* the
-  book, not against it. It was in Ballast until 2026-10-14 (see
+  book, not against it. It was in the sleeve then called Ballast until 2026-10-14 (see
   [`CHANGELOG.md`](CHANGELOG.md)).
 
 ---
@@ -100,13 +102,13 @@ onto the last session. Pairs are `USDBRL=X`, `USDSAR=X`, `USDKRW=X`, `USDTWD=X`,
 `GBPUSD=X`-style pair still converts correctly. Inverting it inflates a position
 by the square of the rate.
 
-The result is visible in the note: Petrobras runs **+36% in reais, +46% in
-dollars**; ASUSTeK **+51% locally, +47% in dollars**.
+The result is visible on the live page, which shows each line's local and USD
+return side by side.
 
 | Condition | Behaviour |
 |---|---|
 | Transient upstream error (429, 5xx) | Retry with exponential backoff; 404 is not retried — that is a wrong ticker |
-| One ticker fails | Recorded; the other 17 proceed |
+| One ticker fails | Recorded; the rest proceed |
 | A currency has no rate | Position drops out of USD figures — **not** passed through as if it were dollars |
 | Quote currency ≠ declared | Exchange wins, warning raised — catches relistings |
 | Position younger than the window | Coverage recorded and flagged |
@@ -130,8 +132,8 @@ GLD with a 3% day in CRWV. The dashboard alerts at ±2σ.
 
 Every series is the **dividend-adjusted** close, so returns include reinvested
 distributions and are net of each fund's own fee. Price-only closes read a
-T-bill fund paying ~4% a year as flat and understate high-payout lines like
-PETR4 and 2222.SR by their whole yield. Indices (^KS11) have no dividends to
+T-bill fund, whose return is almost all yield, as flat and understate high-payout
+lines like PETR4 and 2222.SR by their whole yield. Indices (^KS11) have no dividends to
 adjust and use the plain close.
 
 ### Index construction
@@ -169,11 +171,12 @@ A toggle switches the curve, headline stats, YTD chart and table between
 
 Hedged is *not* the local return. A rolled forward hedge earns or pays the rate
 differential, so hedged ≈ local + (r<sub>USD</sub> − r<sub>CCY</sub>), accrued
-daily. For reais that costs ~10pp a year (Selic 13.75% vs Fed ~3.9%), which is
-most of the FX gain on Petrobras. Rates are a dated table in
-`data/positions.json` (`fx_hedge`), held flat across the window; `check-book`
-fails if a book currency has no rate. Not modelled: cross-currency basis, the
-onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
+daily. For reais that carry is a large cost, which can absorb most of the FX
+gain on Petrobras; the current rates are on the page. Rates come from a dated
+series where one exists (USD 13-week T-bills, BRL CDI) and otherwise from the
+dated policy-rate table in `data/positions.json` (`fx_hedge`), held flat across
+the window; `check-book` fails if a book currency has no rate. Not modelled:
+cross-currency basis, the onshore/offshore NDF gap for KRW, TWD and BRL, and the cross term on gains.
 
 ### EWY, measured against ^KS11
 
@@ -225,14 +228,14 @@ figure.
 ### Factor exposure (three years, three factors)
 
 Weekly USD returns in excess of T-bills (SGOV) for the book, each bucket and
-each Ballast line, over three years, regressed on global equity (ACWI),
+each Diversifiers line, over three years, regressed on global equity (ACWI),
 semiconductors (SMH) and energy (XLE) — none of them a holding, so no bucket is
 regressed on itself. Lines that listed later join the long-run curve when they
 list. The page adds a rolling 52-week beta to ACWI and SMH, shows each bucket's
 loadings beside its name, and states the conclusion the numbers support:
-returns are explained by exposure; an intercept in a hindsight backtest
-measures selection, not an edge. Over three years Ballast loads 0.74 on global
-equity — diversification by degree, not a hedge.
+in a hindsight backtest an intercept measures selection, not edge, which is why
+the book is judged by its live record. The loading of the Diversifiers on global
+equity is on the page: diversification by degree, not a hedge.
 
 ### Tail risk and stress tests
 
@@ -346,7 +349,7 @@ deployments from one commit.
   day's rate until 14 Oct 2026). A session still open at run time is never
   published as a close.
 - **Second source.** Each refresh compares the unadjusted close of AMD, TSM,
-  JPM, GLD and VGT with Nasdaq's published closes, session by session; a gap
+  JPM, GLD and VST with Nasdaq's published closes, session by session; a gap
   above 0.5% is flagged. On 14 Oct 2026: 125 sessions, largest gap 0.001%.
 - **Independent recomputation.** `scripts/verify_independent.py` refetches AMD,
   PETR4.SA (with USDBRL) and GLD using only the Python standard library,
@@ -373,7 +376,7 @@ labour:
 
 | Mine | Claude Code's |
 |---|---|
-| The thesis and the three-bucket structure | All code: Node data layer, Python research layer, Streamlit dashboard, this page |
+| The thesis and the four-bucket structure | All code: Node data layer, Python research layer, Streamlit dashboard, this page |
 | Every position, its weight, and what would prove it wrong | FX normalisation, total-return series, validation gate, CI/CD |
 | Which questions to test (is Ballast really a hedge? what does KOSPI cost to hold?) | The statistics that answer them: factor regressions, tracking error, hedged returns |
 | Deciding what to do with the answers | Explaining the results in plain language so I could decide |

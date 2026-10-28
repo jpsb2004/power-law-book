@@ -76,6 +76,7 @@ QUERY_HINTS = {
     "SGOV": "Treasury bill yields Federal Reserve",
     "ETN": "Eaton electrical equipment data center",
     "HUBB": "Hubbell utility grid equipment",
+    "VST": "Vistra power generation data center",
     "ASML": "ASML lithography export controls",
     "IEUR": "European stocks MSCI Europe",
 }

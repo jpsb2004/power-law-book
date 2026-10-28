@@ -51,12 +51,26 @@ export declare function hedgedSeries(
   ratesPct: Record<string, number>,
   base?: string
 ): Point[];
-export declare function weeklyReturns(points: Point[]): Map<string, number>;
+export declare function weeklyReturns(points: Point[], opts?: { simple?: boolean }): Map<string, number>;
 export declare function alignWeekly(...maps: Map<string, number>[]): { weeks: string[]; cols: number[][] };
 export declare function ols(
   y: number[],
   xs: number[][]
 ): { n: number; coef: number[]; se: number[]; t: (number | null)[]; r2: number | null } | null;
+export declare const MIN_WEEKS: number;
+export declare function olsMin(y: number[], xs: number[][]): ReturnType<typeof ols>;
+export declare function weeklyCovariance(legs: { key: string; weight: number; points: Point[] }[]): {
+  keys: string[];
+  capitalPct: number[];
+  w: number[];
+  weeks: number;
+  weekKeys: string[];
+  cols: number[][];
+  cov: number[][];
+  insufficient: { key: string; weeks: number; capitalPct: number }[];
+  includedCapitalPct: number;
+  excludedCapitalPct: number;
+};
 export declare const INDEX_METHOD: string;
 export declare function trackingStats(
   target: Point[],

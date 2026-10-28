@@ -13,6 +13,9 @@ import {
   windowed,
   riskContributions,
   portfolioIndex,
+  MIN_WEEKS,
+  olsMin,
+  weeklyCovariance,
 } from "../lib/analytics.js";
 
 const DAY = 864e5;
@@ -101,20 +104,83 @@ test("risk shares follow the Euler decomposition and sum to the whole book", () 
   const b = series(Array.from({ length: 400 }, (_, i) => Math.cos(i * 1.3) * 0.03));
   const legs = [{ key: "A", weight: 70, points: a }, { key: "B", weight: 30, points: b }];
   const book = portfolioIndex(legs);
+  // Phase 2: one Σ of weekly simple returns makes the decomposition exact, so
+  // the old 1.5pp slack (per-line windows, log returns) is now 1e-9.
   const rc = riskContributions(legs, book);
-  // Weekly log returns of a daily-rebalanced book are not exactly the weighted
-  // sum of the legs' weekly log returns, so allow a little slack.
-  close(rc.sumPct, 100, 1.5);
+  close(rc.sumPct, 100, 1e-9);
   const B = rc.rows.find((r) => r.key === "B");
   assert.ok(B.riskSharePct > 30, "the more volatile line carries more than its weight");
   close(B.riskPerWeight, B.riskSharePct / 100 / 0.3, 1e-9);
 });
 
-test("a line with a short history is computed but flagged", () => {
+/** Deterministic uniform draws for fixtures. */
+function prng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), a | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+test("Euler shares sum to 100% on a random five-asset book, and match w'Σw", () => {
+  const u = prng(7);
+  // A common factor plus noise, so the lines are correlated as real ones are.
+  const days = 420;
+  const f = Array.from({ length: days }, () => (u() - 0.5) * 0.02);
+  const legs = [12, 30, 8, 25, 25].map((weight, k) => ({
+    key: "L" + k,
+    weight,
+    points: series(f.map((x) => x * (0.5 + k * 0.4) + (u() - 0.5) * 0.03 * (1 + k / 2))),
+  }));
+  const rc = riskContributions(legs);
+  close(rc.sumPct, 100, 1e-9);
+  assert.equal(rc.rows.length, 5);
+  assert.deepEqual(rc.insufficient, []);
+  close(rc.includedCapitalPct, 100, 1e-12);
+  // Book vol from Σ equals the vol of the weighted sum of the lines' weekly
+  // simple returns: the linearity that makes the decomposition exact.
+  const S = weeklyCovariance(legs);
+  const book = S.cols[0].map((_, t) => S.w.reduce((a, w, i) => a + w * S.cols[i][t], 0));
+  const m = book.reduce((a, b) => a + b, 0) / book.length;
+  const sd = Math.sqrt(book.reduce((a, r) => a + (r - m) ** 2, 0) / (book.length - 1));
+  close(rc.bookVolPct, sd * Math.sqrt(52) * 100, 1e-9);
+});
+
+test("a 14-week line is excluded from the shares and listed with its capital", () => {
+  // Phase 2: below MIN_WEEKS a line gets no share at all (it used to get an
+  // indicative one, which is why the column summed to 104%).
   const a = series(Array.from({ length: 400 }, (_, i) => Math.sin(i) * 0.01));
-  const young = a.slice(-100); // ~14 weeks
-  const rc = riskContributions([{ key: "A", weight: 90, points: a }, { key: "Y", weight: 10, points: young }], a);
-  const y = rc.rows.find((r) => r.key === "Y");
-  assert.equal(y.short, true);
-  assert.ok(y.riskSharePct != null);
+  const b = series(Array.from({ length: 400 }, (_, i) => Math.cos(i * 1.7) * 0.02));
+  const young = b.slice(-100); // ~14 weeks
+  const rc = riskContributions([
+    { key: "A", weight: 60, points: a },
+    { key: "B", weight: 38, points: b },
+    { key: "Y", weight: 2, points: young },
+  ]);
+  assert.equal(rc.rows.find((r) => r.key === "Y"), undefined);
+  assert.equal(rc.insufficient.length, 1);
+  const y = rc.insufficient[0];
+  assert.equal(y.key, "Y");
+  assert.ok(y.weeks < MIN_WEEKS && y.weeks >= 13, `weeks ${y.weeks}`);
+  close(y.capitalPct, 2, 1e-12);
+  close(rc.excludedCapitalPct, 2, 1e-12);
+  close(rc.sumPct, 100, 1e-9);
+  // Weights shown are actual capital; risk ÷ weight is against the included 98%.
+  const A = rc.rows.find((r) => r.key === "A");
+  close(A.weightPct, 60, 1e-12);
+  close(A.riskPerWeight, A.riskSharePct / 100 / (60 / 98), 1e-9);
+});
+
+test("factor regressions need MIN_WEEKS observations: 14 weeks is not enough", () => {
+  assert.equal(MIN_WEEKS, 40);
+  const x = Array.from({ length: 60 }, (_, i) => Math.sin(i * 0.9) * 0.02);
+  const y = x.map((v, i) => 1.5 * v + Math.cos(i * 2.1) * 0.005);
+  // ols alone would fit 14 points with three regressors' worth of slack; olsMin refuses.
+  assert.equal(olsMin(y.slice(-14), [x.slice(-14)]), null);
+  assert.equal(olsMin(y.slice(-39), [x.slice(-39)]), null);
+  const fit = olsMin(y.slice(-40), [x.slice(-40)]);
+  assert.equal(fit.n, 40);
+  close(fit.coef[1], 1.5, 0.1);
 });

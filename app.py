@@ -45,13 +45,19 @@ BRIEFING = ROOT / "latest_briefing.md"
 
 # Same hues as the published page, validated for colourblind separation and
 # contrast across all pairs rather than picked by eye.
-BUCKET_COLOUR = {"Substrate": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65389F", "Ballast": "#B02D6E"}
+BUCKET_COLOUR = {"Substrate": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65389F", "Diversifiers": "#B02D6E"}
 # Display order, from the ontology rather than restated here.
 BUCKET_RANK = {BUCKET_LABELS[k]: i for i, k in enumerate(BUCKET_ORDER)}
 GAIN, LOSS, MUTED = "#2E7D5B", "#B4382F", "#6E7A7F"
 
+
+def _pct(value, spec="+.1f"):
+    """Percent text for a stat that may be missing: a dash, never a silent 0."""
+    return "—" if value is None else f"{value:{spec}}%"
+
+
 st.set_page_config(
-    page_title="Thesis Initiation Report — Physical Bottlenecks of the AI CapEx Supercycle",
+    page_title="The Power Law Book — Monitor",
     page_icon="⚡",
     layout="wide",
 )
@@ -98,7 +104,7 @@ except SchemaError as exc:
     st.stop()
 
 # ----------------------------------------------------------------- masthead
-st.title("The Power Law Book")
+st.title("The Power Law Book — Monitor")
 st.caption(
     "Quantifying the physical bottlenecks of the global AI CapEx supercycle · "
     f"{len(book.entities)} positions · base {book.base} · "
@@ -123,10 +129,10 @@ st.caption(
 )
 cols = st.columns(5)
 cols[0].metric("Index", f"{book.index_level:.2f}", f"{(book.index_level or 100) - 100:+.1f} vs base")
-cols[1].metric("YTD (USD)", f"{stats.get('ytd', 0):+.1f}%")
-cols[2].metric("1-year (USD)", f"{stats.get('ret1y', 0):+.1f}%")
-cols[3].metric("Volatility", f"{stats.get('vol', 0):.1f}%")
-cols[4].metric("Max drawdown", f"{stats.get('maxDrawdown', 0):+.1f}%")
+cols[1].metric("YTD (USD)", _pct(stats.get("ytd")))
+cols[2].metric("1-year (USD)", _pct(stats.get("ret1y")))
+cols[3].metric("Volatility", _pct(stats.get("vol"), ".1f"))
+cols[4].metric("Max drawdown", _pct(stats.get("maxDrawdown")))
 
 # The live record: chain-linked forward from its inception, written by the
 # pipeline (data/track.json) and never revised. Kept apart from the replay.
@@ -235,10 +241,10 @@ with tab_alloc:
 
     targets = " / ".join(f"{BUCKET_LABELS[k]} {book.bucket_weight(k):.0f}" for k in BUCKET_ORDER)
     st.info(
-        f"Sizing is near equal-weight by design: bucket targets are {targets}, split close to "
-        "equally within each bucket, so no single stock call carries the thesis. "
+        f"Bucket targets are {targets}. Weights within each bucket are set line by line, and the "
+        "change log records why. Equal capital is not equal risk: see the risk table. "
         "**RARA11.SA has its own Materials bucket** rather "
-        "than sitting in Ballast: a concentrated, policy-driven rare-earth basket tracks the same "
+        "than sitting in Diversifiers: a concentrated, policy-driven rare-earth basket tracks the same "
         "technology-materials cycle as the rest of the book, so in most states it falls with the "
         "book rather than against it. The exception is an export-control shock — toggle "
         "Geopolitical Shock under Stress Tests and it is the largest positive contributor in the book."
@@ -249,11 +255,29 @@ with tab_alloc:
     risk = book.risk.get("usd") or {}
     if risk.get("rows"):
         st.subheader("Equal capital is not equal risk")
-        st.caption(
-            "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
-            f"book ÷ the book's variance), on weekly USD returns over {risk['weeks']} weeks. The column sums "
-            f"to {risk['sumPct']:.0f}%; lines marked short have under 26 weeks of history and are indicative."
-        )
+        _excl = risk.get("insufficient")
+        if _excl is not None:
+            st.caption(
+                "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
+                "book ÷ the book's variance), from one covariance matrix of weekly simple USD returns over "
+                f"{risk['weeks']} common weeks, so the column sums to {risk['sumPct']:.0f}%."
+                + (
+                    f" Shares cover the included lines ({risk['includedCapitalPct']:.0f}% of capital); "
+                    + ", ".join(f"{x['key']} ({x['weeks']} weeks, {x['capitalPct']:.0f}% of capital)" for x in _excl)
+                    + (" have" if len(_excl) > 1 else " has")
+                    + " fewer than 40 weeks of history and "
+                    + ("get" if len(_excl) > 1 else "gets")
+                    + " no share. Risk ÷ weight compares each share with the line's share of the included capital."
+                    if _excl
+                    else ""
+                )
+            )
+        else:
+            st.caption(
+                "Share of risk is each line's contribution to the book's variance (weight × covariance with the "
+                f"book ÷ the book's variance), on weekly USD returns over {risk['weeks']} weeks. The column sums "
+                f"to {risk['sumPct']:.0f}%; lines marked short have under 26 weeks of history and are indicative."
+            )
         rdf = pd.DataFrame(
             [
                 {
@@ -500,10 +524,19 @@ with tab_thesis:
             u = c.get("unit")
             return f"${c['reading']:.2f}" if u == "$" else f"{c['reading']:+.1f}{'pp' if u == 'pp' else '%'}"
 
+        def _response(c):
+            # Snapshots before falsifier governance carry no latestResponse key: leave blank.
+            if c.get("triggered") is not True or "latestResponse" not in c:
+                return ""
+            r = c["latestResponse"]
+            return f"{r['date']} ({r['decision']}): {r['text']}" if r else "UNANSWERED"
+
         st.dataframe(
             pd.DataFrame([
-                {"Falsifier": c["name"], "Test": c["test"], "Reading": _reading(c),
-                 "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding")}
+                {"Falsifier": c["name"], "Test": c["test"], "If met": c.get("consequence") or "",
+                 "Reading": _reading(c),
+                 "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding"),
+                 "Response": _response(c)}
                 for c in th["checks"]
             ]),
             width="stretch", hide_index=True,
@@ -512,9 +545,28 @@ with tab_thesis:
     if sx:
         st.subheader(f"How many bets {len(book.entities)} lines are")
         c1, c2, c3 = st.columns(3)
-        c1.metric("Effective bets", f"{sx['enb']:.1f}", f"of {sx['lines']} lines", delta_color="off")
-        c2.metric("First component", f"{sx['firstPcSharePct']:.0f}%", "of book variance", delta_color="off")
+        _er, _pr = sx.get("enbRange"), sx.get("firstPcRange")
+        c1.metric(
+            "Effective bets",
+            f"≈ {sx['enb']:.1f}" if _er else f"{sx['enb']:.1f}",
+            (f"90% sampling range {_er['p05']:.1f}–{_er['p95']:.1f} · " if _er else "") + f"of {sx['lines']} lines",
+            delta_color="off",
+        )
+        c2.metric(
+            "First component",
+            f"{sx['firstPcSharePct']:.0f}%",
+            (f"90% sampling range {_pr['p05']:.0f}–{_pr['p95']:.0f}% · " if _pr else "") + "of book variance",
+            delta_color="off",
+        )
         c3.metric("Common factor", f"{sx['firstCorrPcPct']:.0f}%", "of total correlation", delta_color="off")
+        if _er:
+            st.caption(
+                f"Estimated from {sx['weeks']} weeks on {sx['lines']} lines; the 90% sampling range is the 5th to 95th "
+                f"percentile of a block bootstrap ({sx['bootstrap']['draws']:,} resamples of "
+                f"{sx['bootstrap']['blockWeeks']}-week blocks). Small samples also overstate the first component, a "
+                "bias the range does not remove, so the effective number of bets is more likely understated than "
+                "overstated."
+            )
         st.dataframe(
             pd.DataFrame([
                 {"Shared failure": g["name"], "Lines": ", ".join(g["tickers"]), "Capital %": g["capitalPct"],
@@ -566,16 +618,10 @@ with tab_thesis:
 # ------------------------------------------------------------------- stress
 with tab_stress:
     st.subheader("Scenario shocks")
-    _ccys = len({e.currency for e in book.entities})
-    _young = [e for e in book.entities if e.partial]
-    _young_txt = (
-        " — including " + ", ".join(f"{e.ticker} with {round(52 * (e.coverage or 0))} weeks of history" for e in _young) + " —"
-        if _young else ""
-    )
     st.caption(
-        "These are **stated assumptions, not estimates from a covariance matrix.** A year of "
-        f"daily data across {_ccys} currencies{_young_txt} cannot support an estimated correlation "
-        "structure, and one built on it would look rigorous while being noise."
+        "These are **stated assumptions, not estimates.** Sample covariance describes realised co-movement "
+        "and is used for risk attribution; scenario shocks need forward-looking correlations in regimes the "
+        "sample never saw, so they are stated, not estimated."
     )
 
     chosen = []
@@ -658,7 +704,7 @@ with tab_stress:
              ("1-week VaR 95%", tail["weekly"][0]), ("1-week VaR 99%", tail["weekly"][1])],
         ):
             if item:
-                col.metric(lab, f"−{item['varPct']:.1f}%", f"CVaR −{item['cvarPct']:.1f}%", delta_color="off")
+                col.metric(lab, _pct(-item["varPct"]), f"CVaR {_pct(-item['cvarPct'])}", delta_color="off")
         rows = [
             {"Scenario": h["name"], "Kind": "historical", "Window": f"{h['start']} → {h['end']}",
              "Book %": h["bookPct"], "VGT %": h["benchmarks"].get("VGT"), "ACWI %": h["benchmarks"].get("ACWI"),

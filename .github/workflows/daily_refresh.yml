@@ -67,7 +67,7 @@ jobs:
 
       # Guards the roster before anything fetches or publishes: counts must
       # agree across positions.json, holdings.js and the last snapshot, and
-      # bucket weights must still land on 38/32/30.
+      # bucket weights must still land on bucket_targets in positions.json.
       - name: Check book invariants
         run: node scripts/check-book.mjs
 
@@ -80,6 +80,10 @@ jobs:
 
       - name: Fetch and validate daily closes
         id: refresh
+        env:
+          # Optional. Second price source for PETR4.SA and AINF.L; without it
+          # those lines are recorded as single-source and the refresh proceeds.
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
         run: |
           set +e
           node scripts/refresh.mjs 2>&1 | tee refresh.log
@@ -140,11 +144,21 @@ jobs:
 
       # Three lines recomputed by independent code (and as Excel formulas)
       # against the snapshot just written. Before the page is uploaded, so
-      # the page reports today's check; a failure never blocks publishing.
+      # the page reports today's check. Exit 3 (a real mismatch) fails the
+      # job: nothing is committed or deployed and the previous page stays
+      # live; the live record picks the day up on the next good run. Exit 4
+      # (data unavailable) is not a mismatch: warn and keep the last check.
       - name: Independent verification
         if: steps.refresh.outputs.status == 'published'
         run: |
-          python scripts/verify_independent.py && node scripts/build-page.mjs || echo "::warning::verification failed"
+          set +e
+          python scripts/verify_independent.py
+          code=$?
+          set -e
+          if [ $code -eq 3 ]; then echo "::error::independent verification failed (exit 3); not publishing"; exit 3; fi
+          if [ $code -eq 4 ]; then echo "::warning::verification data unavailable (exit 4); keeping the previous check"
+          elif [ $code -ne 0 ]; then echo "::error::verification crashed (exit $code)"; exit $code; fi
+          node scripts/build-page.mjs
 
       # The PDF is rebuilt from the same snapshot, so the note sent with an
       # application never disagrees with the page. A failure keeps the last PDF.

@@ -167,6 +167,9 @@ if (snap.thesis) {
   if (document.getElementById("value-section").hidden) fail.push("snapshot carries the thesis but the valuation section is hidden");
   const f = document.querySelectorAll("#falsifier-tbl tbody tr").length;
   if (f !== snap.thesis.checks.length) fail.push(`falsifier table rendered ${f} rows for ${snap.thesis.checks.length}`);
+  const owed = snap.thesis.checks.filter((c) => c.triggered === true && "latestResponse" in c && !c.latestResponse).length;
+  const badges = document.querySelectorAll("#falsifier-tbl .falsifier-unanswered").length;
+  if (badges !== owed) fail.push(`falsifier table shows ${badges} UNANSWERED badge(s) for ${owed} unanswered trigger(s)`);
 }
 if (snap.fundamentals?.valuation?.length) {
   const v = document.querySelectorAll("#val-tbl tbody tr").length;

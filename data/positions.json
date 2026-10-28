@@ -2,8 +2,8 @@
   "$schema_note": "Canonical roster. lib/holdings.js and scripts/make_pdf.py both read this; edit here only.",
   "base_currency": "USD",
   "bucket_targets": {
-    "energy": 42,
-    "compute": 34,
+    "energy": 43,
+    "compute": 33,
     "materials": 2,
     "ballast": 22
   },
@@ -57,10 +57,17 @@
       "change": "Substrate (renamed from Energy) 42: adds ETN 2 and HUBB 2. Compute 34: adds ASML 2. Materials 2: RARA11.SA 5 -> 2. Ballast 22: AVDV 5 -> 4, JPM 5 -> 4, IEUR 4 added, XLP removed.",
       "why": "Grid equipment is the bottleneck the thesis names, so it belongs in the bucket beside fuel and land; ASML is the one supplier every fab depends on. IEUR (MSCI Europe) replaces XLP as Ballast's equity line, chosen over EXSA for its lower ASML weight. RARA11 is cut to an option-sized line.",
       "breaks": "Removed to fund the grid-equipment and European lines. What breaks it: a rotation out of AI into defensives, which XLP caught in the book's worst stretch (+7.5%, 2 Jun - 29 Jul 2026), now lands only on SGOV and GLD, and Ballast loses its one equity line that rose while the thesis fell."
+    },
+    {
+      "date": "2026-10-28",
+      "kind": "composition",
+      "change": "Substrate 43: ETN 2 -> 5, HUBB 2 -> 5, VST 5 added; NBIS and CRWV move to Compute. Compute 33: NBIS 5 -> 3 and CRWV 5 -> 2 (moved from Substrate), 2357.TW 4 -> 3, VGT removed. Materials 2 and Diversifiers 22 unchanged.",
+      "why": "NBIS and CRWV rent out GPU capacity: they sell the output of the chips, so they sit with Compute. NBIS is held at 3% and CRWV at 2% because of net debt: about $2.0bn against $45.2bn, including leases (30 Jun 2026 balance sheets, Alpha Vantage). VST is a merchant generator, paid the scarcity price when load outruns supply; at about 9.8x forward EV/EBITDA on its 2026 adjusted EBITDA guidance (enterprise value about $70.8bn on 20 Oct 2026, over the $7.2bn midpoint of Vistra's reaffirmed 2026 adjusted EBITDA guidance; a non-GAAP measure) it is under the 14x Substrate entry threshold. VGT is removed as an overlap with the Compute lines and as the book's tech benchmark; it stays on the page as a benchmark only. The rotation falsifier is triggered, and this change respects its rule: no Compute or capacity-renter line is added and no target weight in those lines is raised (NBIS and CRWV are reclassified at lower weights), and Compute falls from 34 to 33. Rotation reading, Compute minus Substrate over twelve months, replayed from data/prices.csv to 26 Oct 2026: current book +47.9pp; NBIS and CRWV moved only +25.1pp; full change +43.4pp.",
+      "breaks": "Removed: it overlapped with the Compute lines and is the book's US-tech benchmark, so holding it measured the bucket partly against itself. What breaks it: Compute loses its one diversified line, so a miss in any single Compute name now lands on the book undiluted."
     }
   ],
   "thesis": {
-    "variant_view": "The market prices the AI buildout as a semiconductor story and treats power as a utility input that will be supplied on demand. This book's view is that grid interconnection, fuel and sited land are the binding constraint for the next three to five years, so the scarce rent accrues to whoever owns power, fuel and land with grid access rather than to the designers of the chips; the consensus reprices that only once announced data-centre capacity visibly slips.",
+    "variant_view": "AI compute demand runs through an ordered physical chain — fuel, land and grid, then minerals, then fabrication, then compute. Over three to five years the scarce rent accrues to the upstream links, not to the compute layer the consensus prices, and the market reprices this once announced data-centre capacity visibly slips. The book holds every link, with more capital upstream than in compute, and scores itself on whether Substrate keeps pace with Compute.",
     "horizon": "Three to five years, matching transformer, switchgear and interconnection-queue lead times. Daily and monthly moves are monitored, not acted on.",
     "review_rules": "Reviewed each quarter against the portfolio falsifiers below and every line's own 'what breaks it'. A line is cut when its falsification condition is met, not on price alone; a line whose valuation breaches its bucket's trim rule is cut back to target. If two portfolio falsifiers trigger in the same quarter, the thesis itself is reconsidered, not just the lines.",
     "falsifiers": [
@@ -68,14 +75,24 @@
         "key": "capex",
         "name": "Hyperscaler capex cut",
         "test": "Two or more of Microsoft, Alphabet, Amazon and Meta cut next-year capital spending guidance in the same quarter.",
-        "kind": "qualitative"
+        "kind": "qualitative",
+        "consequence": "Tests the demand side of the thesis directly. At the next quarterly review every Compute line, plus the Substrate lines that depend on hyperscaler load (ETN, HUBB, VST), is tested against its own falsification condition and cut only where that condition is met. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       },
       {
         "key": "rotation",
         "name": "Compute keeps leading power",
         "test": "Compute out-returns Substrate by more than 20 percentage points over twelve months.",
         "kind": "buckets",
-        "threshold": 20
+        "threshold": 20,
+        "consequence": "Read as a valuation question first. At the next quarterly review Compute lines are tested against the bucket trim rule and cut back to target where it is breached. Substrate lines are tested against their own falsification conditions. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. Counts toward the two-in-a-quarter rule.",
+        "responses": [
+          {
+            "date": "2026-10-28",
+            "decision": "hold",
+            "text": "Compute's twelve-month lead over Substrate is above the 20pp threshold; the live figure is in the reading column, and this response does not fix one. Under the review rules one portfolio falsifier does not reconsider the thesis, and no line is cut on price alone. This trigger is the reason the Substrate/Compute sizing is under review; any change will be logged in the change log. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. For the two-in-a-quarter rule, this trigger counts from 28 Oct 2026, the date of this response, and in each later quarter in which it stays triggered. Any period above threshold before this response is not counted. Watched before the Q4 review: (1) whether the gap reflects a Compute re-rating rather than Substrate lines failing; each Substrate line is checked against its own falsification condition. (2) Compute lines against the bucket trim rule, cut back to target where it is breached. (3) A second trigger this quarter: hyperscaler capex guidance in the current earnings season, and Micron against its −30% from-high threshold. If either triggers before quarter-end, the thesis itself is reconsidered."
+          }
+        ]
       },
       {
         "key": "uranium",
@@ -83,7 +100,9 @@
         "test": "Sprott Physical Uranium Trust (a holder of physical uranium) falls more than 25% over twelve months.",
         "kind": "drawdown12m",
         "ticker": "U-U.TO",
-        "threshold": -25
+        "threshold": -25,
+        "consequence": "The nuclear-fuel lines (URA, NLR) are tested against their own falsification conditions at the next quarterly review and cut only where a condition is met. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       },
       {
         "key": "memory",
@@ -91,7 +110,9 @@
         "test": "Micron, the listed read on HBM pricing, trades more than 30% below its twelve-month high.",
         "kind": "fromHigh",
         "ticker": "MU",
-        "threshold": -30
+        "threshold": -30,
+        "consequence": "EWY, the line through which HBM pricing reaches the book (Samsung, SK Hynix), is tested against its own falsification condition at the next quarterly review. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       },
       {
         "key": "oil",
@@ -99,7 +120,9 @@
         "test": "Brent trades below $60, the level at which Saudi Aramco and Petrobras payouts come under pressure.",
         "kind": "level",
         "ticker": "BZ=F",
-        "threshold": 60
+        "threshold": 60,
+        "consequence": "The payout lines (PETR4.SA, 2222.SR) are tested against their own dividend-based falsification conditions at the next quarterly review. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       }
     ]
   },
@@ -126,7 +149,6 @@
         "CRWV",
         "AMD",
         "PLTR",
-        "VGT",
         "AINF.L"
       ],
       "why": "These lines are paid out of hyperscaler capital spending; one guidance cut moves all of them."
@@ -294,12 +316,12 @@
     {
       "ticker": "NBIS",
       "name": "Nebius Group",
-      "bucket": "energy",
+      "bucket": "compute",
       "exchange": "NASDAQ",
       "currency": "USD",
-      "weight": 5,
+      "weight": 3,
       "instrument_type": "Equity",
-      "factor_role": "A neocloud: rents GPU capacity by the hour to firms that will not build their own. Sits in this bucket because the binding constraint on the business is contracted power and shell space, not chips.",
+      "factor_role": "A neocloud: rents GPU capacity by the hour to firms that will not build their own. It sits in Compute because it sells the output of the chips; contracted power and shell space limit how fast it can grow.",
       "falsification_metric": "Capex-funded, customer-concentrated, and competing with hyperscalers who own their own silicon.",
       "investable": {
         "br_retail": null,
@@ -316,10 +338,10 @@
     {
       "ticker": "CRWV",
       "name": "CoreWeave",
-      "bucket": "energy",
+      "bucket": "compute",
       "exchange": "NASDAQ",
       "currency": "USD",
-      "weight": 5,
+      "weight": 2,
       "instrument_type": "Equity",
       "factor_role": "The scaled version of the same trade as NBIS, with a contracted backlog rather than a spot book. The clearest listed read on whether AI capacity is genuinely pre-sold.",
       "falsification_metric": "Debt-funded purchases of an asset that depreciates on a chip cycle. One anchor customer renegotiating resets the whole model, and it overlaps heavily with NBIS — this is one position expressed twice.",
@@ -341,7 +363,7 @@
       "bucket": "energy",
       "exchange": "NYSE",
       "currency": "USD",
-      "weight": 2,
+      "weight": 5,
       "instrument_type": "Equity",
       "factor_role": "Switchgear, transformers and power-distribution equipment: the grid hardware whose lead times set how fast new data-centre capacity can be energised.",
       "falsification_metric": "Lead times normalise. If transformer and switchgear backlogs shrink as capacity is added, pricing power goes with them, and a multiple built on scarcity re-rates to an industrial one.",
@@ -363,7 +385,7 @@
       "bucket": "energy",
       "exchange": "NYSE",
       "currency": "USD",
-      "weight": 2,
+      "weight": 5,
       "instrument_type": "Equity",
       "factor_role": "Utility transmission and distribution components: the poles-and-wires hardware utilities need to connect new load.",
       "falsification_metric": "Utility capex disappoints. Hubbell sells to utilities, not to data centres, so a pause in rate-base growth or a regulatory squeeze on spending hits it before any AI demand shows up.",
@@ -378,6 +400,31 @@
         "name": "Hubbell Incorporated",
         "rationale": "The utility side of the same bottleneck as Eaton: connecting new load needs transmission and distribution hardware that utilities buy, and that is where its revenue sits."
       }
+    },
+    {
+      "ticker": "VST",
+      "name": "Vistra Corp.",
+      "bucket": "energy",
+      "exchange": "NYSE",
+      "currency": "USD",
+      "weight": 5,
+      "instrument_type": "Equity",
+      "factor_role": "A merchant power generator: it owns gas, nuclear and coal plants, mainly in Texas (ERCOT) and the PJM grid, and sells their output into wholesale markets, hedged ahead, rather than earning a regulated return. When new load outruns new generation and grid connections, the scarcity shows up in power and capacity prices, and a merchant fleet is paid it. About two-fifths of its adjusted EBITDA comes from its retail arm (TXU Energy), which buys power to resell, so part of any scarcity gain is offset inside the company.",
+      "falsification_metric": "Scarcity does not last. If new gas, solar and battery capacity, or data-centre load that arrives slower than forecast, pulls forward power and capacity prices back down, the margin goes with them; a regulatory cap on capacity prices or a market redesign in ERCOT or PJM can take it by rule. It is also a spread between power and gas prices, which can narrow for reasons that have nothing to do with AI.",
+      "investable": {
+        "br_retail": null,
+        "blocker": null,
+        "proxy_for": null,
+        "tracking_notes": null
+      },
+      "status": "active",
+      "memo": {
+        "name": "Vistra Corp.",
+        "rationale": "The book held the grid's equipment (ETN, HUBB) and its fuel (URA, NLR, PETR4.SA, 2222.SR) but no owner of generation selling the electricity. A merchant generator is paid the scarcity price directly when load outruns supply, not through a regulated rate base. It is not already held through NLR. Its live valuation is in the valuation table; the entry check against the Substrate threshold is in the change log."
+      },
+      "classification_flags": [
+        "merchant power-price beta, not regulated rent"
+      ]
     },
     {
       "ticker": "TSM",
@@ -461,11 +508,13 @@
         "proxy_for": null,
         "tracking_notes": null
       },
-      "status": "active",
+      "status": "removed",
       "memo": {
         "name": "Vanguard Information Technology ETF",
         "rationale": "A broad, low-conviction sleeve that keeps the bucket from being a handful of single-name bets on a theme this book is intentionally underweighting."
-      }
+      },
+      "removed_on": "2026-10-28",
+      "removal_note": "Removed: it overlapped with the Compute lines and is the book's US-tech benchmark, so holding it measured the bucket partly against itself. What breaks it: Compute loses its one diversified line, so a miss in any single Compute name now lands on the book undiluted."
     },
     {
       "ticker": "2357.TW",
@@ -473,7 +522,7 @@
       "bucket": "compute",
       "exchange": "TWSE",
       "currency": "TWD",
-      "weight": 4,
+      "weight": 3,
       "instrument_type": "Equity",
       "factor_role": "AI server exposure at a hardware multiple rather than a semiconductor one. The AI server business is repricing the whole company while it is still classified as a PC maker.",
       "falsification_metric": "Server assembly is margin-thin with real customer concentration, and the legacy PC cycle still swamps the AI line in reported revenue.",
@@ -562,7 +611,7 @@
       "weight": 4,
       "instrument_type": "ETF",
       "factor_role": "Spreads the infrastructure bet across semis, cloud and networking, including names the single-name lines here miss.",
-      "falsification_metric": "Overlaps with VGT and with the megacap complex most portfolios already own, and the LSE line quotes GBP against a USD NAV — an FX layer sitting on top of the actual exposure.",
+      "falsification_metric": "Overlaps with the megacap complex most portfolios already own, and the LSE line quotes GBP against a USD NAV — an FX layer sitting on top of the actual exposure.",
       "investable": {
         "br_retail": null,
         "blocker": null,

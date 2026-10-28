@@ -346,9 +346,9 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>Allocation</h2></div>
     <p class="lede prose">
-      Sizing is near equal-weight by design: bucket targets carry the argument, and lines inside
-      a bucket get close to the same slice, so no single stock call is asked to carry the thesis.
-      <span id="alloc-ballast">Ballast carries a large share of the book</span>, which is a deliberate
+      Bucket targets are set first; weights within each bucket are set line by line, and the
+      change log records why. Equal capital is not equal risk: see the risk table.
+      <span id="alloc-ballast">Diversifiers carry a large share of the book</span>, which is a deliberate
       statement that the book's own thesis might be wrong.
     </p>
     <figure>
@@ -442,7 +442,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section id="factor-section" hidden>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>What the returns are made of</h2></div>
     <p class="lede prose" id="factor-lede">
-      Ballast exists in case the rest of the book is one trade. If it does its job, it should
+      The Diversifiers sleeve exists in case the rest of the book is one trade. If it does its job, it should
       load lightly on the factors the thesis is long and explain little of its own movement
       through them.
     </p>
@@ -634,12 +634,21 @@ function renderStamp() {
       xc.source + ": " + sessions + " sessions on this run, largest gap " + worst.maxAbsDiffPct.toFixed(3) + "% (" +
       worst.ticker + "). A gap above 0.5% is flagged by the validator. Dividend adjustment is Yahoo's ratio method; " +
       "splits are applied to the whole history by the provider, and the validator flags a clean 2x/3x/4x jump.";
+    if (xc.singleSource?.length) {
+      $("xcheck-note").textContent +=
+        " No second source was checked for " + xc.singleSource.join(", ") + " on this run: their prices rest on Yahoo alone.";
+    }
   }
   const vf = DATA.verification;
   if (vf?.rows?.length) {
+    // Files written before per-line status existed carry only the maximum.
+    const result = vf.status
+      ? "result against the pipeline at each line's last close (pass under " + (vf.tolerancePp ?? 0.05) + "pp): " +
+        vf.rows.map((r) => r.ticker + " " + r.status.toUpperCase() + (r.reason ? " (" + r.reason + ")" : "")).join(", ") +
+        (vf.maxAbsDiffPp != null ? "; largest difference " + vf.maxAbsDiffPp.toFixed(4) + "pp" : "")
+      : "largest difference from the pipeline " + vf.maxAbsDiffPp.toFixed(4) + "pp";
     $("xcheck-note").textContent += " " + vf.rows.map((r) => r.ticker).join(", ") + " are also recomputed independently " +
-      "(standard-library Python and Excel formulas, research/verification.xlsx): largest difference from the pipeline " +
-      vf.maxAbsDiffPp.toFixed(4) + "pp, checked " + vf.asOf + ".";
+      "(standard-library Python and Excel formulas, research/verification.xlsx): " + result + ", checked " + vf.asOf + ".";
   }
 }
 
@@ -650,7 +659,7 @@ function renderStats() {
     { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
     { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
     { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
-    { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "what is left if the thesis is wrong" },
+    { k: "Diversifiers weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "cushions drawdowns if the thesis is wrong" },
   ];
   // The forward-tracked series, kept apart from the replay above it.
   const tr = DATA.track;
@@ -838,8 +847,8 @@ function renderAlloc() {
   const top = order.reduce((a, b) => (sw[b] > sw[a] ? b : a));
   $("alloc-ballast").textContent =
     top === "ballast"
-      ? "Ballast carries the largest single allocation (" + sw.ballast + "%)"
-      : "Ballast carries " + sw.ballast + "% of the book, against " + SLEEVES[top].name + "'s " + sw[top] + "%";
+      ? "Diversifiers carry the largest single allocation (" + sw.ballast + "%)"
+      : "Diversifiers carry " + sw.ballast + "% of the book, against " + SLEEVES[top].name + "'s " + sw[top] + "%";
   const W = 1000, H = 160, m = { t: 34, r: 2, b: 44, l: 2 };
   const iw = W - m.l - m.r, bh = H - m.t - m.b;
   const total = POS.reduce((a, p) => a + p.weight, 0);
@@ -1342,10 +1351,17 @@ function renderBets() {
   $("bets-lede").textContent =
     words(POS.length) + " lines are not " + words(POS.length).toLowerCase() + " independent bets. Weekly USD returns over " + S.weeks + " weeks: the effective number of " +
     "bets splits the book's variance across its principal components and asks how evenly it is spread: 1 if everything " +
-    "rides one factor, " + S.lines + " if every line were its own bet.";
+    "rides one factor, " + S.lines + " if every line were its own bet." +
+    (S.enbRange
+      ? " Both figures are estimated from " + S.weeks + " weeks on " + S.lines + " lines, so each is shown with a 90% sampling " +
+        "range: the 5th to 95th percentile of a block bootstrap (" + S.bootstrap.draws.toLocaleString("en") + " resamples of " +
+        S.bootstrap.blockWeeks + "-week blocks). Small samples also overstate the first component, a bias the range does " +
+        "not remove, so the effective number of bets is more likely understated than overstated."
+      : "");
+  const rng = (r, d, u = "") => (r ? "90% sampling range " + r.p05.toFixed(d) + "–" + r.p95.toFixed(d) + u + " · " : "");
   const tiles = [
-    { k: "Effective bets", v: S.enb.toFixed(1), n: "of " + S.lines + " lines (Meucci entropy measure)" },
-    { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: "of the book's variance" },
+    { k: "Effective bets", v: (S.enbRange ? "≈ " : "") + S.enb.toFixed(1), n: rng(S.enbRange, 1) + "of " + S.lines + " lines (Meucci entropy measure)" },
+    { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: rng(S.firstPcRange, 0, "%") + "of the book's variance" },
     { k: "Common factor", v: S.firstCorrPcPct.toFixed(0) + "%", n: "of total correlation, first eigenvalue" },
   ];
   $("bets-kv").innerHTML = tiles.map((c) =>
@@ -1422,10 +1438,19 @@ function renderValue() {
     const reading = (c) => c.reading == null ? "checked each earnings season"
       : c.unit === "$" ? "$" + c.reading.toFixed(2) : c.unit === "pp" ? pp(c.reading) : pct(c.reading);
     $("falsifier-tbl").innerHTML = "<thead><tr><th>Falsifier</th><th>Test</th><th>Reading</th><th>Status</th></tr></thead><tbody>" +
-      T.checks.map((c) => '<tr><td class="lbl">' + escape(c.name) + '</td><td style="font-size:.84rem;color:var(--ink-2)">' + escape(c.test) + "</td>" +
-        '<td class="n">' + escape(reading(c)) + (c.detail ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(c.detail) + "</div>" : "") + "</td>" +
-        "<td>" + (c.triggered == null ? '<span class="tag">watch</span>' : c.triggered ? '<span class="tag warn">triggered</span>' : '<span class="tag">holding</span>') +
-        "</td></tr>").join("") + "</tbody>";
+      T.checks.map((c) => {
+        // Snapshots before falsifier governance carry no latestResponse key: no badge for them.
+        const r = c.triggered ? c.latestResponse : null;
+        const unanswered = c.triggered === true && "latestResponse" in c && !c.latestResponse;
+        return '<tr><td class="lbl">' + escape(c.name) + '</td><td style="font-size:.84rem;color:var(--ink-2)">' + escape(c.test) +
+          (c.consequence ? '<div style="margin-top:.3rem"><b>If met:</b> ' + escape(c.consequence) + "</div>" : "") +
+          (r ? '<div style="margin-top:.3rem"><b>Response, ' + escape(r.date) + " (" + escape(r.decision) + "):</b> " + escape(r.text) + "</div>" : "") + "</td>" +
+          '<td class="n">' + escape(reading(c)) + (c.detail ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(c.detail) + "</div>" : "") + "</td>" +
+          "<td>" + (c.triggered == null ? '<span class="tag">watch</span>' : c.triggered ? '<span class="tag warn">triggered</span>' : '<span class="tag">holding</span>') +
+          (r ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(r.decision) + " · " + escape(r.date) + "</div>" : "") +
+          (unanswered ? ' <span class="tag warn falsifier-unanswered">UNANSWERED</span>' : "") +
+          "</td></tr>";
+      }).join("") + "</tbody>";
   }
   if (F?.valuation?.length) {
     const x = (v, d, suf) => (v == null ? "—" : v < 0 && suf === "x" ? "n.m." : v.toFixed(d) + suf);
@@ -1546,7 +1571,7 @@ function renderRisk() {
   const bal = R.buckets.find((b) => b.sleeve === "ballast");
   $("risk-lede").textContent =
     top2.map((r) => r.key).join(" and ") + " hold " + topW.toFixed(0) + "% of the capital and " + topShare.toFixed(0) +
-    "% of the risk" + (bal ? "; Ballast holds " + bal.weightPct.toFixed(0) + "% of the capital and " + bal.riskSharePct.toFixed(0) + "% of the risk" : "") +
+    "% of the risk" + (bal ? "; Diversifiers hold " + bal.weightPct.toFixed(0) + "% of the capital and " + bal.riskSharePct.toFixed(0) + "% of the risk" : "") +
     ". Share of risk is each line's contribution to the book's variance, so the column sums to the whole book " +
     "and a negative entry is a line that lowered it.";
 
@@ -1556,7 +1581,7 @@ function renderRisk() {
       '<tr style="--sleeve: var(' + SLEEVE_VAR[b.sleeve] + ')"><td class="lbl">' + SLEEVES[b.sleeve].numeral + " · " + escape(SLEEVES[b.sleeve].name) + "</td>" +
       '<td class="n">' + b.weightPct.toFixed(0) + "%</td>" +
       '<td class="n">' + share(b.riskSharePct) + "</td>" +
-      '<td class="n">' + num(b.riskSharePct / b.weightPct) + "</td></tr>"
+      '<td class="n">' + num(b.riskPerWeight ?? b.riskSharePct / b.weightPct) + "</td></tr>"
     ).join("") + "</tbody>";
 
   $("risk-tbl").innerHTML =
@@ -1571,8 +1596,19 @@ function renderRisk() {
       '<td class="n">' + num(r.corrToBook) + "</td></tr>"
     ).join("") + "</tbody>";
 
-  $("risk-note").textContent =
-    "Euler decomposition on weekly log returns over " + R.weeks + " weeks: weight × covariance with the book ÷ the book's " +
+  const excl = R.insufficient ?? [];
+  $("risk-note").textContent = R.insufficient
+    ? "Euler decomposition on one covariance matrix of weekly simple returns over " + R.weeks + " common weeks: each line's " +
+      "weight × its covariance with the book ÷ the book's variance, in the " + V().label + " view, so the shares sum to " +
+      R.sumPct.toFixed(0) + "%. Weekly sampling avoids the time-zone bias in daily cross-market covariances; on this basis " +
+      "the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure in the headline. " +
+      (excl.length
+        ? "Shares cover the included lines (" + R.includedCapitalPct.toFixed(0) + "% of capital); " +
+          excl.map((r) => r.key + " (" + r.weeks + " weeks, " + r.capitalPct.toFixed(0) + "% of capital)").join(", ") +
+          (excl.length > 1 ? " have" : " has") + " fewer than 40 weeks of history and " + (excl.length > 1 ? "get" : "gets") +
+          " no share. Risk ÷ weight compares each share with the line's share of the included capital."
+        : "")
+    : "Euler decomposition on weekly log returns over " + R.weeks + " weeks: weight × covariance with the book ÷ the book's " +
     "variance, in the " + V().label + " view. Weekly sampling avoids the time-zone bias in daily cross-market " +
     "covariances; on this basis the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure " +
     "in the headline. " +
@@ -1768,7 +1804,7 @@ function renderFactors() {
   const yrs = f.window ? ((Date.parse(f.window.end) - Date.parse(f.window.start)) / 3.15576e10).toFixed(0) : null;
   const fnames = f.factors.map((x) => x.ticker + " (" + x.id + ")").join(", ");
   $("factor-lede").textContent =
-    "Ballast exists in case the rest of the book is one trade. If it does its job, it should load lightly on the " +
+    "The Diversifiers sleeve exists in case the rest of the book is one trade. If it does its job, it should load lightly on the " +
     "factors the thesis is long and explain little of its own movement through them. Weekly USD returns" +
     (f.excessOf ? " in excess of " + f.excessOf + " (T-bills)" : "") +
     (f.window ? ", " + fmtDate(Date.parse(f.window.start)) + " to " + fmtDate(Date.parse(f.window.end)) + " (" + yrs + " years)" : "") +
@@ -1780,7 +1816,7 @@ function renderFactors() {
     return name(top) + " (" + r.betas[top].toFixed(2) + ")";
   };
   const read = b
-    ? "Ballast's largest loading is on " + lead(b) + "; the factors together explain " + (b.r2 * 100).toFixed(0) +
+    ? "Diversifiers' largest loading is on " + lead(b) + "; the factors together explain " + (b.r2 * 100).toFixed(0) +
       "% of its weekly variance, and its correlation with " + thesisList + " combined is " + num(b.rhoThesis) + ". " +
       (ids.some((id) => b.betas[id] > 0.3 && (b.tStats[id] ?? 0) > 2)
         ? "That is not a hedge: it rises and falls with the market, only by different amounts. A hedge would show negative loadings. "
@@ -1788,11 +1824,10 @@ function renderFactors() {
     : "";
   const sig = f.rows.filter((r) => !r.insufficient && r.kind !== "position" && Math.abs(r.alphaT ?? 0) >= 2);
   $("factor-conclusion").textContent =
-    "Returns are explained by factor exposure; there is no evidence of skill. " +
+    "In a hindsight backtest an intercept measures selection, not edge, which is why the book is judged by its live record. " +
     (sig.length
       ? sig.map((r) => r.label).join(", ") + " show" + (sig.length === 1 ? "s" : "") + " an intercept with a t-statistic near or " +
-        "above 2, but this is a backtest of positions chosen knowing how these years went: an intercept there measures " +
-        "the selection, not an edge that would have been available in advance."
+        "above 2."
       : "No intercept clears a t-statistic of 2.");
   $("factor-note").textContent =
     read +

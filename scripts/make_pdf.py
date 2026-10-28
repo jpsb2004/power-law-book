@@ -59,14 +59,15 @@ RULE = colors.HexColor("#C8CDD4")
 BUCKET_INK = {"Substrate": colors.HexColor("#B5790A"),
               "Compute": colors.HexColor("#1F6FB2"),
               "Materials": colors.HexColor("#65389F"),
-              "Ballast": colors.HexColor("#A02060")}
+              "Diversifiers": colors.HexColor("#A02060")}
 BUCKET_TINT = {"Substrate": colors.HexColor("#FAF3E4"),
                "Compute": colors.HexColor("#EAF1F8"),
                "Materials": colors.HexColor("#F0EBF7"),
-               "Ballast": colors.HexColor("#F9EAF1")}
+               "Diversifiers": colors.HexColor("#F9EAF1")}
 # Display order and labels come from the ontology, so a bucket added there
 # reaches every table and chart below without another hand-kept list.
 ORDER = [BUCKET_LABELS[k] for k in BUCKET_ORDER]
+DIVERSIFIERS = BUCKET_LABELS["ballast"]
 NUMBER_WORDS = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
 CREAM = colors.HexColor("#F7F1E3")
 
@@ -357,9 +358,9 @@ story += [
     Paragraph("EQUITY STRATEGY · PORTFOLIO INITIATION", eyebrow),
     Paragraph("Quantifying the Physical Bottlenecks<br/>of the Global AI CapEx Supercycle", cover_head),
     Paragraph(
-        "Overweight Substrate, hold Compute as a counterweight, and size Ballast to absorb "
-        f"drawdown. {N_POSITIONS} positions in {N_CURRENCIES} currencies express a rotation out of hyperscaler "
-        "beta and into the physical infrastructure that gates it.", deck),
+        "Own the ordered physical chain behind AI compute, with more capital in the upstream links. "
+        f"Compute is held as a counterweight and Diversifiers cushion drawdowns across {N_POSITIONS} positions "
+        f"in {N_CURRENCIES} currencies.", deck),
 ]
 for lead, rest in [
     ("The consensus AI trade is crowded.",
@@ -370,15 +371,15 @@ for lead, rest in [
      " Grid interconnect queues and transformer lead times, not chip supply, increasingly "
      "gate how fast new capacity can actually come online."),
     ("Construction is top-down, not stock-by-stock.",
-     " Target weights are set at the bucket level ("
-     + " / ".join(f"{b} {BUCKET_W.get(b, 0):.0f}%" for b in ORDER) + "); positions "
-     "inside each bucket are held close to equal-weight so no single stock call carries the thesis."),
+     " Bucket targets are "
+     + " / ".join(f"{b} {BUCKET_W.get(b, 0):.0f}%" for b in ORDER) + ". Weights within each bucket "
+     "are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table on the published page."),
     ("Compute is retained on purpose, not shrunk to a token hedge.",
      " A portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
-     "construction than one that wins on the rotation but does not collapse if the rotation stalls."),
+     "construction than one that wins when the upstream links outpace compute but does not collapse if they fall behind."),
     ("Every position carries a standing falsification note:",
      " the specific condition under which its inclusion in the thesis is wrong. The critical-minerals "
-     "ETF sits in its own Materials bucket rather than being counted as ballast. See Section 4."),
+     "ETF sits in its own Materials bucket rather than being counted as a diversifier. See Section 4."),
 ]:
     story.append(Paragraph(f"•&nbsp;<b>{lead}</b>{rest}", cover_body))
 
@@ -425,18 +426,18 @@ story += [
     Paragraph("Bucket Weights and Factor Logic", headline),
     Paragraph(
         f"The book is organized into {NUMBER_WORDS[len(ORDER)]} thematic buckets rather than picked stock-by-stock. "
-        "Target weights are set at the bucket level; positions within a bucket are then held "
-        "close to equal-weight, so no single stock-picking call inside a bucket is doing "
-        "outsized work. The bet is on the theme, not on any individual name being the best "
+        "Bucket targets are set first; weights within each bucket are set line by line, and the "
+        "change log records why. Equal capital is not equal risk: see the risk table on the published page. "
+        "The bet is on the theme, not on any individual name being the best "
         "operator in it.", body),
 ]
 
 rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Weight", "N", "Structural exposure")]]
 exposure = {
     "Substrate": "Fuel, generation, land, interconnect rights and grid equipment:<br/>the most direct expression of the thesis",
-    "Compute": "The hardware layer itself: a counterweight against<br/>being wrong about the timing of the rotation",
+    "Compute": "The hardware layer itself: a counterweight in case<br/>the upstream links lag compute",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
-    "Ballast": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
+    "Diversifiers": "Cross-asset diversifiers, monetary safety assets, and<br/>developed-market value, sized to cushion drawdown",
 }
 for b in ORDER:
     rows.append([Paragraph(b, tbl_cell), Paragraph(f"{BUCKET_W[b]:.1f}%", tbl_cell),
@@ -455,10 +456,10 @@ bt.setStyle(TableStyle([
 story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
     f"Substrate ({BUCKET_W.get('Substrate', 0):.0f}%) is weighted above Compute ({BUCKET_W.get('Compute', 0):.0f}%) "
     "deliberately: fuel, land and the grid equipment that connects them are the more direct, less crowded "
-    "expression of the thesis. Compute is kept at about a third of the book on purpose: a "
+    "expression of the thesis. Compute is kept as a counterweight on purpose, at the weight in the table above: a "
     "portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
-    "construction than one that wins on the rotation but does not collapse if the rotation "
-    "stalls. Ballast is sized to absorb drawdown from the rest of the book rather than to add "
+    "construction than one that wins when the upstream links outpace compute but does not "
+    "collapse if they fall behind. Diversifiers are sized to absorb drawdown from the rest of the book rather than to add "
     "a competing return thesis.", body)]
 
 # Equal capital is not equal risk: the same Euler decomposition the page shows,
@@ -471,11 +472,11 @@ if _rrows:
     _bk = {b["sleeve"]: b for b in _risk.get("buckets", [])}
     _bal = _bk.get("ballast")
     story.append(Paragraph(
-        "Near equal weight is not equal risk. Measured as each line's share of the book's variance "
+        "Equal capital is not equal risk. Measured as each line's share of the book's variance "
         f"(weekly USD returns, {_risk['weeks']} weeks), {_top[0]['key']} and {_top[1]['key']} hold "
         f"{sum(r['weightPct'] for r in _top):.0f}% of the capital and "
         f"{sum(r['riskSharePct'] for r in _top):.0f}% of the risk"
-        + (f"; Ballast holds {_bal['weightPct']:.0f}% of the capital and {_bal['riskSharePct']:.0f}% of the risk"
+        + (f"; Diversifiers hold {_bal['weightPct']:.0f}% of the capital and {_bal['riskSharePct']:.0f}% of the risk"
            if _bal else "")
         + ". The full table is on the published page.", body))
 
@@ -564,7 +565,7 @@ story.append(Paragraph(f"Critical Materials ({BUCKET_W.get('Materials', 0):.1f}%
 for _p in positions_in("materials"):
     story.append(KeepTogether(position(_p)))
 
-story.append(Paragraph(f"Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
+story.append(Paragraph(f"{DIVERSIFIERS} ({BUCKET_W[DIVERSIFIERS]:.1f}%, {BUCKET_N[DIVERSIFIERS]} positions)", sub_head))
 for _p in positions_in("ballast"):
     story.append(KeepTogether(position(_p)))
 
@@ -580,12 +581,14 @@ story += [
     Paragraph(
         "<b>Concentration.</b> Measured on weekly returns, the "
         f"{N_POSITIONS}-position book behaves like "
-        + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets, with "
-           f"{(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
+        + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets"
+           + (f" (90% sampling range {book.structure['enbRange']['p05']:.1f}–{book.structure['enbRange']['p95']:.1f})"
+              if (book.structure or {}).get("enbRange") else "")
+           + f", with {(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
            if book.structure else "far fewer independent bets than it has lines."), weakness),
     Paragraph(
         "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
-        "bucket rather than in Ballast, because it is correlated with the same technology-materials "
+        "bucket rather than in Diversifiers, because it is correlated with the same technology-materials "
         f"cycle the rest of the book is long. Its thin trading history (~{RARA_COVER} active "
         "coverage in the measured window) adds noise to any long-horizon variance figure.", weakness),
     Paragraph(
@@ -617,10 +620,23 @@ if _th:
             return "checked each earnings season"
         u = c.get("unit")
         return f"${c['reading']:.2f}" if u == "$" else (f"{c['reading']:+.1f}pp" if u == "pp" else f"{c['reading']:+.1f}%")
+    def _x(t):
+        return str(t).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     _fr = [[Paragraph(h, tbl_head) for h in ("Falsifier", "Test", "Reading", "Status")]]
     for c in _th.get("checks", []):
         _st = "watch" if c.get("triggered") is None else ("<b>triggered</b>" if c["triggered"] else "holding")
-        _fr.append([Paragraph(c["name"], tbl_cell), Paragraph(c["test"], tbl_cell), Paragraph(_rd(c), tbl_cell),
+        _tx = c["test"]
+        if c.get("consequence"):
+            _tx += f"<br/><b>If met:</b> {_x(c['consequence'])}"
+        # Snapshots before falsifier governance carry no latestResponse key: no badge for them.
+        if c.get("triggered") is True and "latestResponse" in c:
+            _r = c["latestResponse"]
+            if _r:
+                _tx += f"<br/><b>Response, {_x(_r['date'])} ({_x(_r['decision'])}):</b> {_x(_r['text'])}"
+                _st += f"<br/>{_x(_r['decision'])}, {_x(_r['date'])}"
+            else:
+                _st += "<br/><b>UNANSWERED</b>"
+        _fr.append([Paragraph(c["name"], tbl_cell), Paragraph(_tx, tbl_cell), Paragraph(_rd(c), tbl_cell),
                     Paragraph(_st, tbl_cell)])
     _ft = Table(_fr, colWidths=[95, 255, 80, 60], repeatRows=1)
     _ft.setStyle(TableStyle([
@@ -640,7 +656,13 @@ if _sx:
     story.append(Paragraph(
         f"<b>{N_POSITIONS} lines, {_sx['enb']:.1f} effective bets.</b> Splitting the book's weekly variance across its "
         f"principal components, the first carries {_sx['firstPcSharePct']:.0f}% of it; the entropy-based effective "
-        f"number of bets is {_sx['enb']:.1f} of {_sx['lines']} lines. Shared points of failure: {_pf}.", body))
+        f"number of bets is {_sx['enb']:.1f} of {_sx['lines']} lines"
+        + (f" (90% sampling range {_sx['enbRange']['p05']:.1f}–{_sx['enbRange']['p95']:.1f}; first component "
+           f"{_sx['firstPcRange']['p05']:.0f}–{_sx['firstPcRange']['p95']:.0f}%, from a block bootstrap of the "
+           f"{_sx['weeks']} weeks). Small samples also overstate the first component, a bias the range does not "
+           "remove, so the effective number of bets is more likely understated than overstated"
+           if _sx.get("enbRange") and _sx.get("firstPcRange") else "")
+        + f". Shared points of failure: {_pf}.", body))
 
 # ---- change log: every change to the book or its method, from positions.json
 _changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)
@@ -757,8 +779,8 @@ if _brow:
         Paragraph("Exposure, Not Alpha", sub_head),
         Paragraph(
             f"Weekly excess returns over {_f['window']['start'][:4]}–{_f['window']['end'][:4]} load {_fx} on global equity, "
-            f"semiconductors and energy, with R² {_brow['r2']:.2f}. Returns are explained by factor exposure; an "
-            "intercept in a backtest of positions chosen with hindsight measures the selection, not an edge. "
+            f"semiconductors and energy, with R² {_brow['r2']:.2f}. "
+            "In a hindsight backtest an intercept measures selection, not edge, which is why the book is judged by its live record. "
             + (f"Over the latest year the book's Sharpe ratio was {_bk['sharpe']:.2f}, against {_vgt['sharpe']:.2f} for VGT "
                f"(US tech) and {_acwi['sharpe']:.2f} for ACWI (global equity): it did not beat simply holding tech "
                "per unit of risk." if _bk.get('sharpe') is not None and _vgt.get('sharpe') is not None and _bk['sharpe'] < _vgt['sharpe']

@@ -29,7 +29,9 @@ REQUIRED_POSITION_FIELDS = ("ticker", "name", "sleeve", "currency", "weight", "v
 REQUIRED_SNAPSHOT_FIELDS = ("asOf", "base", "positions", "curve", "curveStats", "fx")
 
 BUCKET_ORDER = ("energy", "compute", "materials", "ballast")
-BUCKET_LABELS = {"energy": "Substrate", "compute": "Compute", "materials": "Materials", "ballast": "Ballast"}
+BUCKET_LABELS = {"energy": "Substrate", "compute": "Compute", "materials": "Materials", "ballast": "Diversifiers"}
+# Decisions a falsifier response may record (mirrors lib/falsifiers.js DECISIONS).
+FALSIFIER_DECISIONS = ("hold", "trim", "exit", "revise-thesis")
 
 
 class SchemaError(ValueError):
@@ -164,6 +166,22 @@ def _require(mapping: dict[str, Any], fields: Iterable[str], where: str) -> None
         raise SchemaError(f"{where} is missing required field(s): {', '.join(missing)}")
 
 
+def _check_thesis(thesis: dict[str, Any]) -> None:
+    """Falsifier checks may carry a consequence and the latest response; when present, they must be readable."""
+    for c in thesis.get("checks") or []:
+        where = f"thesis check {c.get('key', '?')}"
+        if c.get("consequence") is not None and not isinstance(c["consequence"], str):
+            raise SchemaError(f"{where}: consequence is not text")
+        r = c.get("latestResponse")
+        if r is None:
+            continue
+        if not isinstance(r, dict):
+            raise SchemaError(f"{where}: latestResponse is not an object")
+        _require(r, ("date", "decision", "text"), f"{where} latestResponse")
+        if r["decision"] not in FALSIFIER_DECISIONS:
+            raise SchemaError(f"{where}: decision {r['decision']!r} not one of {', '.join(FALSIFIER_DECISIONS)}")
+
+
 def load_book(path: Path | None = None) -> Book:
     """Load and validate the snapshot into entities."""
     path = path or SNAPSHOT
@@ -227,6 +245,8 @@ def load_book(path: Path | None = None) -> Book:
     unknown = {e.bucket for e in entities} - set(BUCKET_ORDER)
     if unknown:
         raise SchemaError(f"unknown bucket(s) in snapshot: {', '.join(sorted(unknown))}")
+
+    _check_thesis(raw.get("thesis") or {})
 
     return Book(
         as_of=retrieved,

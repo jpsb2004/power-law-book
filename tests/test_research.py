@@ -15,7 +15,7 @@ from research.ontology import BUCKET_LABELS, BUCKET_ORDER, SchemaError, load_boo
 from research.scenarios import SCENARIOS, apply_scenario, combined
 
 
-def _snapshot(tmp_path, positions):
+def _snapshot(tmp_path, positions, **extra):
     snap = {
         "asOf": 1_791_936_000_000,
         "base": "USD",
@@ -23,6 +23,7 @@ def _snapshot(tmp_path, positions):
         "curve": [{"t": 0, "c": 100.0}, {"t": 1, "c": 101.0}],
         "curveStats": {"ytd": 1.0},
         "fx": {"USD": {"rate": 1}},
+        **extra,
     }
     path = tmp_path / "snapshot.json"
     path.write_text(json.dumps(snap), encoding="utf-8")
@@ -57,7 +58,7 @@ def test_bucket_weights(book):
 
 def test_scenario_buckets_follow_display_order_not_roster_order(book):
     result = apply_scenario(book, SCENARIOS["grid"])
-    assert list(result["by_bucket"]) == ["Substrate", "Compute", "Materials", "Ballast"]
+    assert list(result["by_bucket"]) == ["Substrate", "Compute", "Materials", "Diversifiers"]
 
 
 def test_scenario_contribution_is_shock_times_weight(book):
@@ -70,7 +71,7 @@ def test_scenario_contribution_is_shock_times_weight(book):
 
 
 def test_capex_note_reads_ballast_from_live_weights(book):
-    assert "ballast is only 25%" in apply_scenario(book, SCENARIOS["capex"])["note"]
+    assert "the diversifiers are only 25%" in apply_scenario(book, SCENARIOS["capex"])["note"]
 
 
 def test_combined_note_has_no_unfilled_placeholders(book):
@@ -81,3 +82,25 @@ def test_combined_note_has_no_unfilled_placeholders(book):
 def test_unknown_bucket_is_rejected(tmp_path):
     with pytest.raises(SchemaError):
         load_book(_snapshot(tmp_path, [_pos("A", "energy", 50), _pos("B", "crypto", 50)]))
+
+
+def _checks(**over):
+    check = {"key": "rotation", "triggered": True, "consequence": "Review at the quarter.",
+             "latestResponse": {"date": "2026-10-28", "decision": "hold", "text": "Watched."}}
+    check.update(over)
+    return {"thesis": {"checks": [check]}}
+
+
+def test_falsifier_consequence_and_response_load(tmp_path):
+    b = load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **_checks()))
+    c = b.thesis["checks"][0]
+    assert c["consequence"] == "Review at the quarter."
+    assert c["latestResponse"]["decision"] == "hold"
+    # A snapshot written before the fields existed still loads.
+    load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], thesis={"checks": [{"key": "x", "triggered": True}]}))
+
+
+def test_falsifier_response_with_unknown_decision_is_rejected(tmp_path):
+    bad = _checks(latestResponse={"date": "2026-10-28", "decision": "sell", "text": "t"})
+    with pytest.raises(SchemaError):
+        load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **bad))
