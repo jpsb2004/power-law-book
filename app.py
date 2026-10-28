@@ -50,8 +50,14 @@ BUCKET_COLOUR = {"Substrate": "#AE6A12", "Compute": "#0F7BC0", "Materials": "#65
 BUCKET_RANK = {BUCKET_LABELS[k]: i for i, k in enumerate(BUCKET_ORDER)}
 GAIN, LOSS, MUTED = "#2E7D5B", "#B4382F", "#6E7A7F"
 
+
+def _pct(value, spec="+.1f"):
+    """Percent text for a stat that may be missing: a dash, never a silent 0."""
+    return "—" if value is None else f"{value:{spec}}%"
+
+
 st.set_page_config(
-    page_title="Thesis Initiation Report — Physical Bottlenecks of the AI CapEx Supercycle",
+    page_title="The Power Law Book — Monitor",
     page_icon="⚡",
     layout="wide",
 )
@@ -98,7 +104,7 @@ except SchemaError as exc:
     st.stop()
 
 # ----------------------------------------------------------------- masthead
-st.title("The Power Law Book")
+st.title("The Power Law Book — Monitor")
 st.caption(
     "Quantifying the physical bottlenecks of the global AI CapEx supercycle · "
     f"{len(book.entities)} positions · base {book.base} · "
@@ -123,10 +129,10 @@ st.caption(
 )
 cols = st.columns(5)
 cols[0].metric("Index", f"{book.index_level:.2f}", f"{(book.index_level or 100) - 100:+.1f} vs base")
-cols[1].metric("YTD (USD)", f"{stats.get('ytd', 0):+.1f}%")
-cols[2].metric("1-year (USD)", f"{stats.get('ret1y', 0):+.1f}%")
-cols[3].metric("Volatility", f"{stats.get('vol', 0):.1f}%")
-cols[4].metric("Max drawdown", f"{stats.get('maxDrawdown', 0):+.1f}%")
+cols[1].metric("YTD (USD)", _pct(stats.get("ytd")))
+cols[2].metric("1-year (USD)", _pct(stats.get("ret1y")))
+cols[3].metric("Volatility", _pct(stats.get("vol"), ".1f"))
+cols[4].metric("Max drawdown", _pct(stats.get("maxDrawdown")))
 
 # The live record: chain-linked forward from its inception, written by the
 # pipeline (data/track.json) and never revised. Kept apart from the replay.
@@ -698,7 +704,7 @@ with tab_stress:
              ("1-week VaR 95%", tail["weekly"][0]), ("1-week VaR 99%", tail["weekly"][1])],
         ):
             if item:
-                col.metric(lab, f"−{item['varPct']:.1f}%", f"CVaR −{item['cvarPct']:.1f}%", delta_color="off")
+                col.metric(lab, _pct(-item["varPct"]), f"CVaR {_pct(-item['cvarPct'])}", delta_color="off")
         rows = [
             {"Scenario": h["name"], "Kind": "historical", "Window": f"{h['start']} → {h['end']}",
              "Book %": h["bookPct"], "VGT %": h["benchmarks"].get("VGT"), "ACWI %": h["benchmarks"].get("ACWI"),
