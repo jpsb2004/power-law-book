@@ -16,6 +16,14 @@ It writes two files:
                               spreadsheet without trusting this script either;
   data/verification.json      the comparison, read by the README and the page.
 
+Each series ends at the snapshot's `lastBar` for that line, so both sides are
+measured to the same close. A line whose independent series has no close on
+that date is "not comparable" (with the reason) rather than a mismatch; a line
+passes when every difference is under 0.05pp, and fails otherwise.
+
+Exit codes: 0 no line failed, 3 a line failed, 4 the data could not be fetched
+(nothing is written then: data unavailable is not a mismatch).
+
 Run it right after a refresh so both sides see the same closes.
 """
 
@@ -23,6 +31,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -33,27 +42,70 @@ from openpyxl.styles import Font
 ROOT = Path(__file__).resolve().parents[1]
 LINES = [("AMD", None), ("PETR4.SA", "USDBRL=X"), ("GLD", None)]
 UA = {"User-Agent": "Mozilla/5.0 (verify_independent; power-law-book)"}
+TOL_PP = 0.05
+RANK = {"pass": 0, "not comparable": 1, "fail": 2}
+
+
+class FetchError(Exception):
+    """The data could not be had. Not a mismatch: exit 4, not 3."""
+
+
+def _day(ts: float, off: float) -> str:
+    return datetime.fromtimestamp(ts + off, timezone.utc).strftime("%Y-%m-%d")
+
+
+def parse_chart(res: dict, now: float) -> list[tuple[str, float]]:
+    adj = (res["indicators"].get("adjclose") or [{}])[0].get("adjclose") or res["indicators"]["quote"][0]["close"]
+    meta = res["meta"]
+    off = meta.get("gmtoffset", 0)
+    regular = meta.get("currentTradingPeriod", {}).get("regular", {})
+    stamps = res["timestamp"]
+    out = []
+    for i, (t, c) in enumerate(zip(stamps, adj)):
+        # For a while after a close Yahoo serves the final bar with a null
+        # close while the quote holds the print. Take the quote if it is from
+        # that bar's session; otherwise the bar is dropped, never carried.
+        if c is None and i == len(stamps) - 1:
+            q, qt = meta.get("regularMarketPrice"), meta.get("regularMarketTime")
+            if q is not None and qt is not None and _day(qt, off) == _day(t, off):
+                c = q
+        if c is None:
+            continue
+        out.append((_day(t, off), float(c)))
+    # Same rule as the pipeline: a session still open is not a close.
+    if regular and regular["start"] <= now < regular["end"] and out:
+        if out[-1][0] == _day(now, off):
+            out.pop()
+    return out
 
 
 def chart(symbol: str) -> list[tuple[str, float]]:
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=1y&interval=1d"
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
-        res = json.load(r)["chart"]["result"][0]
-    adj = (res["indicators"].get("adjclose") or [{}])[0].get("adjclose") or res["indicators"]["quote"][0]["close"]
-    off = res["meta"].get("gmtoffset", 0)
-    regular = res["meta"].get("currentTradingPeriod", {}).get("regular", {})
-    now = datetime.now(timezone.utc).timestamp()
-    out = []
-    for t, c in zip(res["timestamp"], adj):
-        if c is None:
-            continue
-        out.append((datetime.fromtimestamp(t + off, timezone.utc).strftime("%Y-%m-%d"), float(c)))
-    # Same rule as the pipeline: a session still open is not a close.
-    if regular and regular["start"] <= now < regular["end"] and out:
-        today = datetime.fromtimestamp(now + off, timezone.utc).strftime("%Y-%m-%d")
-        if out[-1][0] == today:
-            out.pop()
-    return out
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+            res = json.load(r)["chart"]["result"][0]
+        return parse_chart(res, datetime.now(timezone.utc).timestamp())
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as e:
+        raise FetchError(f"{symbol}: {e!r}") from e
+
+
+def align(series, last_bar):
+    """End the series at the snapshot's last bar: (series, None), or (None, reason)."""
+    if not last_bar:
+        return None, "snapshot has no lastBar"
+    cut = [(d, c) for d, c in series if d <= last_bar]
+    if not cut or cut[-1][0] != last_bar:
+        have = series[-1][0] if series else "none"
+        return None, f"independent series has no close for {last_bar} (last {have})"
+    return cut, None
+
+
+def row_status(diff: dict) -> str:
+    return "pass" if all(abs(v) < TOL_PP for v in diff.values()) else "fail"
+
+
+def overall(rows) -> str:
+    return max((r["status"] for r in rows), key=RANK.__getitem__, default="not comparable")
 
 
 def to_usd(local, fx):
@@ -89,23 +141,49 @@ def stats(usd):
     }
 
 
-def main() -> None:
-    snap = json.loads((ROOT / "data" / "snapshot.json").read_text(encoding="utf-8"))
+def main(fetch=chart, root: Path = ROOT) -> int:
+    snap = json.loads((root / "data" / "snapshot.json").read_text(encoding="utf-8"))
     by = {p["ticker"]: p for p in snap["positions"]}
+    # Everything is fetched before anything is written, so a network failure
+    # leaves the previous check in place.
+    try:
+        raw = [(ticker, pair, fetch(ticker), fetch(pair) if pair else None) for ticker, pair in LINES]
+    except FetchError as e:
+        print(f"fetch failed, nothing written: {e}")
+        return 4
     wb = Workbook()
     wb.remove(wb.active)
     rows = []
-    for ticker, pair in LINES:
-        local = chart(ticker)
-        fx = chart(pair) if pair else None
+    for ticker, pair, local_all, fx_all in raw:
+        theirs = by[ticker]["usd"]
+        last_bar = by[ticker].get("lastBar")
+        local, why = align(local_all, last_bar)
+        fx = None
+        if pair and not why:
+            fx, why = align(fx_all, last_bar)
+        if why:
+            rows.append({
+                "ticker": ticker,
+                "status": "not comparable",
+                "reason": why,
+                "lastBar": last_bar,
+                "independent": None,
+                "pipeline": {k: round(theirs[k], 4) for k in ("ytd", "ret1y", "vol")},
+                "diffPp": None,
+                "lastClose": local_all[-1][0] if local_all else None,
+            })
+            continue
         usd = to_usd(local, fx)
         mine = stats(usd)
-        theirs = by[ticker]["usd"]
+        diff = {k: round(mine[k] - theirs[k], 4) for k in ("ytd", "ret1y", "vol")}
         rows.append({
             "ticker": ticker,
+            "status": row_status(diff),
+            "reason": None,
+            "lastBar": last_bar,
             "independent": {k: round(mine[k], 4) for k in ("ytd", "ret1y", "vol")},
             "pipeline": {k: round(theirs[k], 4) for k in ("ytd", "ret1y", "vol")},
-            "diffPp": {k: round(mine[k] - theirs[k], 4) for k in ("ytd", "ret1y", "vol")},
+            "diffPp": diff,
             "lastClose": usd[-1][0],
         })
 
@@ -139,21 +217,28 @@ def main() -> None:
         for col, w in (("A", 12), ("B", 22), ("C", 14), ("D", 14), ("E", 12), ("G", 26), ("H", 14)):
             ws.column_dimensions[col].width = w
 
-    out = ROOT / "research" / "verification.xlsx"
+    if not wb.sheetnames:
+        wb.create_sheet("status")["A1"] = "No line was comparable on this run; see data/verification.json."
+    out = root / "research" / "verification.xlsx"
     wb.save(out)
-    worst = max(abs(v) for r in rows for v in r["diffPp"].values())
+    diffs = [abs(v) for r in rows if r["diffPp"] for v in r["diffPp"].values()]
+    worst = max(diffs) if diffs else None
+    status = overall(rows)
     result = {
         "asOf": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "snapshotAsOf": datetime.fromtimestamp(snap["asOf"] / 1000, timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
+        "status": status,
+        "tolerancePp": TOL_PP,
         "rows": rows,
         "maxAbsDiffPp": worst,
     }
-    (ROOT / "data" / "verification.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    (root / "data" / "verification.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     for r in rows:
-        print(r["ticker"], "independent", r["independent"], "pipeline", r["pipeline"], "diff", r["diffPp"])
-    print(f"max abs difference {worst:.4f}pp -> {out.relative_to(ROOT)}")
+        print(r["ticker"], r["status"], r["reason"] or "", "independent", r["independent"], "pipeline", r["pipeline"], "diff", r["diffPp"])
+    print(f"status {status}, max abs difference {'n/a' if worst is None else f'{worst:.4f}pp'} -> {out.relative_to(root)}")
+    return 3 if status == "fail" else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
