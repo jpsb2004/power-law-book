@@ -634,6 +634,10 @@ function renderStamp() {
       xc.source + ": " + sessions + " sessions on this run, largest gap " + worst.maxAbsDiffPct.toFixed(3) + "% (" +
       worst.ticker + "). A gap above 0.5% is flagged by the validator. Dividend adjustment is Yahoo's ratio method; " +
       "splits are applied to the whole history by the provider, and the validator flags a clean 2x/3x/4x jump.";
+    if (xc.singleSource?.length) {
+      $("xcheck-note").textContent +=
+        " No second source was checked for " + xc.singleSource.join(", ") + " on this run: their prices rest on Yahoo alone.";
+    }
   }
   const vf = DATA.verification;
   if (vf?.rows?.length) {
