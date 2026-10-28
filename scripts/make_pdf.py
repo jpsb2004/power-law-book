@@ -373,7 +373,7 @@ for lead, rest in [
     ("Construction is top-down, not stock-by-stock.",
      " Bucket targets are "
      + " / ".join(f"{b} {BUCKET_W.get(b, 0):.0f}%" for b in ORDER) + ". Weights within each bucket "
-     "are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table."),
+     "are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table on the published page."),
     ("Compute is retained on purpose, not shrunk to a token hedge.",
      " A portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
      "construction than one that wins when the upstream links outpace compute but does not collapse if they fall behind."),
@@ -427,7 +427,7 @@ story += [
     Paragraph(
         f"The book is organized into {NUMBER_WORDS[len(ORDER)]} thematic buckets rather than picked stock-by-stock. "
         "Bucket targets are set first; weights within each bucket are set line by line, and the "
-        "change log records why. Equal capital is not equal risk: see the risk table. "
+        "change log records why. Equal capital is not equal risk: see the risk table on the published page. "
         "The bet is on the theme, not on any individual name being the best "
         "operator in it.", body),
 ]
