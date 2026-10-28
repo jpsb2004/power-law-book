@@ -29,7 +29,7 @@ REQUIRED_POSITION_FIELDS = ("ticker", "name", "sleeve", "currency", "weight", "v
 REQUIRED_SNAPSHOT_FIELDS = ("asOf", "base", "positions", "curve", "curveStats", "fx")
 
 BUCKET_ORDER = ("energy", "compute", "materials", "ballast")
-BUCKET_LABELS = {"energy": "Substrate", "compute": "Compute", "materials": "Materials", "ballast": "Ballast"}
+BUCKET_LABELS = {"energy": "Substrate", "compute": "Compute", "materials": "Materials", "ballast": "Diversifiers"}
 # Decisions a falsifier response may record (mirrors lib/falsifiers.js DECISIONS).
 FALSIFIER_DECISIONS = ("hold", "trim", "exit", "revise-thesis")
 

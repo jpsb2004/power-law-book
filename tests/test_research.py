@@ -58,7 +58,7 @@ def test_bucket_weights(book):
 
 def test_scenario_buckets_follow_display_order_not_roster_order(book):
     result = apply_scenario(book, SCENARIOS["grid"])
-    assert list(result["by_bucket"]) == ["Substrate", "Compute", "Materials", "Ballast"]
+    assert list(result["by_bucket"]) == ["Substrate", "Compute", "Materials", "Diversifiers"]
 
 
 def test_scenario_contribution_is_shock_times_weight(book):
@@ -71,7 +71,7 @@ def test_scenario_contribution_is_shock_times_weight(book):
 
 
 def test_capex_note_reads_ballast_from_live_weights(book):
-    assert "ballast is only 25%" in apply_scenario(book, SCENARIOS["capex"])["note"]
+    assert "the diversifiers are only 25%" in apply_scenario(book, SCENARIOS["capex"])["note"]
 
 
 def test_combined_note_has_no_unfilled_placeholders(book):

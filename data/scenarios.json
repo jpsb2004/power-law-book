@@ -35,7 +35,7 @@
         "URA, NLR, LB, PETR4.SA, 2222.SR: owners of power and land capture scarcity rent.",
         "NBIS, CRWV: the neoclouds are the losers; they have signed for capacity they cannot energise, and their capex is already committed.",
         "Compute lines: demand is deferred, not destroyed.",
-        "GLD, JPM, AVDV: Ballast roughly holds. RARA11.SA: rare earths bid on grid hardware demand.",
+        "GLD, JPM, AVDV: the diversifiers roughly hold. RARA11.SA: rare earths bid on grid hardware demand.",
         "SGOV: bills hold par.",
         "ETN, HUBB: grid equipment is the scarce input, so its makers take the rent. ASML: tool orders defer with the compute build. IEUR: Europe is a bystander."
       ]
@@ -44,7 +44,7 @@
       "key": "capex",
       "name": "CapEx Retrenchment",
       "premise": "Hyperscalers cut AI capital spending guidance. The supercycle is re-rated as a cycle.",
-      "note": "The book's central risk. Note ballast is only {ballast:.0f}% — it cushions, it does not rescue.",
+      "note": "The book's central risk. Note the diversifiers are only {ballast:.0f}% — it cushions, it does not rescue.",
       "shocks": {
         "CRWV": -45.0,
         "NBIS": -40.0,
@@ -73,7 +73,7 @@
       "rationale": [
         "Compute and neocloud lines take the hit first.",
         "URA, NLR, LB, PETR4.SA, 2222.SR: fuel demand is a derivative of the buildout, so it goes too, just less, because reactors serve grids rather than data centres alone.",
-        "GLD, AVDV, JPM: this is the scenario Ballast exists for.",
+        "GLD, AVDV, JPM: this is the scenario the diversifiers exist for.",
         "RARA11.SA: falls with the technology-materials cycle, so it does not cushion here.",
         "SGOV: bills hold par.",
         "ETN, HUBB: data-centre electrical orders fall, utility orders hold up better. ASML: tool orders are cut with foundry capex. IEUR: falls with global equity, less than US tech."

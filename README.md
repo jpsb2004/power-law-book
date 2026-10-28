@@ -26,15 +26,14 @@ built.
 
 Chips are fungible on a two-year horizon. **Interconnection queues are not.** The
 book is positioned long the constraint and long the ground it stands on, with a
-fifth of the notional held against the possibility that the whole thesis is
-one trade wearing three hats.
+diversifying sleeve that cushions drawdowns if the thesis is wrong.
 
 | Bucket | Claim | Positions |
 |---|---|---|
 | **I · Substrate** | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV, ETN, HUBB |
 | **II · Compute** | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L, ASML |
 | **III · Materials** | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
-| **IV · Ballast** | What survives if the rest of the book is the same bet | GLD, SGOV, AVDV, JPM, IEUR |
+| **IV · Diversifiers** (formerly Ballast) | Cushions drawdowns; measured as diversification, not a hedge | GLD, SGOV, AVDV, JPM, IEUR |
 
 Targets are `bucket_targets` in [`data/positions.json`](data/positions.json); live weights
 are on the [page](https://jpsb2004.github.io/power-law-book/).
@@ -46,9 +45,9 @@ arguing with, stated in the repo rather than buried:
 
 - **VGT overlaps half its own bucket** — it already holds AMD's peers and the
   megacaps, diluting single-name risk without adding a new bet.
-- **RARA11.SA is not ballast, so it has its own Materials bucket.** It is a
+- **RARA11.SA is not a diversifier, so it has its own Materials bucket.** It is a
   concentrated, policy-driven rare-earth basket that will likely fall *with* the
-  book, not against it. It was in Ballast until 2026-10-14 (see
+  book, not against it. It was in the sleeve then called Ballast until 2026-10-14 (see
   [`CHANGELOG.md`](CHANGELOG.md)).
 
 ---
@@ -228,7 +227,7 @@ figure.
 ### Factor exposure (three years, three factors)
 
 Weekly USD returns in excess of T-bills (SGOV) for the book, each bucket and
-each Ballast line, over three years, regressed on global equity (ACWI),
+each Diversifiers line, over three years, regressed on global equity (ACWI),
 semiconductors (SMH) and energy (XLE) — none of them a holding, so no bucket is
 regressed on itself. Lines that listed later join the long-run curve when they
 list. The page adds a rolling 52-week beta to ACWI and SMH, shows each bucket's

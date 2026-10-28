@@ -59,14 +59,15 @@ RULE = colors.HexColor("#C8CDD4")
 BUCKET_INK = {"Substrate": colors.HexColor("#B5790A"),
               "Compute": colors.HexColor("#1F6FB2"),
               "Materials": colors.HexColor("#65389F"),
-              "Ballast": colors.HexColor("#A02060")}
+              "Diversifiers": colors.HexColor("#A02060")}
 BUCKET_TINT = {"Substrate": colors.HexColor("#FAF3E4"),
                "Compute": colors.HexColor("#EAF1F8"),
                "Materials": colors.HexColor("#F0EBF7"),
-               "Ballast": colors.HexColor("#F9EAF1")}
+               "Diversifiers": colors.HexColor("#F9EAF1")}
 # Display order and labels come from the ontology, so a bucket added there
 # reaches every table and chart below without another hand-kept list.
 ORDER = [BUCKET_LABELS[k] for k in BUCKET_ORDER]
+DIVERSIFIERS = BUCKET_LABELS["ballast"]
 NUMBER_WORDS = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
 CREAM = colors.HexColor("#F7F1E3")
 
@@ -378,7 +379,7 @@ for lead, rest in [
      "construction than one that wins on the rotation but does not collapse if the rotation stalls."),
     ("Every position carries a standing falsification note:",
      " the specific condition under which its inclusion in the thesis is wrong. The critical-minerals "
-     "ETF sits in its own Materials bucket rather than being counted as ballast. See Section 4."),
+     "ETF sits in its own Materials bucket rather than being counted as a diversifier. See Section 4."),
 ]:
     story.append(Paragraph(f"•&nbsp;<b>{lead}</b>{rest}", cover_body))
 
@@ -436,7 +437,7 @@ exposure = {
     "Substrate": "Fuel, generation, land, interconnect rights and grid equipment:<br/>the most direct expression of the thesis",
     "Compute": "The hardware layer itself: a counterweight against<br/>being wrong about the timing of the rotation",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
-    "Ballast": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
+    "Diversifiers": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
 }
 for b in ORDER:
     rows.append([Paragraph(b, tbl_cell), Paragraph(f"{BUCKET_W[b]:.1f}%", tbl_cell),
@@ -458,7 +459,7 @@ story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
     "expression of the thesis. Compute is kept at about a third of the book on purpose: a "
     "portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
     "construction than one that wins on the rotation but does not collapse if the rotation "
-    "stalls. Ballast is sized to absorb drawdown from the rest of the book rather than to add "
+    "stalls. Diversifiers are sized to absorb drawdown from the rest of the book rather than to add "
     "a competing return thesis.", body)]
 
 # Equal capital is not equal risk: the same Euler decomposition the page shows,
@@ -475,7 +476,7 @@ if _rrows:
         f"(weekly USD returns, {_risk['weeks']} weeks), {_top[0]['key']} and {_top[1]['key']} hold "
         f"{sum(r['weightPct'] for r in _top):.0f}% of the capital and "
         f"{sum(r['riskSharePct'] for r in _top):.0f}% of the risk"
-        + (f"; Ballast holds {_bal['weightPct']:.0f}% of the capital and {_bal['riskSharePct']:.0f}% of the risk"
+        + (f"; Diversifiers hold {_bal['weightPct']:.0f}% of the capital and {_bal['riskSharePct']:.0f}% of the risk"
            if _bal else "")
         + ". The full table is on the published page.", body))
 
@@ -564,7 +565,7 @@ story.append(Paragraph(f"Critical Materials ({BUCKET_W.get('Materials', 0):.1f}%
 for _p in positions_in("materials"):
     story.append(KeepTogether(position(_p)))
 
-story.append(Paragraph(f"Ballast ({BUCKET_W['Ballast']:.1f}%, {BUCKET_N['Ballast']} positions)", sub_head))
+story.append(Paragraph(f"{DIVERSIFIERS} ({BUCKET_W[DIVERSIFIERS]:.1f}%, {BUCKET_N[DIVERSIFIERS]} positions)", sub_head))
 for _p in positions_in("ballast"):
     story.append(KeepTogether(position(_p)))
 
@@ -587,7 +588,7 @@ story += [
            if book.structure else "far fewer independent bets than it has lines."), weakness),
     Paragraph(
         "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
-        "bucket rather than in Ballast, because it is correlated with the same technology-materials "
+        "bucket rather than in Diversifiers, because it is correlated with the same technology-materials "
         f"cycle the rest of the book is long. Its thin trading history (~{RARA_COVER} active "
         "coverage in the measured window) adds noise to any long-horizon variance figure.", weakness),
     Paragraph(

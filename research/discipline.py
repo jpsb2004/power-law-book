@@ -35,7 +35,7 @@ VALUATION_RULES: tuple[tuple[str, str], ...] = (
         "cap the position at five sessions of average traded value on B3.",
     ),
     (
-        "Ballast",
+        "Diversifiers",
         "Rebalance when yield spread / discount to NAV deviates by >1.5 standard "
         "deviations from the 3-year trailing mean.",
     ),

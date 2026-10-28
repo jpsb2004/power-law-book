@@ -348,7 +348,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
     <p class="lede prose">
       Sizing is near equal-weight by design: bucket targets carry the argument, and lines inside
       a bucket get close to the same slice, so no single stock call is asked to carry the thesis.
-      <span id="alloc-ballast">Ballast carries a large share of the book</span>, which is a deliberate
+      <span id="alloc-ballast">Diversifiers carry a large share of the book</span>, which is a deliberate
       statement that the book's own thesis might be wrong.
     </p>
     <figure>
@@ -442,7 +442,7 @@ footer .disclaimer { font-family: var(--font-mono); font-size: 0.68rem; line-hei
   <section id="factor-section" hidden>
     <div class="sec-head"><span class="eyebrow secnum"></span><h2>What the returns are made of</h2></div>
     <p class="lede prose" id="factor-lede">
-      Ballast exists in case the rest of the book is one trade. If it does its job, it should
+      The Diversifiers sleeve exists in case the rest of the book is one trade. If it does its job, it should
       load lightly on the factors the thesis is long and explain little of its own movement
       through them.
     </p>
@@ -655,7 +655,7 @@ function renderStats() {
     { k: "Year to date", v: pct(s.ytd), c: signClass(s.ytd), n: "since 1 Jan 2026" },
     { k: "Volatility", v: (s.vol ?? 0).toFixed(1) + "%", c: "", n: "annualised, daily returns" },
     { k: "Max drawdown", v: pct(s.maxDrawdown), c: "neg", n: "peak to trough, 12m" },
-    { k: "Ballast weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "what is left if the thesis is wrong" },
+    { k: "Diversifiers weight", v: DATA.sleeveWeights.ballast + "%", c: "", n: "cushions drawdowns if the thesis is wrong" },
   ];
   // The forward-tracked series, kept apart from the replay above it.
   const tr = DATA.track;
@@ -843,8 +843,8 @@ function renderAlloc() {
   const top = order.reduce((a, b) => (sw[b] > sw[a] ? b : a));
   $("alloc-ballast").textContent =
     top === "ballast"
-      ? "Ballast carries the largest single allocation (" + sw.ballast + "%)"
-      : "Ballast carries " + sw.ballast + "% of the book, against " + SLEEVES[top].name + "'s " + sw[top] + "%";
+      ? "Diversifiers carry the largest single allocation (" + sw.ballast + "%)"
+      : "Diversifiers carry " + sw.ballast + "% of the book, against " + SLEEVES[top].name + "'s " + sw[top] + "%";
   const W = 1000, H = 160, m = { t: 34, r: 2, b: 44, l: 2 };
   const iw = W - m.l - m.r, bh = H - m.t - m.b;
   const total = POS.reduce((a, p) => a + p.weight, 0);
@@ -1567,7 +1567,7 @@ function renderRisk() {
   const bal = R.buckets.find((b) => b.sleeve === "ballast");
   $("risk-lede").textContent =
     top2.map((r) => r.key).join(" and ") + " hold " + topW.toFixed(0) + "% of the capital and " + topShare.toFixed(0) +
-    "% of the risk" + (bal ? "; Ballast holds " + bal.weightPct.toFixed(0) + "% of the capital and " + bal.riskSharePct.toFixed(0) + "% of the risk" : "") +
+    "% of the risk" + (bal ? "; Diversifiers hold " + bal.weightPct.toFixed(0) + "% of the capital and " + bal.riskSharePct.toFixed(0) + "% of the risk" : "") +
     ". Share of risk is each line's contribution to the book's variance, so the column sums to the whole book " +
     "and a negative entry is a line that lowered it.";
 
@@ -1800,7 +1800,7 @@ function renderFactors() {
   const yrs = f.window ? ((Date.parse(f.window.end) - Date.parse(f.window.start)) / 3.15576e10).toFixed(0) : null;
   const fnames = f.factors.map((x) => x.ticker + " (" + x.id + ")").join(", ");
   $("factor-lede").textContent =
-    "Ballast exists in case the rest of the book is one trade. If it does its job, it should load lightly on the " +
+    "The Diversifiers sleeve exists in case the rest of the book is one trade. If it does its job, it should load lightly on the " +
     "factors the thesis is long and explain little of its own movement through them. Weekly USD returns" +
     (f.excessOf ? " in excess of " + f.excessOf + " (T-bills)" : "") +
     (f.window ? ", " + fmtDate(Date.parse(f.window.start)) + " to " + fmtDate(Date.parse(f.window.end)) + " (" + yrs + " years)" : "") +
@@ -1812,7 +1812,7 @@ function renderFactors() {
     return name(top) + " (" + r.betas[top].toFixed(2) + ")";
   };
   const read = b
-    ? "Ballast's largest loading is on " + lead(b) + "; the factors together explain " + (b.r2 * 100).toFixed(0) +
+    ? "Diversifiers' largest loading is on " + lead(b) + "; the factors together explain " + (b.r2 * 100).toFixed(0) +
       "% of its weekly variance, and its correlation with " + thesisList + " combined is " + num(b.rhoThesis) + ". " +
       (ids.some((id) => b.betas[id] > 0.3 && (b.tStats[id] ?? 0) > 2)
         ? "That is not a hedge: it rises and falls with the market, only by different amounts. A hedge would show negative loadings. "
