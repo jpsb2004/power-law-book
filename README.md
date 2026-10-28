@@ -30,8 +30,8 @@ diversifying sleeve that cushions drawdowns if the thesis is wrong.
 
 | Bucket | Claim | Positions |
 |---|---|---|
-| **I · Substrate** | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, NBIS, CRWV, ETN, HUBB |
-| **II · Compute** | The demand side — silicon, fabs, and the firms selling the output | TSM, AMD, PLTR, VGT, 2357.TW, EWY, AINF.L, ASML |
+| **I · Substrate** | The buildout is constrained by fuel, molecules, the ground it stands on and the grid equipment that connects it | URA, NLR, PETR4.SA, 2222.SR, LB, ETN, HUBB, VST |
+| **II · Compute** | The demand side — silicon, fabs, and the firms selling the output | NBIS, CRWV, TSM, AMD, PLTR, 2357.TW, EWY, AINF.L, ASML |
 | **III · Materials** | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
 | **IV · Diversifiers** (formerly Ballast) | Cushions drawdowns; measured as diversification, not a hedge | GLD, SGOV, AVDV, JPM, IEUR |
 
@@ -43,8 +43,9 @@ Every position carries a thesis **and its falsification condition** in
 [`data/positions.json`](data/positions.json). Classification calls worth
 arguing with, stated in the repo rather than buried:
 
-- **VGT overlaps half its own bucket** — it already holds AMD's peers and the
-  megacaps, diluting single-name risk without adding a new bet.
+- **NBIS and CRWV sit in Compute, not Substrate** — they rent out GPU capacity, so they
+  sell the output of the chips; contracted power limits how fast they grow but does not
+  make them owners of the constraint. Moved on 2026-10-28 (see the change log).
 - **RARA11.SA is not a diversifier, so it has its own Materials bucket.** It is a
   concentrated, policy-driven rare-earth basket that will likely fall *with* the
   book, not against it. It was in the sleeve then called Ballast until 2026-10-14 (see
@@ -348,7 +349,7 @@ deployments from one commit.
   day's rate until 14 Oct 2026). A session still open at run time is never
   published as a close.
 - **Second source.** Each refresh compares the unadjusted close of AMD, TSM,
-  JPM, GLD and VGT with Nasdaq's published closes, session by session; a gap
+  JPM, GLD and VST with Nasdaq's published closes, session by session; a gap
   above 0.5% is flagged. On 14 Oct 2026: 125 sessions, largest gap 0.001%.
 - **Independent recomputation.** `scripts/verify_independent.py` refetches AMD,
   PETR4.SA (with USDBRL) and GLD using only the Python standard library,
