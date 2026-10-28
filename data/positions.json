@@ -68,14 +68,24 @@
         "key": "capex",
         "name": "Hyperscaler capex cut",
         "test": "Two or more of Microsoft, Alphabet, Amazon and Meta cut next-year capital spending guidance in the same quarter.",
-        "kind": "qualitative"
+        "kind": "qualitative",
+        "consequence": "Tests the demand side of the thesis directly. At the next quarterly review every Compute line, plus the Substrate lines that depend on hyperscaler load (NBIS, CRWV, ETN, HUBB), is tested against its own falsification condition and cut only where that condition is met. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       },
       {
         "key": "rotation",
         "name": "Compute keeps leading power",
         "test": "Compute out-returns Substrate by more than 20 percentage points over twelve months.",
         "kind": "buckets",
-        "threshold": 20
+        "threshold": 20,
+        "consequence": "Read as a valuation question first. At the next quarterly review Compute lines are tested against the bucket trim rule and cut back to target where it is breached. Substrate lines are tested against their own falsification conditions. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. Counts toward the two-in-a-quarter rule.",
+        "responses": [
+          {
+            "date": "2026-10-28",
+            "decision": "hold",
+            "text": "Compute's twelve-month lead over Substrate is above the 20pp threshold; the live figure is in the reading column, and this response does not fix one. Under the review rules one portfolio falsifier does not reconsider the thesis, and no line is cut on price alone. This trigger is the reason the Substrate/Compute sizing is under review; any change will be logged in the change log. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. For the two-in-a-quarter rule, this trigger counts from 28 Oct 2026, the date of this response, and in each later quarter in which it stays triggered. Any period above threshold before this response is not counted. Watched before the Q4 review: (1) whether the gap reflects a Compute re-rating rather than Substrate lines failing; each Substrate line is checked against its own falsification condition. (2) Compute lines against the bucket trim rule, cut back to target where it is breached. (3) A second trigger this quarter: hyperscaler capex guidance in the current earnings season, and Micron against its −30% from-high threshold. If either triggers before quarter-end, the thesis itself is reconsidered."
+          }
+        ]
       },
       {
         "key": "uranium",
@@ -83,7 +93,9 @@
         "test": "Sprott Physical Uranium Trust (a holder of physical uranium) falls more than 25% over twelve months.",
         "kind": "drawdown12m",
         "ticker": "U-U.TO",
-        "threshold": -25
+        "threshold": -25,
+        "consequence": "The nuclear-fuel lines (URA, NLR) are tested against their own falsification conditions at the next quarterly review and cut only where a condition is met. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       },
       {
         "key": "memory",
@@ -91,7 +103,9 @@
         "test": "Micron, the listed read on HBM pricing, trades more than 30% below its twelve-month high.",
         "kind": "fromHigh",
         "ticker": "MU",
-        "threshold": -30
+        "threshold": -30,
+        "consequence": "EWY, the line through which HBM pricing reaches the book (Samsung, SK Hynix), is tested against its own falsification condition at the next quarterly review. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       },
       {
         "key": "oil",
@@ -99,7 +113,9 @@
         "test": "Brent trades below $60, the level at which Saudi Aramco and Petrobras payouts come under pressure.",
         "kind": "level",
         "ticker": "BZ=F",
-        "threshold": 60
+        "threshold": 60,
+        "consequence": "The payout lines (PETR4.SA, 2222.SR) are tested against their own dividend-based falsification conditions at the next quarterly review. Counts toward the two-in-a-quarter rule.",
+        "responses": []
       }
     ]
   },

@@ -13,6 +13,7 @@
 
 import { readFileSync, existsSync } from "node:fs";
 import { HOLDINGS } from "../lib/holdings.js";
+import { falsifierProblems } from "../lib/falsifiers.js";
 
 const root = new URL("../", import.meta.url);
 const read = (p) => JSON.parse(readFileSync(new URL(p, root), "utf8"));
@@ -91,6 +92,11 @@ const markup = active
   .filter((p) => /&(amp|lt|gt);|<\/?[a-z]+>/i.test(`${p.memo?.name ?? ""}${p.memo?.rationale ?? ""}${p.factor_role}`))
   .map((p) => p.ticker);
 check("no HTML markup stored in the SSOT", markup.length === 0, markup.join(", "));
+
+// --- falsifier governance. A falsifier with no pre-committed consequence, or a
+// response the page cannot read, is detection with nothing behind it.
+const fProblems = falsifierProblems(book.thesis?.falsifiers ?? []);
+check("every falsifier has a consequence and well-formed responses", fProblems.length === 0, fProblems.join("; "));
 
 console.log();
 if (failures.length) {
