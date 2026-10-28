@@ -637,9 +637,14 @@ function renderStamp() {
   }
   const vf = DATA.verification;
   if (vf?.rows?.length) {
+    // Files written before per-line status existed carry only the maximum.
+    const result = vf.status
+      ? "result against the pipeline at each line's last close (pass under " + (vf.tolerancePp ?? 0.05) + "pp): " +
+        vf.rows.map((r) => r.ticker + " " + r.status.toUpperCase() + (r.reason ? " (" + r.reason + ")" : "")).join(", ") +
+        (vf.maxAbsDiffPp != null ? "; largest difference " + vf.maxAbsDiffPp.toFixed(4) + "pp" : "")
+      : "largest difference from the pipeline " + vf.maxAbsDiffPp.toFixed(4) + "pp";
     $("xcheck-note").textContent += " " + vf.rows.map((r) => r.ticker).join(", ") + " are also recomputed independently " +
-      "(standard-library Python and Excel formulas, research/verification.xlsx): largest difference from the pipeline " +
-      vf.maxAbsDiffPp.toFixed(4) + "pp, checked " + vf.asOf + ".";
+      "(standard-library Python and Excel formulas, research/verification.xlsx): " + result + ", checked " + vf.asOf + ".";
   }
 }
 

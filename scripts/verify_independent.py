@@ -96,7 +96,7 @@ def align(series, last_bar):
     cut = [(d, c) for d, c in series if d <= last_bar]
     if not cut or cut[-1][0] != last_bar:
         have = series[-1][0] if series else "none"
-        return None, f"independent series has no close for {last_bar} (last {have})"
+        return None, f"no independent close for {last_bar}, last is {have}"
     return cut, None
 
 
