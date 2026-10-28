@@ -358,9 +358,9 @@ story += [
     Paragraph("EQUITY STRATEGY · PORTFOLIO INITIATION", eyebrow),
     Paragraph("Quantifying the Physical Bottlenecks<br/>of the Global AI CapEx Supercycle", cover_head),
     Paragraph(
-        "Overweight Substrate, hold Compute as a counterweight, and size Ballast to absorb "
-        f"drawdown. {N_POSITIONS} positions in {N_CURRENCIES} currencies express a rotation out of hyperscaler "
-        "beta and into the physical infrastructure that gates it.", deck),
+        "Own the ordered physical chain behind AI compute, with more capital in the upstream links. "
+        f"Compute is held as a counterweight and Diversifiers cushion drawdowns across {N_POSITIONS} positions "
+        f"in {N_CURRENCIES} currencies.", deck),
 ]
 for lead, rest in [
     ("The consensus AI trade is crowded.",
@@ -376,7 +376,7 @@ for lead, rest in [
      "inside each bucket are held close to equal-weight so no single stock call carries the thesis."),
     ("Compute is retained on purpose, not shrunk to a token hedge.",
      " A portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
-     "construction than one that wins on the rotation but does not collapse if the rotation stalls."),
+     "construction than one that wins when the upstream links outpace compute but does not collapse if they fall behind."),
     ("Every position carries a standing falsification note:",
      " the specific condition under which its inclusion in the thesis is wrong. The critical-minerals "
      "ETF sits in its own Materials bucket rather than being counted as a diversifier. See Section 4."),
@@ -435,7 +435,7 @@ story += [
 rows = [[Paragraph(h, tbl_head) for h in ("Bucket", "Weight", "N", "Structural exposure")]]
 exposure = {
     "Substrate": "Fuel, generation, land, interconnect rights and grid equipment:<br/>the most direct expression of the thesis",
-    "Compute": "The hardware layer itself: a counterweight against<br/>being wrong about the timing of the rotation",
+    "Compute": "The hardware layer itself: a counterweight in case<br/>the upstream links lag compute",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
     "Diversifiers": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
 }
@@ -458,8 +458,8 @@ story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
     "deliberately: fuel, land and the grid equipment that connects them are the more direct, less crowded "
     "expression of the thesis. Compute is kept at about a third of the book on purpose: a "
     "portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
-    "construction than one that wins on the rotation but does not collapse if the rotation "
-    "stalls. Diversifiers are sized to absorb drawdown from the rest of the book rather than to add "
+    "construction than one that wins when the upstream links outpace compute but does not "
+    "collapse if they fall behind. Diversifiers are sized to absorb drawdown from the rest of the book rather than to add "
     "a competing return thesis.", body)]
 
 # Equal capital is not equal risk: the same Euler decomposition the page shows,

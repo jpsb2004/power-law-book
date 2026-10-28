@@ -60,7 +60,7 @@
     }
   ],
   "thesis": {
-    "variant_view": "The market prices the AI buildout as a semiconductor story and treats power as a utility input that will be supplied on demand. This book's view is that grid interconnection, fuel and sited land are the binding constraint for the next three to five years, so the scarce rent accrues to whoever owns power, fuel and land with grid access rather than to the designers of the chips; the consensus reprices that only once announced data-centre capacity visibly slips.",
+    "variant_view": "AI compute demand runs through an ordered physical chain — fuel, land and grid, then minerals, then fabrication, then compute. Over three to five years the scarce rent accrues to the upstream links, not to the compute layer the consensus prices, and the market reprices this once announced data-centre capacity visibly slips. The book holds every link, with more capital upstream than in compute, and scores itself on whether Substrate keeps pace with Compute.",
     "horizon": "Three to five years, matching transformer, switchgear and interconnection-queue lead times. Daily and monthly moves are monitored, not acted on.",
     "review_rules": "Reviewed each quarter against the portfolio falsifiers below and every line's own 'what breaks it'. A line is cut when its falsification condition is met, not on price alone; a line whose valuation breaches its bucket's trim rule is cut back to target. If two portfolio falsifiers trigger in the same quarter, the thesis itself is reconsidered, not just the lines.",
     "falsifiers": [
