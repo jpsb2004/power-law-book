@@ -13,6 +13,8 @@ import {
   windowed,
   riskContributions,
   portfolioIndex,
+  MIN_WEEKS,
+  olsMin,
 } from "../lib/analytics.js";
 
 const DAY = 864e5;
@@ -117,4 +119,16 @@ test("a line with a short history is computed but flagged", () => {
   const y = rc.rows.find((r) => r.key === "Y");
   assert.equal(y.short, true);
   assert.ok(y.riskSharePct != null);
+});
+
+test("factor regressions need MIN_WEEKS observations: 14 weeks is not enough", () => {
+  assert.equal(MIN_WEEKS, 40);
+  const x = Array.from({ length: 60 }, (_, i) => Math.sin(i * 0.9) * 0.02);
+  const y = x.map((v, i) => 1.5 * v + Math.cos(i * 2.1) * 0.005);
+  // ols alone would fit 14 points with three regressors' worth of slack; olsMin refuses.
+  assert.equal(olsMin(y.slice(-14), [x.slice(-14)]), null);
+  assert.equal(olsMin(y.slice(-39), [x.slice(-39)]), null);
+  const fit = olsMin(y.slice(-40), [x.slice(-40)]);
+  assert.equal(fit.n, 40);
+  close(fit.coef[1], 1.5, 0.1);
 });

@@ -57,6 +57,8 @@ export declare function ols(
   y: number[],
   xs: number[][]
 ): { n: number; coef: number[]; se: number[]; t: (number | null)[]; r2: number | null } | null;
+export declare const MIN_WEEKS: number;
+export declare function olsMin(y: number[], xs: number[][]): ReturnType<typeof ols>;
 export declare const INDEX_METHOD: string;
 export declare function trackingStats(
   target: Point[],
