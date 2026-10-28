@@ -437,7 +437,7 @@ exposure = {
     "Substrate": "Fuel, generation, land, interconnect rights and grid equipment:<br/>the most direct expression of the thesis",
     "Compute": "The hardware layer itself: a counterweight in case<br/>the upstream links lag compute",
     "Materials": "Rare earths and strategic metals: the export-controlled inputs<br/>to magnets, motors and turbines",
-    "Diversifiers": "Cross-asset hedges, monetary safety assets, and<br/>development-market value, sized to absorb drawdown",
+    "Diversifiers": "Cross-asset diversifiers, monetary safety assets, and<br/>developed-market value, sized to cushion drawdown",
 }
 for b in ORDER:
     rows.append([Paragraph(b, tbl_cell), Paragraph(f"{BUCKET_W[b]:.1f}%", tbl_cell),
@@ -456,7 +456,7 @@ bt.setStyle(TableStyle([
 story += [Spacer(1, 4), bt, Spacer(1, 9), Paragraph(
     f"Substrate ({BUCKET_W.get('Substrate', 0):.0f}%) is weighted above Compute ({BUCKET_W.get('Compute', 0):.0f}%) "
     "deliberately: fuel, land and the grid equipment that connects them are the more direct, less crowded "
-    "expression of the thesis. Compute is kept at about a third of the book on purpose: a "
+    "expression of the thesis. Compute is kept as a counterweight on purpose, at the weight in the table above: a "
     "portfolio that only wins if hyperscalers underperform their own suppliers is a weaker "
     "construction than one that wins when the upstream links outpace compute but does not "
     "collapse if they fall behind. Diversifiers are sized to absorb drawdown from the rest of the book rather than to add "

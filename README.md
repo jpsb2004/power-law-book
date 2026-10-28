@@ -131,8 +131,8 @@ GLD with a 3% day in CRWV. The dashboard alerts at ±2σ.
 
 Every series is the **dividend-adjusted** close, so returns include reinvested
 distributions and are net of each fund's own fee. Price-only closes read a
-T-bill fund paying ~4% a year as flat and understate high-payout lines like
-PETR4 and 2222.SR by their whole yield. Indices (^KS11) have no dividends to
+T-bill fund, whose return is almost all yield, as flat and understate high-payout
+lines like PETR4 and 2222.SR by their whole yield. Indices (^KS11) have no dividends to
 adjust and use the plain close.
 
 ### Index construction
