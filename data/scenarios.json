@@ -28,6 +28,7 @@
         "SGOV": 0.0,
         "ETN": 15.0,
         "HUBB": 12.0,
+        "VST": 15.0,
         "ASML": -8.0,
         "IEUR": -1.0
       },
@@ -37,7 +38,8 @@
         "Compute lines: demand is deferred, not destroyed.",
         "GLD, JPM, AVDV: the diversifiers roughly hold. RARA11.SA: rare earths bid on grid hardware demand.",
         "SGOV: bills hold par.",
-        "ETN, HUBB: grid equipment is the scarce input, so its makers take the rent. ASML: tool orders defer with the compute build. IEUR: Europe is a bystander."
+        "ETN, HUBB: grid equipment is the scarce input, so its makers take the rent. ASML: tool orders defer with the compute build. IEUR: Europe is a bystander.",
+        "VST: when new capacity cannot connect, existing plants set the price, and a merchant fleet sells at it."
       ]
     },
     {
@@ -67,6 +69,7 @@
         "SGOV": 0.0,
         "ETN": -15.0,
         "HUBB": -8.0,
+        "VST": -25.0,
         "ASML": -28.0,
         "IEUR": -4.0
       },
@@ -76,7 +79,8 @@
         "GLD, AVDV, JPM: this is the scenario the diversifiers exist for.",
         "RARA11.SA: falls with the technology-materials cycle, so it does not cushion here.",
         "SGOV: bills hold par.",
-        "ETN, HUBB: data-centre electrical orders fall, utility orders hold up better. ASML: tool orders are cut with foundry capex. IEUR: falls with global equity, less than US tech."
+        "ETN, HUBB: data-centre electrical orders fall, utility orders hold up better. ASML: tool orders are cut with foundry capex. IEUR: falls with global equity, less than US tech.",
+        "VST: its price carries a data-centre load premium that goes with the capex; power sold to the rest of the grid holds, so less than the neoclouds."
       ]
     },
     {
@@ -106,6 +110,7 @@
         "SGOV": 0.0,
         "ETN": -8.0,
         "HUBB": -5.0,
+        "VST": -10.0,
         "ASML": -35.0,
         "IEUR": -10.0
       },
@@ -114,7 +119,8 @@
         "PLTR: defence-adjacent software is the one compute line that can rise.",
         "Energy bids on supply fear; RARA11.SA bids hard on export controls.",
         "SGOV: bills hold par.",
-        "ASML: export controls tighten and its largest customer's fabs stop. ETN, HUBB: industrial sell-off, orders intact. IEUR: risk-off and an ASML-heavy top holding."
+        "ASML: export controls tighten and its largest customer's fabs stop. ETN, HUBB: industrial sell-off, orders intact. IEUR: risk-off and an ASML-heavy top holding.",
+        "VST: a delay to accelerator supply hits the data-centre premium in a risk-off market; domestic generation and a firmer gas price limit the fall."
       ]
     }
   ],
