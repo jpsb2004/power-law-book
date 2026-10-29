@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-10-29 01:48 UTC",
-  "snapshotAsOf": "2026-10-29 01:48 UTC",
+  "asOf": "2026-10-29 18:26 UTC",
+  "snapshotAsOf": "2026-10-29 18:25 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "status": "pass",
   "tolerancePp": 0.05,
@@ -33,18 +33,18 @@
       "reason": null,
       "lastBar": "2026-10-28",
       "independent": {
-        "ytd": 87.5156,
-        "ret1y": 92.3515,
-        "vol": 34.392
+        "ytd": 87.5157,
+        "ret1y": 92.1593,
+        "vol": 34.4391
       },
       "pipeline": {
         "ytd": 87.5156,
-        "ret1y": 92.3516,
-        "vol": 34.3919
+        "ret1y": 92.1596,
+        "vol": 34.439
       },
       "diffPp": {
         "ytd": 0.0001,
-        "ret1y": -0.0,
+        "ret1y": -0.0003,
         "vol": 0.0002
       },
       "lastClose": "2026-10-28"
@@ -72,5 +72,5 @@
       "lastClose": "2026-10-28"
     }
   ],
-  "maxAbsDiffPp": 0.0002
+  "maxAbsDiffPp": 0.0003
 }
