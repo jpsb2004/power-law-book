@@ -1,8 +1,8 @@
 {
-  "asOf": "2026-10-28 23:18 UTC",
-  "snapshotAsOf": "2026-10-28 23:18 UTC",
+  "asOf": "2026-10-29 01:48 UTC",
+  "snapshotAsOf": "2026-10-29 01:48 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
-  "status": "not comparable",
+  "status": "pass",
   "tolerancePp": 0.05,
   "rows": [
     {
@@ -29,16 +29,24 @@
     },
     {
       "ticker": "PETR4.SA",
-      "status": "not comparable",
-      "reason": "no independent close for 2026-10-28, last is 2026-10-27",
+      "status": "pass",
+      "reason": null,
       "lastBar": "2026-10-28",
-      "independent": null,
-      "pipeline": {
-        "ytd": 87.5541,
-        "ret1y": 92.9621,
-        "vol": 34.3915
+      "independent": {
+        "ytd": 87.5156,
+        "ret1y": 92.3515,
+        "vol": 34.392
       },
-      "diffPp": null,
+      "pipeline": {
+        "ytd": 87.5156,
+        "ret1y": 92.3516,
+        "vol": 34.3919
+      },
+      "diffPp": {
+        "ytd": 0.0001,
+        "ret1y": -0.0,
+        "vol": 0.0002
+      },
       "lastClose": "2026-10-28"
     },
     {
@@ -64,5 +72,5 @@
       "lastClose": "2026-10-28"
     }
   ],
-  "maxAbsDiffPp": 0.0
+  "maxAbsDiffPp": 0.0002
 }
