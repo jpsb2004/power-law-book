@@ -35,10 +35,12 @@ diversifying sleeve that cushions drawdowns if the thesis is wrong.
 | **III · Materials** | The minerals the buildout cannot design around, and whose supply is set by export policy | RARA11.SA |
 | **IV · Diversifiers** (formerly Ballast) | Cushions drawdowns; measured as diversification, not a hedge | GLD, SGOV, AVDV, JPM, IEUR |
 
+Bucket targets (data/positions.json → bucket_targets): Substrate 43 · Compute 33 · Materials 2 · Diversifiers 22. Substrate is the largest allocation.
+
 Targets are `bucket_targets` in [`data/positions.json`](data/positions.json); live weights
 are on the [page](https://jpsb2004.github.io/power-law-book/).
 Bucket targets are set first; weights within each bucket are set line by line, and the change log records why. Equal capital is not equal risk: see the risk table.
-Bucket weights are fixed; there is no "provisional" allocation.
+Bucket targets change only through a dated change-log entry; there is no "provisional" allocation.
 Every position carries a thesis **and its falsification condition** in
 [`data/positions.json`](data/positions.json). Classification calls worth
 arguing with, stated in the repo rather than buried:
