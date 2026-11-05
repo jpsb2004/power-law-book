@@ -697,10 +697,9 @@ story += [
     Paragraph("5. RISK FRAMEWORK", eyebrow),
     Paragraph("Scenario Stress-Testing", headline),
     Paragraph(
-        f"An empirical covariance matrix, estimated over a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} "
-        f"currencies (one line with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
-        "while being almost entirely noise. The portfolio uses stated-assumption scenario shocks "
-        "instead.", body),
+        "The shocks are stated assumptions, not estimates. The sample covariance is used only to describe "
+        "realised co-movement (risk shares, effective bets); it is not used to set shocks, because a scenario "
+        "needs correlations in regimes the sample never saw.", body),
 ]
 grid_text = Paragraph(
     "Interconnection queues and transformer lead times, not chip supply, become the binding "
@@ -790,9 +789,10 @@ if _brow:
     ]
 
 callout = Table([[Paragraph(
-    "<b>Why stated assumptions instead of a fitted model.</b> A covariance matrix estimated "
-    f"from a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} currencies would look statistically rigorous and "
-    "would be almost entirely noise, given how little history several positions have. The three "
+    "<b>Why stated assumptions instead of a fitted model.</b> The shocks are stated assumptions, not "
+    "estimates. The sample covariance is used only to describe realised co-movement (risk shares, effective "
+    "bets); it is not used to set shocks, because a scenario needs correlations in regimes the sample never "
+    "saw. The three "
     "scenarios are therefore stated shocks, written down per position in data/scenarios.json so "
     "they can be argued with, and checked against what actually happened in the historical "
     "windows above rather than presented as forecasts.", body)]], colWidths=[R - L - 72])

@@ -294,10 +294,10 @@ secret. Set the key locally, or as a repository secret, to enable synthesis.
 Three scenarios — Grid Bottleneck, CapEx Retrenchment, Geopolitical Shock —
 toggleable and combinable in the dashboard.
 
-The shocks are **stated assumptions, not estimates from a covariance matrix.** A
-year of daily data across five currencies, including a fund with a few months of
-history, cannot support an estimated correlation structure; one built on it
-would look rigorous and be noise. Sensitivities are set per position rather than
+The shocks are **stated assumptions, not estimates.** The sample covariance is
+used only to describe realised co-movement (risk shares, effective bets); it is
+not used to set shocks, because a scenario needs correlations in regimes the
+sample never saw. Sensitivities are set per position rather than
 per bucket, because the buckets are not internally uniform — a grid bottleneck helps the uranium miner and the merchant generator far more than the oil exporters, and all of them sit in Substrate.
 
 Combining scenarios sums the shocks, which assumes independence they do not
