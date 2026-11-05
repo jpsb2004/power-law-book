@@ -298,8 +298,7 @@ The shocks are **stated assumptions, not estimates from a covariance matrix.** A
 year of daily data across five currencies, including a fund with a few months of
 history, cannot support an estimated correlation structure; one built on it
 would look rigorous and be noise. Sensitivities are set per position rather than
-per bucket, because the buckets are not internally uniform — a grid bottleneck
-is good for a uranium miner and bad for a neocloud, and both sit in Substrate.
+per bucket, because the buckets are not internally uniform — a grid bottleneck helps the uranium miner and the merchant generator far more than the oil exporters, and all of them sit in Substrate.
 
 Combining scenarios sums the shocks, which assumes independence they do not
 have. The dashboard says so on screen.
