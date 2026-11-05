@@ -562,6 +562,7 @@ with tab_thesis:
             delta_color="off",
         )
         c3.metric("Common factor", f"{sx['firstCorrPcPct']:.0f}%", "of total correlation", delta_color="off")
+        c1.caption("Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not.")
         if _er:
             st.caption(
                 f"Estimated from {sx['weeks']} weeks on {sx['lines']} lines; the 90% sampling range is the 5th to 95th "

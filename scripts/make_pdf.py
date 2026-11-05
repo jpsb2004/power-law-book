@@ -584,7 +584,8 @@ story += [
         + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets"
            + (f" (90% sampling range {book.structure['enbRange']['p05']:.1f}–{book.structure['enbRange']['p95']:.1f})"
               if (book.structure or {}).get("enbRange") else "")
-           + f", with {(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
+           + f", with {(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor. "
+           "Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not."
            if book.structure else "far fewer independent bets than it has lines."), weakness),
     Paragraph(
         "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
@@ -664,7 +665,7 @@ if _sx:
            f"{_sx['weeks']} weeks). Small samples also overstate the first component, a bias the range does not "
            "remove, so the effective number of bets is more likely understated than overstated"
            if _sx.get("enbRange") and _sx.get("firstPcRange") else "")
-        + f". Shared points of failure: {_pf}.", body))
+        + f". Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not. Shared points of failure: {_pf}.", body))
 
 # ---- change log: every change to the book or its method, from positions.json
 _changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)

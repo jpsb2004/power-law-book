@@ -1360,7 +1360,7 @@ function renderBets() {
       : "");
   const rng = (r, d, u = "") => (r ? "90% sampling range " + r.p05.toFixed(d) + "–" + r.p95.toFixed(d) + u + " · " : "");
   const tiles = [
-    { k: "Effective bets", v: (S.enbRange ? "≈ " : "") + S.enb.toFixed(1), n: rng(S.enbRange, 1) + "of " + S.lines + " lines (Meucci entropy measure)" },
+    { k: "Effective bets", v: (S.enbRange ? "≈ " : "") + S.enb.toFixed(1), n: rng(S.enbRange, 1) + "of " + S.lines + " lines (Meucci entropy measure). Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not." },
     { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: rng(S.firstPcRange, 0, "%") + "of the book's variance" },
     { k: "Common factor", v: S.firstCorrPcPct.toFixed(0) + "%", n: "of total correlation, first eigenvalue" },
   ];
