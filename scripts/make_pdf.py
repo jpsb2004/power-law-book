@@ -106,7 +106,7 @@ N_POSITIONS = len(book.entities)
 _rara = next((e for e in book.entities if e.ticker == "RARA11.SA"), None)
 RARA_W = _rara.weight if _rara else 0.0
 RARA_WEEKS = round(52 * (_rara.coverage or 0)) if _rara else 0
-N_CURRENCIES = len({e.currency for e in book.entities})
+N_CURRENCIES = len({e.currency for e in book.entities} - {"USD"})  # trading currencies besides the US dollar
 
 BUCKET_N = {}
 BUCKET_W = {}
@@ -360,7 +360,7 @@ story += [
     Paragraph(
         "Own the ordered physical chain behind AI compute, with more capital in the upstream links. "
         f"Compute is held as a counterweight and Diversifiers cushion drawdowns across {N_POSITIONS} positions "
-        f"in {N_CURRENCIES} currencies.", deck),
+        f"in {N_CURRENCIES} currencies besides the US dollar.", deck),
 ]
 for lead, rest in [
     ("The consensus AI trade is crowded.",

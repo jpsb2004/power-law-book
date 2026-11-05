@@ -612,7 +612,7 @@ function renderStamp() {
   $("stamp").innerHTML = [
     "As of " + fmtDate(DATA.asOf) + ", " + new Date(DATA.asOf).toISOString().slice(11, 16) + " UTC",
     POS.length + " positions",
-    ccys.length + " currencies → USD",
+    ccys.filter((c) => c !== "USD").length + " currencies besides the US dollar",
     "Source: " + DATA.source,
   ].map((s) => "<span>" + escape(s) + "</span>").join("");
   $("npos-word").textContent = words(POS.length);

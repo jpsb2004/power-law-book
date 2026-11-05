@@ -107,7 +107,8 @@ except SchemaError as exc:
 st.title("The Power Law Book — Monitor")
 st.caption(
     "Quantifying the physical bottlenecks of the global AI CapEx supercycle · "
-    f"{len(book.entities)} positions · base {book.base} · "
+    f"{len(book.entities)} positions · "
+    f"{len({e.currency for e in book.entities} - {'USD'})} currencies besides the US dollar · base {book.base} · "
     f"data as of {book.as_of:%Y-%m-%d %H:%M UTC}"
 )
 

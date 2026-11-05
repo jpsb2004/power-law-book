@@ -95,7 +95,7 @@ blanks.
 
 ### Multi-exchange normalisation
 
-23 instruments, 7 venues, 5 currencies, no API key.
+23 instruments, 7 venues, 4 currencies besides the US dollar, no API key.
 
 FX is applied **date by date, not at today's spot** — converting a year of
 Korean prices at the current KRW rate would book twelve months of currency moves
@@ -391,7 +391,7 @@ positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
 ## CV summary
 
 > **The Power Law Book** — built a 23-position thematic equity portfolio on AI
-> compute and the energy it consumes, across 7 exchanges and 5 currencies;
+> compute and the energy it consumes, across 7 exchanges and 4 currencies besides the US dollar;
 > developed an FX-hedged USD return model, benchmark and risk-adjusted
 > comparison, factor regressions, risk-contribution, effective-bets and
 > stress-test analytics, refreshed and published automatically every weekday
