@@ -53,6 +53,21 @@ test("unanswered lists triggered falsifiers with no response only", () => {
   assert.deepEqual(unanswered(fs, checks), ["a"]);
 });
 
+test("basis_changed is optional and, when present, needs an ISO date and a note", () => {
+  assert.deepEqual(falsifierProblems([ok({ basis_changed: { date: "2026-10-28", note: "Reclassified." } })]), []);
+  const bad = falsifierProblems([ok({ basis_changed: { date: "28 Oct 2026", note: " " } })]);
+  assert.equal(bad.length, 2);
+  assert.match(bad.join(" "), /basis_changed.date/);
+  assert.match(bad.join(" "), /basis_changed.note/);
+});
+
+test("the rotation falsifier records its change of basis on 2026-10-28", () => {
+  const book = JSON.parse(readFileSync(new URL("../data/positions.json", import.meta.url), "utf8"));
+  const rot = book.thesis.falsifiers.find((f) => f.key === "rotation");
+  assert.equal(rot.basis_changed.date, "2026-10-28");
+  assert.match(rot.basis_changed.note, /^NBIS and CRWV moved from Substrate to Compute/);
+});
+
 test("the live book's falsifiers pass the schema", () => {
   const book = JSON.parse(readFileSync(new URL("../data/positions.json", import.meta.url), "utf8"));
   assert.deepEqual(falsifierProblems(book.thesis.falsifiers), []);

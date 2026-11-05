@@ -628,6 +628,8 @@ if _th:
         _tx = c["test"]
         if c.get("consequence"):
             _tx += f"<br/><b>If met:</b> {_x(c['consequence'])}"
+        if c.get("basisChanged"):
+            _tx += f"<br/><b>Basis changed, {_x(c['basisChanged']['date'])}:</b> {_x(c['basisChanged']['note'])}"
         # Snapshots before falsifier governance carry no latestResponse key: no badge for them.
         if c.get("triggered") is True and "latestResponse" in c:
             _r = c["latestResponse"]

@@ -533,7 +533,9 @@ with tab_thesis:
 
         st.dataframe(
             pd.DataFrame([
-                {"Falsifier": c["name"], "Test": c["test"], "If met": c.get("consequence") or "",
+                {"Falsifier": c["name"], "Test": c["test"]
+                 + (f" Basis changed, {c['basisChanged']['date']}: {c['basisChanged']['note']}" if c.get("basisChanged") else ""),
+                 "If met": c.get("consequence") or "",
                  "Reading": _reading(c),
                  "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding"),
                  "Response": _response(c)}

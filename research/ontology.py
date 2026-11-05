@@ -172,6 +172,11 @@ def _check_thesis(thesis: dict[str, Any]) -> None:
         where = f"thesis check {c.get('key', '?')}"
         if c.get("consequence") is not None and not isinstance(c["consequence"], str):
             raise SchemaError(f"{where}: consequence is not text")
+        b = c.get("basisChanged")
+        if b is not None:
+            if not isinstance(b, dict):
+                raise SchemaError(f"{where}: basisChanged is not an object")
+            _require(b, ("date", "note"), f"{where} basisChanged")
         r = c.get("latestResponse")
         if r is None:
             continue
