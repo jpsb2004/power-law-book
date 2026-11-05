@@ -9,8 +9,9 @@ set shocks, because a scenario needs correlations in regimes the sample never
 saw.
 
 Sensitivities are attached at position level rather than bucket level, because
-the buckets are not internally uniform: a grid bottleneck is good for a uranium
-miner and bad for a neocloud, and both sit in Energy.
+the buckets are not internally uniform: a grid bottleneck helps the uranium
+miner and the merchant generator far more than the oil exporters, and all of
+them sit in Substrate.
 
 Every number is a judgement. They are stated in one table, data/scenarios.json,
 so they can be argued with, which is the point.
