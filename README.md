@@ -400,11 +400,6 @@ positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
 > data against a second source and an independent recomputation, and changed
 > the book when the tests said so.
 
-Do **not** put the return on a CV as a result. If a number is mentioned, label
-it **backtest**: it replays today's weights over a year chosen after the fact.
-The measured findings are the better line — e.g. the book behaves like about
-two independent bets, and per unit of risk it did not beat simply holding VGT.
-
 ---
 
 ## Disclaimer
