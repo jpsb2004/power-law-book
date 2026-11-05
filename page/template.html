@@ -674,16 +674,16 @@ function renderStats() {
           n: (tp.length - 1) + " trading day" + (tp.length === 2 ? "" : "s") + ", chain-linked, never revised" };
   $("stats").innerHTML =
     '<div class="flag"><b>Hindsight backtest — not a track record.</b> Return, volatility and drawdown replay today\'s ' +
-    "weights over the past twelve months, with positions chosen knowing how that year went. The live record is the last tile.</div>" +
+    "weights over the past twelve months, with positions chosen knowing how that year went. The live record is the first tile.</div>" +
+    '<div class="stat live"><div class="k">' + escape(live.k) + '</div><div class="v ' + live.c + '">' + live.v +
+    '</div><div class="n">' + escape(live.n) + "</div></div>" +
     cards
       .map(
         (c) =>
           '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
           c.v + '</div><div class="n">' + c.n + "</div></div>"
       )
-      .join("") +
-    '<div class="stat live"><div class="k">' + escape(live.k) + '</div><div class="v ' + live.c + '">' + live.v +
-    '</div><div class="n">' + escape(live.n) + "</div></div>";
+      .join("");
 }
 
 /* ----------------------------------------------------------------- chain */
