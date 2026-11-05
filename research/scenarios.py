@@ -2,14 +2,16 @@
 Stress scenarios.
 
 These are **assumptions, not measurements.** Each scenario is a hand-specified
-shock in percent applied to individual positions, aggregated by weight. No
-covariance matrix is estimated, because a year of daily data across several
-currencies and a fund with a few months of history cannot support one — a
-correlation matrix built on that would look rigorous and be noise.
+shock in percent applied to individual positions, aggregated by weight. The
+shocks are stated assumptions, not estimates. The sample covariance is used only
+to describe realised co-movement (risk shares, effective bets); it is not used to
+set shocks, because a scenario needs correlations in regimes the sample never
+saw.
 
 Sensitivities are attached at position level rather than bucket level, because
-the buckets are not internally uniform: a grid bottleneck is good for a uranium
-miner and bad for a neocloud, and both sit in Energy.
+the buckets are not internally uniform: a grid bottleneck helps the uranium
+miner and the merchant generator far more than the oil exporters, and all of
+them sit in Substrate.
 
 Every number is a judgement. They are stated in one table, data/scenarios.json,
 so they can be argued with, which is the point.

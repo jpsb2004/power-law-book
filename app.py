@@ -107,7 +107,8 @@ except SchemaError as exc:
 st.title("The Power Law Book — Monitor")
 st.caption(
     "Quantifying the physical bottlenecks of the global AI CapEx supercycle · "
-    f"{len(book.entities)} positions · base {book.base} · "
+    f"{len(book.entities)} positions · "
+    f"{len({e.currency for e in book.entities} - {'USD'})} currencies besides the US dollar · base {book.base} · "
     f"data as of {book.as_of:%Y-%m-%d %H:%M UTC}"
 )
 
@@ -533,7 +534,9 @@ with tab_thesis:
 
         st.dataframe(
             pd.DataFrame([
-                {"Falsifier": c["name"], "Test": c["test"], "If met": c.get("consequence") or "",
+                {"Falsifier": c["name"], "Test": c["test"]
+                 + (f" Basis changed, {c['basisChanged']['date']}: {c['basisChanged']['note']}" if c.get("basisChanged") else ""),
+                 "If met": c.get("consequence") or "",
                  "Reading": _reading(c),
                  "Status": "watch" if c.get("triggered") is None else ("TRIGGERED" if c["triggered"] else "holding"),
                  "Response": _response(c)}
@@ -559,6 +562,7 @@ with tab_thesis:
             delta_color="off",
         )
         c3.metric("Common factor", f"{sx['firstCorrPcPct']:.0f}%", "of total correlation", delta_color="off")
+        c1.caption("Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not.")
         if _er:
             st.caption(
                 f"Estimated from {sx['weeks']} weeks on {sx['lines']} lines; the 90% sampling range is the 5th to 95th "

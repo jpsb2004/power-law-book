@@ -106,7 +106,7 @@ N_POSITIONS = len(book.entities)
 _rara = next((e for e in book.entities if e.ticker == "RARA11.SA"), None)
 RARA_W = _rara.weight if _rara else 0.0
 RARA_WEEKS = round(52 * (_rara.coverage or 0)) if _rara else 0
-N_CURRENCIES = len({e.currency for e in book.entities})
+N_CURRENCIES = len({e.currency for e in book.entities} - {"USD"})  # trading currencies besides the US dollar
 
 BUCKET_N = {}
 BUCKET_W = {}
@@ -360,7 +360,7 @@ story += [
     Paragraph(
         "Own the ordered physical chain behind AI compute, with more capital in the upstream links. "
         f"Compute is held as a counterweight and Diversifiers cushion drawdowns across {N_POSITIONS} positions "
-        f"in {N_CURRENCIES} currencies.", deck),
+        f"in {N_CURRENCIES} currencies besides the US dollar.", deck),
 ]
 for lead, rest in [
     ("The consensus AI trade is crowded.",
@@ -584,7 +584,8 @@ story += [
         + (f"{(book.structure or {}).get('enb', 0):.1f} effective bets"
            + (f" (90% sampling range {book.structure['enbRange']['p05']:.1f}–{book.structure['enbRange']['p95']:.1f})"
               if (book.structure or {}).get("enbRange") else "")
-           + f", with {(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor."
+           + f", with {(book.structure or {}).get('firstPcSharePct', 0):.0f}% of its variance on one common factor. "
+           "Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not."
            if book.structure else "far fewer independent bets than it has lines."), weakness),
     Paragraph(
         "<b>Materials concentration and liquidity drag.</b> RARA11.SA sits in its own Materials "
@@ -628,6 +629,8 @@ if _th:
         _tx = c["test"]
         if c.get("consequence"):
             _tx += f"<br/><b>If met:</b> {_x(c['consequence'])}"
+        if c.get("basisChanged"):
+            _tx += f"<br/><b>Basis changed, {_x(c['basisChanged']['date'])}:</b> {_x(c['basisChanged']['note'])}"
         # Snapshots before falsifier governance carry no latestResponse key: no badge for them.
         if c.get("triggered") is True and "latestResponse" in c:
             _r = c["latestResponse"]
@@ -662,7 +665,7 @@ if _sx:
            f"{_sx['weeks']} weeks). Small samples also overstate the first component, a bias the range does not "
            "remove, so the effective number of bets is more likely understated than overstated"
            if _sx.get("enbRange") and _sx.get("firstPcRange") else "")
-        + f". Shared points of failure: {_pf}.", body))
+        + f". Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not. Shared points of failure: {_pf}.", body))
 
 # ---- change log: every change to the book or its method, from positions.json
 _changes = sorted(POSITIONS.get("book_changes", []), key=lambda c: c["date"], reverse=True)
@@ -697,10 +700,9 @@ story += [
     Paragraph("5. RISK FRAMEWORK", eyebrow),
     Paragraph("Scenario Stress-Testing", headline),
     Paragraph(
-        f"An empirical covariance matrix, estimated over a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} "
-        f"currencies (one line with {RARA_WEEKS} weeks of trading history), would look statistically rigorous "
-        "while being almost entirely noise. The portfolio uses stated-assumption scenario shocks "
-        "instead.", body),
+        "The shocks are stated assumptions, not estimates. The sample covariance is used only to describe "
+        "realised co-movement (risk shares, effective bets); it is not used to set shocks, because a scenario "
+        "needs correlations in regimes the sample never saw.", body),
 ]
 grid_text = Paragraph(
     "Interconnection queues and transformer lead times, not chip supply, become the binding "
@@ -790,9 +792,10 @@ if _brow:
     ]
 
 callout = Table([[Paragraph(
-    "<b>Why stated assumptions instead of a fitted model.</b> A covariance matrix estimated "
-    f"from a year of daily data across {NUMBER_WORDS.get(N_CURRENCIES, N_CURRENCIES)} currencies would look statistically rigorous and "
-    "would be almost entirely noise, given how little history several positions have. The three "
+    "<b>Why stated assumptions instead of a fitted model.</b> The shocks are stated assumptions, not "
+    "estimates. The sample covariance is used only to describe realised co-movement (risk shares, effective "
+    "bets); it is not used to set shocks, because a scenario needs correlations in regimes the sample never "
+    "saw. The three "
     "scenarios are therefore stated shocks, written down per position in data/scenarios.json so "
     "they can be argued with, and checked against what actually happened in the historical "
     "windows above rather than presented as forecasts.", body)]], colWidths=[R - L - 72])

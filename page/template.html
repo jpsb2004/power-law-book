@@ -612,7 +612,7 @@ function renderStamp() {
   $("stamp").innerHTML = [
     "As of " + fmtDate(DATA.asOf) + ", " + new Date(DATA.asOf).toISOString().slice(11, 16) + " UTC",
     POS.length + " positions",
-    ccys.length + " currencies → USD",
+    ccys.filter((c) => c !== "USD").length + " currencies besides the US dollar",
     "Source: " + DATA.source,
   ].map((s) => "<span>" + escape(s) + "</span>").join("");
   $("npos-word").textContent = words(POS.length);
@@ -674,16 +674,16 @@ function renderStats() {
           n: (tp.length - 1) + " trading day" + (tp.length === 2 ? "" : "s") + ", chain-linked, never revised" };
   $("stats").innerHTML =
     '<div class="flag"><b>Hindsight backtest — not a track record.</b> Return, volatility and drawdown replay today\'s ' +
-    "weights over the past twelve months, with positions chosen knowing how that year went. The live record is the last tile.</div>" +
+    "weights over the past twelve months, with positions chosen knowing how that year went. The live record is the first tile.</div>" +
+    '<div class="stat live"><div class="k">' + escape(live.k) + '</div><div class="v ' + live.c + '">' + live.v +
+    '</div><div class="n">' + escape(live.n) + "</div></div>" +
     cards
       .map(
         (c) =>
           '<div class="stat"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' +
           c.v + '</div><div class="n">' + c.n + "</div></div>"
       )
-      .join("") +
-    '<div class="stat live"><div class="k">' + escape(live.k) + '</div><div class="v ' + live.c + '">' + live.v +
-    '</div><div class="n">' + escape(live.n) + "</div></div>";
+      .join("");
 }
 
 /* ----------------------------------------------------------------- chain */
@@ -1360,7 +1360,7 @@ function renderBets() {
       : "");
   const rng = (r, d, u = "") => (r ? "90% sampling range " + r.p05.toFixed(d) + "–" + r.p95.toFixed(d) + u + " · " : "");
   const tiles = [
-    { k: "Effective bets", v: (S.enbRange ? "≈ " : "") + S.enb.toFixed(1), n: rng(S.enbRange, 1) + "of " + S.lines + " lines (Meucci entropy measure)" },
+    { k: "Effective bets", v: (S.enbRange ? "≈ " : "") + S.enb.toFixed(1), n: rng(S.enbRange, 1) + "of " + S.lines + " lines (Meucci entropy measure). Not comparable across book changes (14 Oct, 28 Oct 2026); the level is approximate, the direction is not." },
     { k: "First component", v: S.firstPcSharePct.toFixed(0) + "%", n: rng(S.firstPcRange, 0, "%") + "of the book's variance" },
     { k: "Common factor", v: S.firstCorrPcPct.toFixed(0) + "%", n: "of total correlation, first eigenvalue" },
   ];
@@ -1444,6 +1444,7 @@ function renderValue() {
         const unanswered = c.triggered === true && "latestResponse" in c && !c.latestResponse;
         return '<tr><td class="lbl">' + escape(c.name) + '</td><td style="font-size:.84rem;color:var(--ink-2)">' + escape(c.test) +
           (c.consequence ? '<div style="margin-top:.3rem"><b>If met:</b> ' + escape(c.consequence) + "</div>" : "") +
+          (c.basisChanged ? '<div style="margin-top:.3rem"><b>Basis changed, ' + escape(c.basisChanged.date) + ":</b> " + escape(c.basisChanged.note) + "</div>" : "") +
           (r ? '<div style="margin-top:.3rem"><b>Response, ' + escape(r.date) + " (" + escape(r.decision) + "):</b> " + escape(r.text) + "</div>" : "") + "</td>" +
           '<td class="n">' + escape(reading(c)) + (c.detail ? '<div style="font-size:.72rem;color:var(--ink-3)">' + escape(c.detail) + "</div>" : "") + "</td>" +
           "<td>" + (c.triggered == null ? '<span class="tag">watch</span>' : c.triggered ? '<span class="tag warn">triggered</span>' : '<span class="tag">holding</span>') +
@@ -1602,6 +1603,8 @@ function renderRisk() {
       "weight × its covariance with the book ÷ the book's variance, in the " + V().label + " view, so the shares sum to " +
       R.sumPct.toFixed(0) + "%. Weekly sampling avoids the time-zone bias in daily cross-market covariances; on this basis " +
       "the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure in the headline. " +
+      "Risk-table volatility uses weekly simple returns over a common window, for attribution; the headline uses daily " +
+      "returns on the union of venue calendars. They differ by design. " +
       (excl.length
         ? "Shares cover the included lines (" + R.includedCapitalPct.toFixed(0) + "% of capital); " +
           excl.map((r) => r.key + " (" + r.weeks + " weeks, " + r.capitalPct.toFixed(0) + "% of capital)").join(", ") +

@@ -86,6 +86,10 @@
         "kind": "buckets",
         "threshold": 20,
         "consequence": "Read as a valuation question first. At the next quarterly review Compute lines are tested against the bucket trim rule and cut back to target where it is breached. Substrate lines are tested against their own falsification conditions. While this falsifier is triggered, no Compute or capacity-renter line is added and no target weight in those lines is raised. The monthly rebalance back to existing targets continues. No forced selling. Counts toward the two-in-a-quarter rule.",
+        "basis_changed": {
+          "date": "2026-10-28",
+          "note": "NBIS and CRWV moved from Substrate to Compute and VST was added; readings before this date use the old classification and are not comparable. The test is kept: it still asks whether the upstream links out-earn the compute layer, now with the capacity renters on the compute side, where the thesis puts them."
+        },
         "responses": [
           {
             "date": "2026-10-28",

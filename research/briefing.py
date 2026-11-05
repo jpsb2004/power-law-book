@@ -375,7 +375,9 @@ def render_deterministic(book: Book, notes, scenario: dict) -> str:
         f"**{sc.name}** — {sc.premise} Modelled portfolio impact "
         f"**{scenario['portfolio_pct']:+.1f}%**, with "
         + ", ".join(f"{k} {v:+.1f}%" for k, v in scenario["by_bucket"].items())
-        + f". {scenario['note']} These shocks are stated assumptions, not estimates from a covariance matrix.\n"
+        + f". {scenario['note']} The shocks are stated assumptions, not estimates. The sample covariance is used only "
+        "to describe realised co-movement (risk shares, effective bets); it is not used to set shocks, because a "
+        "scenario needs correlations in regimes the sample never saw.\n"
     )
 
     out.append("\n## Watch\n")

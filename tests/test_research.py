@@ -104,3 +104,14 @@ def test_falsifier_response_with_unknown_decision_is_rejected(tmp_path):
     bad = _checks(latestResponse={"date": "2026-10-28", "decision": "sell", "text": "t"})
     with pytest.raises(SchemaError):
         load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **bad))
+
+
+def test_falsifier_basis_changed_loads_and_is_optional(tmp_path):
+    ok = _checks(basisChanged={"date": "2026-10-28", "note": "Classification changed."})
+    c = load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **ok)).thesis["checks"][0]
+    assert c["basisChanged"]["date"] == "2026-10-28"
+    # Older snapshots carry no basisChanged key; null is also accepted.
+    load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **_checks()))
+    load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **_checks(basisChanged=None)))
+    with pytest.raises(SchemaError):
+        load_book(_snapshot(tmp_path, [_pos("A", "energy", 100)], **_checks(basisChanged={"date": "2026-10-28"})))
