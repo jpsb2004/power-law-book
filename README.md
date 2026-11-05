@@ -385,7 +385,7 @@ The AI also found things I would not have: the headline index was
 price-weighted rather than return-weighted, understating the 1-year return by
 ~8pp; returns ignored dividends; and the Ballast bucket, tested against tech and
 energy factors, turned out to be diversification rather than a hedge. Two
-positions (SGOV, XLP) were added to the Ballast as a direct result of that test.
+positions (SGOV, XLP) were added to the Diversifiers as a direct result of that test.
 
 ## CV summary
 
