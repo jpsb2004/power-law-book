@@ -1603,6 +1603,8 @@ function renderRisk() {
       "weight × its covariance with the book ÷ the book's variance, in the " + V().label + " view, so the shares sum to " +
       R.sumPct.toFixed(0) + "%. Weekly sampling avoids the time-zone bias in daily cross-market covariances; on this basis " +
       "the book's volatility is " + R.bookVolPct.toFixed(1) + "%, against the daily figure in the headline. " +
+      "Risk-table volatility uses weekly simple returns over a common window, for attribution; the headline uses daily " +
+      "returns on the union of venue calendars. They differ by design. " +
       (excl.length
         ? "Shares cover the included lines (" + R.includedCapitalPct.toFixed(0) + "% of capital); " +
           excl.map((r) => r.key + " (" + r.weeks + " weeks, " + r.capitalPct.toFixed(0) + "% of capital)").join(", ") +
