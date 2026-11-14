@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-11-13 02:39 UTC",
-  "snapshotAsOf": "2026-11-13 02:38 UTC",
+  "asOf": "2026-11-14 02:27 UTC",
+  "snapshotAsOf": "2026-11-14 02:27 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "status": "pass",
   "tolerancePp": 0.05,
@@ -9,67 +9,67 @@
       "ticker": "AMD",
       "status": "pass",
       "reason": null,
-      "lastBar": "2026-11-12",
+      "lastBar": "2026-11-13",
       "independent": {
-        "ytd": 161.9143,
-        "ret1y": 136.0461,
-        "vol": 72.7493
+        "ytd": 138.9851,
+        "ret1y": 116.3851,
+        "vol": 73.3656
       },
       "pipeline": {
-        "ytd": 161.9144,
-        "ret1y": 136.0461,
-        "vol": 72.7493
+        "ytd": 138.9851,
+        "ret1y": 116.3851,
+        "vol": 73.3656
       },
       "diffPp": {
         "ytd": -0.0,
-        "ret1y": -0.0,
+        "ret1y": 0.0,
         "vol": 0.0
       },
-      "lastClose": "2026-11-12"
+      "lastClose": "2026-11-13"
     },
     {
       "ticker": "PETR4.SA",
       "status": "pass",
       "reason": null,
-      "lastBar": "2026-11-12",
+      "lastBar": "2026-11-13",
       "independent": {
-        "ytd": 52.9972,
-        "ret1y": 43.6985,
-        "vol": 35.8551
+        "ytd": 53.4401,
+        "ret1y": 43.4934,
+        "vol": 35.8542
       },
       "pipeline": {
-        "ytd": 52.9972,
-        "ret1y": 43.6984,
-        "vol": 35.855
+        "ytd": 53.44,
+        "ret1y": 43.4934,
+        "vol": 35.8541
       },
       "diffPp": {
         "ytd": 0.0001,
-        "ret1y": 0.0001,
+        "ret1y": 0.0,
         "vol": 0.0001
       },
-      "lastClose": "2026-11-12"
+      "lastClose": "2026-11-13"
     },
     {
       "ticker": "GLD",
       "status": "pass",
       "reason": null,
-      "lastBar": "2026-11-12",
+      "lastBar": "2026-11-13",
       "independent": {
-        "ytd": -10.8943,
-        "ret1y": -7.308,
-        "vol": 29.1619
+        "ytd": -10.7537,
+        "ret1y": -5.4554,
+        "vol": 29.1068
       },
       "pipeline": {
-        "ytd": -10.8943,
-        "ret1y": -7.308,
-        "vol": 29.1619
+        "ytd": -10.7537,
+        "ret1y": -5.4554,
+        "vol": 29.1068
       },
       "diffPp": {
         "ytd": 0.0,
         "ret1y": 0.0,
         "vol": -0.0
       },
-      "lastClose": "2026-11-12"
+      "lastClose": "2026-11-13"
     }
   ],
   "maxAbsDiffPp": 0.0001
