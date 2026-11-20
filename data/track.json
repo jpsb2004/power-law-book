@@ -187,6 +187,12 @@
       "book": "20d7369997",
       "usd": 86.1691,
       "hedged": 87.2615
+    },
+    {
+      "date": "2026-11-19",
+      "book": "20d7369997",
+      "usd": 84.2838,
+      "hedged": 85.4624
     }
   ],
   "note": "Inception set to the date the P0 changes were merged (author decision, 14 Oct 2026). Days after it are appended by each refresh and never revised."
