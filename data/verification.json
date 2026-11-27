@@ -1,6 +1,6 @@
 {
-  "asOf": "2026-11-26 04:10 UTC",
-  "snapshotAsOf": "2026-11-26 04:10 UTC",
+  "asOf": "2026-11-27 04:17 UTC",
+  "snapshotAsOf": "2026-11-27 04:16 UTC",
   "method": "standard-library fetch of Yahoo chart data; FX applied by date; YTD, 1y, vol recomputed in Python and as Excel formulas",
   "status": "pass",
   "tolerancePp": 0.05,
@@ -31,23 +31,23 @@
       "ticker": "PETR4.SA",
       "status": "pass",
       "reason": null,
-      "lastBar": "2026-11-25",
+      "lastBar": "2026-11-26",
       "independent": {
-        "ytd": 33.8467,
-        "ret1y": 28.0822,
-        "vol": 36.5942
+        "ytd": 41.7399,
+        "ret1y": 34.6185,
+        "vol": 37.0028
       },
       "pipeline": {
-        "ytd": 33.8467,
-        "ret1y": 28.0821,
-        "vol": 36.5941
+        "ytd": 41.7398,
+        "ret1y": 34.6185,
+        "vol": 37.0027
       },
       "diffPp": {
         "ytd": 0.0001,
-        "ret1y": 0.0001,
+        "ret1y": -0.0,
         "vol": 0.0001
       },
-      "lastClose": "2026-11-25"
+      "lastClose": "2026-11-26"
     },
     {
       "ticker": "GLD",
